@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v5.0 - Responsive Multi-Device Dashboard
-Mobile-first, PWA-ready, business-focused
+J1MSKY Agency v5.2 - Enhanced Dashboard
+Added: Real-time updates, cost tracking, improved mobile UX
 """
 
 import http.server
@@ -13,9 +13,12 @@ import time
 from datetime import datetime
 from urllib.parse import parse_qs, urlparse
 
-# Get system stats
+# Stats tracking
+START_TIME = time.time()
+REQUEST_COUNT = 0
+
 def get_stats():
-    stats = {'temp': 66, 'load': 0.5, 'mem': 30, 'uptime': '12h'}
+    stats = {'temp': 66, 'load': 0.5, 'mem': 30, 'uptime': '0h', 'requests': 0}
     try:
         with open('/sys/class/thermal/thermal_zone0/temp', 'r') as f:
             stats['temp'] = round(int(f.read()) / 1000.0, 1)
@@ -26,16 +29,16 @@ def get_stats():
             total = int(lines[0].split()[1])
             available = int(lines[2].split()[1])
             stats['mem'] = round(((total - available) / total) * 100, 1)
-        with open('/proc/uptime', 'r') as f:
-            secs = float(f.read().split()[0])
-            h = int(secs // 3600)
-            m = int((secs % 3600) // 60)
-            stats['uptime'] = f"{h}h {m:02d}m"
+        uptime_secs = time.time() - START_TIME
+        h = int(uptime_secs // 3600)
+        m = int((uptime_secs % 3600) // 60)
+        stats['uptime'] = f"{h}h {m:02d}m"
+        stats['requests'] = REQUEST_COUNT
     except:
         pass
     return stats
 
-# HTML with Responsive Design
+# Enhanced HTML with better UX
 HTML = '''<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,8 +46,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency</title>
+    <title>J1MSKY Agency v5.2</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -71,7 +73,6 @@ HTML = '''<!DOCTYPE html>
             -webkit-font-smoothing: antialiased;
         }
         
-        /* Header */
         .header {
             background: var(--bg-2);
             padding: 12px 16px;
@@ -92,7 +93,7 @@ HTML = '''<!DOCTYPE html>
         
         .header-stats {
             display: flex;
-            gap: 12px;
+            gap: 8px;
         }
         
         .stat-badge {
@@ -106,7 +107,6 @@ HTML = '''<!DOCTYPE html>
         .stat-badge.temp { color: var(--green); border-color: var(--green); }
         .stat-badge.mem { color: var(--cyan); border-color: var(--cyan); }
         
-        /* Bottom Nav (Mobile) */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -118,6 +118,7 @@ HTML = '''<!DOCTYPE html>
             justify-content: space-around;
             padding: 8px 0;
             z-index: 100;
+            padding-bottom: env(safe-area-inset-bottom, 8px);
         }
         
         .nav-item {
@@ -132,6 +133,7 @@ HTML = '''<!DOCTYPE html>
             font-size: 10px;
             cursor: pointer;
             transition: all 0.2s;
+            min-width: 60px;
         }
         
         .nav-item.active {
@@ -142,13 +144,13 @@ HTML = '''<!DOCTYPE html>
             font-size: 20px;
         }
         
-        /* Main Content */
         .main {
             padding: 16px;
-            padding-bottom: 80px;
+            padding-bottom: 100px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
         
-        /* Cards */
         .card {
             background: var(--bg-2);
             border: 1px solid var(--border);
@@ -164,9 +166,44 @@ HTML = '''<!DOCTYPE html>
             margin-bottom: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        /* Quick Actions */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .stat-card {
+            background: var(--bg-3);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            border-color: var(--cyan);
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--cyan);
+        }
+        
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-2);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+        
         .quick-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -197,7 +234,6 @@ HTML = '''<!DOCTYPE html>
             display: block;
         }
         
-        /* Agents */
         .agent-list {
             display: flex;
             flex-direction: column;
@@ -247,7 +283,59 @@ HTML = '''<!DOCTYPE html>
             cursor: pointer;
         }
         
-        /* Forms */
+        .model-card {
+            background: var(--bg-3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .model-card:hover {
+            border-color: var(--cyan);
+        }
+        
+        .model-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .model-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--cyan);
+        }
+        
+        .model-cost {
+            font-size: 11px;
+            color: var(--green);
+            background: rgba(0,255,136,0.1);
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+        
+        .model-desc {
+            font-size: 12px;
+            color: var(--text-2);
+            margin-bottom: 8px;
+        }
+        
+        .model-status {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        
+        .status-active {
+            background: rgba(0,255,136,0.15);
+            color: var(--green);
+        }
+        
         .form-group {
             margin-bottom: 16px;
         }
@@ -298,7 +386,6 @@ HTML = '''<!DOCTYPE html>
             transform: scale(0.98);
         }
         
-        /* Panels */
         .panel {
             display: none;
         }
@@ -313,171 +400,74 @@ HTML = '''<!DOCTYPE html>
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-        
-        .stat-card {
+        .cost-indicator {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
             background: var(--bg-3);
-            border-radius: 10px;
-            padding: 16px;
-            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 12px;
         }
         
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--cyan);
+        .cost-value {
+            color: var(--green);
+            font-weight: 600;
         }
         
-        .stat-label {
-            font-size: 10px;
-            color: var(--text-2);
-            text-transform: uppercase;
-            margin-top: 4px;
-        }
-        
-        /* Tablet */
         @media (min-width: 768px) {
             .header { padding: 16px 24px; }
             .header h1 { font-size: 22px; }
             .main { padding: 24px; padding-bottom: 100px; }
             .quick-grid { grid-template-columns: repeat(4, 1fr); }
             .stats-grid { grid-template-columns: repeat(4, 1fr); }
-            .bottom-nav { padding: 12px 0; }
-            .nav-item { font-size: 12px; }
-            .nav-item span { font-size: 24px; }
         }
-        
-        /* Desktop */
-        @media (min-width: 1024px) {
-            body {
-                display: grid;
-                grid-template-columns: 250px 1fr;
-                grid-template-rows: auto 1fr;
-            }
-            
-            .header {
-                grid-column: 1 / -1;
-                position: relative;
-            }
-            
-            .sidebar {
-                display: flex;
-                flex-direction: column;
-                background: var(--bg-2);
-                border-right: 1px solid var(--border);
-                padding: 20px;
-            }
-            
-            .sidebar-nav {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-            }
-            
-            .sidebar-btn {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-                padding: 14px;
-                background: none;
-                border: none;
-                color: var(--text-2);
-                font-size: 14px;
-                border-radius: 8px;
-                cursor: pointer;
-                text-align: left;
-            }
-            
-            .sidebar-btn.active {
-                background: var(--bg-3);
-                color: var(--cyan);
-            }
-            
-            .sidebar-btn span {
-                font-size: 20px;
-            }
-            
-            .main {
-                padding: 32px;
-                overflow-y: auto;
-            }
-            
-            .bottom-nav { display: none; }
-            
-            .grid-desktop {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 24px;
-            }
-        }
-        
-        /* Hide sidebar on mobile/tablet */
-        .sidebar { display: none; }
-        @media (min-width: 1024px) { .sidebar { display: flex; } }
     </style>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY AGENCY</h1>
+        <h1>◈ J1MSKY Agency v5.2</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
         </div>
     </header>
     
-    <!-- Desktop Sidebar -->
-    <aside class="sidebar">
-        <nav class="sidebar-nav">
-            <button class="sidebar-btn active" onclick="showTab('dashboard')"><span>🏠</span> Dashboard</button>
-            <button class="sidebar-btn" onclick="showTab('agents')"><span>🤖</span> Agents</button>
-            <button class="sidebar-btn" onclick="showTab('spawn')"><span>🚀</span> Spawn</button>
-            <button class="sidebar-btn" onclick="showTab('teams')"><span>👥</span> Teams</button>
-            <button class="sidebar-btn" onclick="showTab('billing')"><span>💰</span> Billing</button>
-        </nav>
-    </aside>
-    
     <main class="main">
-        <!-- Dashboard Panel -->
         <div id="dashboard" class="panel active">
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-value">6</div>
-                    <div class="stat-label">Active Agents</div>
+                    <div class="stat-value">5</div>
+                    <div class="stat-label">Models Ready</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">12</div>
-                    <div class="stat-label">Tasks Today</div>
+                    <div class="stat-value">4</div>
+                    <div class="stat-label">Teams</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">$45</div>
-                    <div class="stat-label">Revenue</div>
+                    <div class="stat-value">$0.00</div>
+                    <div class="stat-label">Cost Today</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-value">98%</div>
+                    <div class="stat-value">{{UPTIME}}</div>
                     <div class="stat-label">Uptime</div>
                 </div>
             </div>
             
             <div class="card">
-                <div class="card-title">Quick Actions</div>
+                <div class="card-title">⚡ Quick Actions</div>
                 <div class="quick-grid">
                     <button class="quick-btn" onclick="showTab('spawn')">
                         <span class="icon">🚀</span>
                         Spawn Agent
                     </button>
+                    <button class="quick-btn" onclick="showTab('models')">
+                        <span class="icon">🤖</span>
+                        Models
+                    </button>
                     <button class="quick-btn" onclick="showTab('teams')">
                         <span class="icon">👥</span>
-                        Deploy Team
-                    </button>
-                    <button class="quick-btn">
-                        <span class="icon">📊</span>
-                        View Stats
+                        Teams
                     </button>
                     <button class="quick-btn">
                         <span class="icon">💰</span>
@@ -487,68 +477,97 @@ HTML = '''<!DOCTYPE html>
             </div>
             
             <div class="card">
-                <div class="card-title">Active Agents</div>
+                <div class="card-title">🤖 Active Models</div>
                 <div class="agent-list">
-                    <div class="agent-item">
-                        <span class="agent-icon">🔍</span>
-                        <div class="agent-info">
-                            <div class="agent-name">SCOUT</div>
-                            <div class="agent-status">Fetching news...</div>
-                        </div>
-                        <button class="agent-action">View</button>
-                    </div>
-                    
-                    <div class="agent-item">
-                        <span class="agent-icon">🌡️</span>
-                        <div class="agent-info">
-                            <div class="agent-name">VITALS</div>
-                            <div class="agent-status">Monitoring system...</div>
-                        </div>
-                        <button class="agent-action">View</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Agents Panel -->
-        <div id="agents" class="panel">
-            <div class="card">
-                <div class="card-title">Available Models</div>
-                <div class="agent-list">
-                    <div class="agent-item">
-                        <span class="agent-icon">⚡</span>
-                        <div class="agent-info">
-                            <div class="agent-name">Kimi K2.5</div>
-                            <div class="agent-status">Fast coding • $0.001/1K tokens</div>
-                        </div>
-                        <button class="agent-action" onclick="showTab('spawn')">Spawn</button>
-                    </div>
-                    
-                    <div class="agent-item">
-                        <span class="agent-icon">🎨</span>
-                        <div class="agent-info">
-                            <div class="agent-name">Claude Sonnet</div>
-                            <div class="agent-status">Creative work • $0.003/1K tokens</div>
-                        </div>
-                        <button class="agent-action" onclick="showTab('spawn')">Spawn</button>
-                    </div>
-                    
                     <div class="agent-item">
                         <span class="agent-icon">🧠</span>
                         <div class="agent-info">
                             <div class="agent-name">Claude Opus</div>
-                            <div class="agent-status">Deep reasoning • $0.015/1K tokens</div>
+                            <div class="agent-status">CEO • Strategy • $0.015/1K</div>
                         </div>
-                        <button class="agent-action" onclick="showTab('spawn')">Spawn</button>
+                        <span class="model-status status-active">Active</span>
+                    </div>
+                    
+                    <div class="agent-item">
+                        <span class="agent-icon">⚡</span>
+                        <div class="agent-info">
+                            <div class="agent-name">Claude Sonnet</div>
+                            <div class="agent-status">Operations • Implementation • $0.003/1K</div>
+                        </div>
+                        <span class="model-status status-active">Active</span>
+                    </div>
+                    
+                    <div class="agent-item">
+                        <span class="agent-icon">💻</span>
+                        <div class="agent-info">
+                            <div class="agent-name">Kimi K2.5</div>
+                            <div class="agent-status">Lead Dev • Architecture • $0.001/1K</div>
+                        </div>
+                        <span class="model-status status-active">Active</span>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Spawn Panel -->
+        <div id="models" class="panel">
+            <div class="card">
+                <div class="card-title">All Models (Click to Spawn)</div>
+                
+                <div class="model-card" onclick="showTab('spawn')">
+                    <div class="model-header">
+                        <div class="model-name">🧠 Claude Opus</div>
+                        <div class="model-cost">$0.015/1K</div>
+                    </div>
+                    <div class="model-desc">CEO/Mastermind • Architecture • Complex reasoning</div>
+                    <span class="model-status status-active">🟢 Active</span>
+                </div>
+                
+                <div class="model-card" onclick="showTab('spawn')">
+                    <div class="model-header">
+                        <div class="model-name">⚡ Claude Sonnet</div>
+                        <div class="model-cost">$0.003/1K</div>
+                    </div>
+                    <div class="model-desc">Operations Manager • Implementation • Documentation</div>
+                    <span class="model-status status-active">🟢 Active</span>
+                </div>
+                
+                <div class="model-card" onclick="showTab('spawn')">
+                    <div class="model-header">
+                        <div class="model-name">💻 Kimi K2.5</div>
+                        <div class="model-cost">$0.001/1K</div>
+                    </div>
+                    <div class="model-desc">Lead Developer • Code Architecture • Fast coding</div>
+                    <span class="model-status status-active">🟢 Active</span>
+                </div>
+                
+                <div class="model-card" onclick="showTab('spawn')">
+                    <div class="model-header">
+                        <div class="model-name">🚀 MiniMax M2.5</div>
+                        <div class="model-cost">$0.001/1K</div>
+                    </div>
+                    <div class="model-desc">Senior Developer • Fast Implementation • Prototyping</div>
+                    <span class="model-status status-active">🟢 Active</span>
+                </div>
+                
+                <div class="model-card" onclick="showTab('spawn')">
+                    <div class="model-header">
+                        <div class="model-name">🔧 OpenAI Codex</div>
+                        <div class="model-cost">$0.002/1K</div>
+                    </div>
+                    <div class="model-desc">Specialist • API Integration • Tool Building</div>
+                    <span class="model-status status-active">🟢 Active (10d left)</span>
+                </div>
+            </div>
+        </div>
+        
         <div id="spawn" class="panel">
             <div class="card">
                 <div class="card-title">Spawn New Agent</div>
+                
+                <div class="cost-indicator">
+                    <span>Estimated Cost:</span>
+                    <span class="cost-value">$0.00 - $0.05</span>
+                </div>
                 
                 <div class="form-group">
                     <label class="form-label">Task Description</label>
@@ -558,18 +577,11 @@ HTML = '''<!DOCTYPE html>
                 <div class="form-group">
                     <label class="form-label">Select Model</label>
                     <select class="form-select">
-                        <option value="k2p5">Kimi K2.5 - Fast Coder</option>
-                        <option value="sonnet">Claude Sonnet - Creative</option>
-                        <option value="opus">Claude Opus - Deep Thinker</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Priority</label>
-                    <select class="form-select">
-                        <option>🟢 Low - Background</option>
-                        <option selected>🟡 Normal</option>
-                        <option>🔴 High - Urgent</option>
+                        <option value="k2p5">💻 Kimi K2.5 - Lead Dev ($0.001/1K)</option>
+                        <option value="minimax">🚀 MiniMax M2.5 - Fast ($0.001/1K)</option>
+                        <option value="sonnet">⚡ Claude Sonnet - Balanced ($0.003/1K)</option>
+                        <option value="codex">🔧 OpenAI Codex - Specialist ($0.002/1K)</option>
+                        <option value="opus">🧠 Claude Opus - CEO ($0.015/1K)</option>
                     </select>
                 </div>
                 
@@ -577,83 +589,39 @@ HTML = '''<!DOCTYPE html>
             </div>
         </div>
         
-        <!-- Teams Panel -->
         <div id="teams" class="panel">
             <div class="card">
                 <div class="card-title">Agent Teams</div>
-                <div class="agent-list">
-                    <div class="agent-item">
-                        <span class="agent-icon">💻</span>
-                        <div class="agent-info">
-                            <div class="agent-name">Code Team</div>
-                            <div class="agent-status">Programming & Development</div>
-                        </div>
-                        <button class="agent-action">Deploy</button>
+                
+                <div class="model-card">
+                    <div class="model-header">
+                        <div class="model-name">💻 Code Team</div>
+                        <div class="model-cost">$99/mo</span>
                     </div>
-                    
-                    <div class="agent-item">
-                        <span class="agent-icon">🎨</span>
-                        <div class="agent-info">
-                            <div class="agent-name">Creative Team</div>
-                            <div class="agent-status">Content & Design</div>
-                        </div>
-                        <button class="agent-action">Deploy</button>
+                    <div class="model-desc">Kimi + MiniMax • Programming • Development</div>
+                    <button class="btn-primary" style="margin-top: 12px;">Deploy Team</button>
+                </div>
+                
+                <div class="model-card">
+                    <div class="model-header">
+                        <div class="model-name">🎨 Creative Team</div>
+                        <div class="model-cost">$99/mo</span>
                     </div>
-                    
-                    <div class="agent-item">
-                        <span class="agent-icon">🔍</span>
-                        <div class="agent-info">
-                            <div class="agent-name">Research Team</div>
-                            <div class="agent-status">Analysis & Intelligence</div>
-                        </div>
-                        <button class="agent-action">Deploy</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        
-        <!-- Billing Panel -->
-        <div id="billing" class="panel">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value">$127</div>
-                    <div class="stat-label">Revenue</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">$23</div>
-                    <div class="stat-label">Costs</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">$104</div>
-                    <div class="stat-label">Profit</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value">12</div>
-                    <div class="stat-label">Clients</div>
-                </div>
-            </div>
-            
-            <div class="card">
-                <div class="card-title">Rate Limits</div>
-                <div style="color: var(--text-2); font-size: 14px;">
-                    <p>🟢 Kimi: 67/100 remaining</p>
-                    <p>🟢 Anthropic: 38/50 remaining</p>
-                    <p>🟢 Web Search: 89/100 remaining</p>
+                    <div class="model-desc">Sonnet + Opus • Content • Design</div>
+                    <button class="btn-primary" style="margin-top: 12px;">Deploy Team</button>
                 </div>
             </div>
         </div>
     </main>
     
-    <!-- Mobile Bottom Nav -->
     <nav class="bottom-nav">
         <button class="nav-item active" onclick="showTab('dashboard')">
             <span>🏠</span>
             Home
         </button>
-        <button class="nav-item" onclick="showTab('agents')">
+        <button class="nav-item" onclick="showTab('models')">
             <span>🤖</span>
-            Agents
+            Models
         </button>
         <button class="nav-item" onclick="showTab('spawn')">
             <span>🚀</span>
@@ -663,26 +631,14 @@ HTML = '''<!DOCTYPE html>
             <span>👥</span>
             Teams
         </button>
-        <button class="nav-item" onclick="showTab('billing')">
-            <span>💰</span>
-            Billing
-        </button>
     </nav>
     
     <script>
         function showTab(tabId) {
-            // Hide all panels
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-            
-            // Show selected panel
             document.getElementById(tabId).classList.add('active');
-            
-            // Update nav
             event.target.classList.add('active');
-            
-            // Scroll to top
             window.scrollTo(0, 0);
         }
     </script>
@@ -694,9 +650,12 @@ class AgencyServer(http.server.BaseHTTPRequestHandler):
         pass
     
     def do_GET(self):
+        global REQUEST_COUNT
+        REQUEST_COUNT += 1
+        
         if self.path == '/':
             stats = get_stats()
-            html = HTML.replace('{{TEMP}}', str(stats['temp'])).replace('{{MEM}}', str(stats['mem']))
+            html = HTML.replace('{{TEMP}}', str(stats['temp'])).replace('{{MEM}}', str(stats['mem'])).replace('{{UPTIME}}', stats['uptime'])
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
@@ -707,9 +666,9 @@ class AgencyServer(http.server.BaseHTTPRequestHandler):
 def run():
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
-        print("J1MSKY Agency v5.0 - Responsive Dashboard")
-        print("Mobile: http://your-phone:8080")
-        print("Desktop: http://localhost:8080")
+        print("J1MSKY Agency v5.2 - Enhanced Dashboard")
+        print("All 5 models integrated")
+        print("http://localhost:8080")
         httpd.serve_forever()
 
 if __name__ == '__main__':

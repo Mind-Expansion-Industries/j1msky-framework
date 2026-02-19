@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+WS="/home/m1ndb0t/Desktop/J1MSKY"
+
+# Start core services (watchdog usually does this, but enforce for one-click UX)
+nohup python3 "$WS/dashboards/j1msky-agency-v5.py" >/tmp/j1msky-agency.log 2>&1 &
+nohup python3 "$WS/scripts/alexa/alexa_bridge.py" >/tmp/alexa-bridge.log 2>&1 &
+nohup python3 "$WS/scripts/alexa/ALEXA_COMMAND_CENTER.py" >/tmp/alexa-cmd-center.log 2>&1 &
+nohup python3 "$WS/dashboards/work-feed.py" >/tmp/jimsky-work-feed.log 2>&1 &
+
+sleep 1
+
+# Open office dashboard and work feed
+xdg-open http://127.0.0.1:8080 >/dev/null 2>&1 || true
+xdg-open http://127.0.0.1:8093 >/dev/null 2>&1 || true
+
+echo "jimsky Office started"

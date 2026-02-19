@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=jimsky Office
+Comment=Open jimsky office dashboard + live work feed
+Exec=/bin/bash -lc '/home/m1ndb0t/Desktop/J1MSKY/scripts/startup/start-jimsky-office.sh'
+Icon=utilities-system-monitor
+Terminal=false
+Type=Application
+Categories=System;

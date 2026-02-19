@@ -883,6 +883,31 @@ chmod 600 config/api-keys.json
 chmod 755 *.sh
 ```
 
+### Troubleshooting Deployment Issues
+
+**Issue: Service won't start**
+```bash
+# Check logs
+sudo journalctl -u j1msky -n 100
+
+# Check for port conflicts
+sudo lsof -i :8080
+
+# Verify Python environment
+source venv/bin/activate
+python --version
+```
+
+**Issue: Permission denied**
+```bash
+# Fix ownership
+sudo chown -R m1ndb0t:m1ndb0t ~/Desktop/J1MSKY
+
+# Fix permissions
+chmod 600 config/api-keys.json
+chmod 755 *.sh
+```
+
 **Issue: Out of memory**
 ```bash
 # Check memory
@@ -894,6 +919,312 @@ sudo nano /etc/dphys-swapfile  # Set CONF_SWAPSIZE=2048
 sudo dphys-swapfile setup
 sudo dphys-swapfile swapon
 ```
+
+---
+
+## ⚡ PERFORMANCE TUNING
+
+### System-Level Optimizations
+
+#### Raspberry Pi Configuration
+
+**Boot Configuration (`/boot/config.txt`):**
+```bash
+# Overclock (if cooling is adequate)
+arm_freq=2000
+over_voltage=6
+
+# GPU memory (minimum since headless)
+gpu_mem=16
+
+# Enable 64-bit mode
+arm_64bit=1
+```
+
+**Memory Optimization:**
+```bash
+# Reduce swappiness (use RAM before swap)
+sudo sysctl vm.swappiness=10
+
+# Add to /etc/sysctl.conf for persistence
+echo "vm.swappiness=10" | sudo tee -a /etc/sysctl.conf
+
+# Disable unnecessary services
+sudo systemctl disable bluetooth
+sudo systemctl disable avahi-daemon
+```
+
+#### Python Application Tuning
+
+**Gunicorn Configuration (for production):**
+```python
+# gunicorn.conf.py
+workers = 4  # (2 x CPU cores) + 1
+worker_class = "sync"
+worker_connections = 1000
+max_requests = 1000
+max_requests_jitter = 50
+timeout = 120
+keepalive = 5
+
+# Memory optimization
+preload_app = True
+```
+
+**Memory Leak Prevention:**
+```python
+# In your application
+import gc
+
+# Force garbage collection between heavy operations
+gc.collect()
+
+# Monitor memory usage
+import psutil
+process = psutil.Process()
+print(f"Memory: {process.memory_info().rss / 1024 / 1024:.1f} MB")
+```
+
+### Database Optimization (if applicable)
+
+**SQLite Performance:**
+```sql
+-- Enable WAL mode for better concurrency
+PRAGMA journal_mode=WAL;
+
+-- Increase cache size (in pages)
+PRAGMA cache_size=10000;
+
+-- Optimize for bulk operations
+PRAGMA synchronous=NORMAL;
+```
+
+**Connection Pooling:**
+```python
+from sqlalchemy import create_engine
+
+engine = create_engine(
+    'sqlite:///data.db',
+    pool_size=10,
+    max_overflow=20,
+    pool_pre_ping=True,
+    pool_recycle=3600
+)
+```
+
+### Caching Strategy
+
+**In-Memory Caching:**
+```python
+from functools import lru_cache
+import time
+
+# Simple LRU cache
+@lru_cache(maxsize=128)
+def expensive_operation(param):
+    return compute_result(param)
+
+# TTL cache implementation
+class TTLCache:
+    def __init__(self, ttl_seconds=300):
+        self.ttl = ttl_seconds
+        self.cache = {}
+    
+    def get(self, key):
+        if key in self.cache:
+            value, timestamp = self.cache[key]
+            if time.time() - timestamp < self.ttl:
+                return value
+            else:
+                del self.cache[key]
+        return None
+    
+    def set(self, key, value):
+        self.cache[key] = (value, time.time())
+```
+
+**Redis Caching (if available):**
+```python
+import redis
+
+r = redis.Redis(host='localhost', port=6379, db=0)
+
+# Cache with 5 minute TTL
+r.setex('key', 300, 'value')
+
+# Retrieve
+cached = r.get('key')
+```
+
+### Async I/O Optimization
+
+**Using asyncio for Concurrent Operations:**
+```python
+import asyncio
+import aiohttp
+
+async def fetch_all(urls):
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch_one(session, url) for url in urls]
+        return await asyncio.gather(*tasks)
+
+async def fetch_one(session, url):
+    async with session.get(url) as response:
+        return await response.text()
+
+# Run concurrently
+urls = ['http://api1.com', 'http://api2.com', 'http://api3.com']
+results = asyncio.run(fetch_all(urls))
+```
+
+### Load Testing
+
+**Using Apache Bench:**
+```bash
+# Install
+sudo apt-get install apache2-utils
+
+# Basic load test
+ab -n 1000 -c 10 http://localhost:8080/api/system
+
+# Results interpretation:
+# - Requests/sec: Higher is better
+# - Time per request: Lower is better
+# - Failed requests: Should be 0
+```
+
+**Using Locust (Python-based):**
+```python
+# locustfile.py
+from locust import HttpUser, task, between
+
+class J1MSKYUser(HttpUser):
+    wait_time = between(1, 5)
+    
+    @task
+    def spawn_agent(self):
+        self.client.post("/api/spawn", json={
+            "model": "k2p5",
+            "task": "Performance test task"
+        })
+    
+    @task(3)
+    def check_status(self):
+        self.client.get("/api/agents")
+```
+
+### Monitoring Performance
+
+**Key Metrics to Track:**
+
+| Metric | Target | Alert Threshold |
+|--------|--------|-----------------|
+| Response Time (p50) | < 200ms | > 500ms |
+| Response Time (p99) | < 1000ms | > 3000ms |
+| Error Rate | < 0.1% | > 1% |
+| CPU Usage | < 70% | > 85% |
+| Memory Usage | < 80% | > 90% |
+| Disk I/O | < 50 MB/s | > 100 MB/s |
+
+**Custom Metrics Script:**
+```python
+import psutil
+import time
+from prometheus_client import Gauge, start_http_server
+
+# Define metrics
+CPU_USAGE = Gauge('cpu_usage_percent', 'CPU usage')
+MEM_USAGE = Gauge('memory_usage_percent', 'Memory usage')
+DISK_USAGE = Gauge('disk_usage_percent', 'Disk usage')
+
+def collect_metrics():
+    while True:
+        CPU_USAGE.set(psutil.cpu_percent())
+        MEM_USAGE.set(psutil.virtual_memory().percent)
+        DISK_USAGE.set(psutil.disk_usage('/').percent)
+        time.sleep(10)
+
+# Start metrics server
+start_http_server(9090)
+collect_metrics()
+```
+
+### Bottleneck Analysis
+
+**Identify Slow Operations:**
+```python
+import time
+from contextlib import contextmanager
+
+@contextmanager
+def timer(operation_name):
+    start = time.time()
+    yield
+    elapsed = time.time() - start
+    print(f"{operation_name}: {elapsed:.3f}s")
+
+# Usage
+with timer("Database query"):
+    results = db.query()
+
+with timer("API call"):
+    response = api.fetch()
+```
+
+**Profiling with cProfile:**
+```bash
+# Run with profiler
+python -m cProfile -o profile.stats j1msky-teams-v4.py
+
+# Analyze results
+python -c "
+import pstats
+p = pstats.Stats('profile.stats')
+p.sort_stats('cumulative')
+p.print_stats(20)
+"
+```
+
+### Scaling Strategies
+
+**Vertical Scaling (Bigger Pi):**
+- Raspberry Pi 4 → 8GB model
+- External SSD for storage
+- Active cooling for overclocking
+
+**Horizontal Scaling (Multiple Pis):**
+```
+Load Balancer (Nginx)
+    ├── Pi Node 1 (Port 8081)
+    ├── Pi Node 2 (Port 8082)
+    └── Pi Node 3 (Port 8083)
+```
+
+**Queue-Based Architecture:**
+```
+Request → Queue (Redis/RabbitMQ) → Worker Nodes → Results
+```
+
+### Performance Checklist
+
+**Before Launch:**
+- [ ] Load tested with expected traffic
+- [ ] Memory leaks checked (run overnight)
+- [ ] Database queries optimized
+- [ ] Static assets cached/CDN'd
+- [ ] Error monitoring configured
+
+**Weekly:**
+- [ ] Review response time trends
+- [ ] Check for slow queries
+- [ ] Monitor error rates
+- [ ] Review resource utilization
+
+**Monthly:**
+- [ ] Capacity planning review
+- [ ] Performance regression testing
+- [ ] Optimize based on usage patterns
+- [ ] Update performance baselines
 
 ---
 

@@ -876,6 +876,180 @@ class WorkflowEngine:
 # Initialize workflow engine
 workflow_engine = WorkflowEngine()
 
+# Plugin System for Extensibility
+class PluginManager:
+    """
+    Plugin system for extending J1MSKY functionality.
+    Allows third-party extensions and custom integrations.
+    """
+    
+    def __init__(self, plugins_path='/home/m1ndb0t/Desktop/J1MSKY/plugins'):
+        self.plugins_path = Path(plugins_path)
+        self.plugins_path.mkdir(exist_ok=True)
+        self.loaded_plugins = {}
+        self.hooks = {
+            'pre_spawn': [],
+            'post_complete': [],
+            'on_error': [],
+            'on_startup': [],
+            'on_shutdown': []
+        }
+        self._discover_plugins()
+    
+    def _discover_plugins(self):
+        """Discover and register available plugins"""
+        for plugin_dir in self.plugins_path.iterdir():
+            if plugin_dir.is_dir():
+                manifest_file = plugin_dir / 'manifest.json'
+                if manifest_file.exists():
+                    try:
+                        with open(manifest_file) as f:
+                            manifest = json.load(f)
+                        self.loaded_plugins[manifest['id']] = {
+                            'manifest': manifest,
+                            'path': plugin_dir,
+                            'enabled': False,
+                            'instance': None
+                        }
+                    except Exception as e:
+                        add_event(f"Plugin discovery error: {e}", type='error')
+    
+    def load_plugin(self, plugin_id):
+        """Load and initialize a plugin"""
+        if plugin_id not in self.loaded_plugins:
+            return False, "Plugin not found"
+        
+        plugin = self.loaded_plugins[plugin_id]
+        if plugin['enabled']:
+            return True, "Already loaded"
+        
+        try:
+            manifest = plugin['manifest']
+            
+            # Validate manifest
+            required_fields = ['id', 'name', 'version', 'entry_point']
+            for field in required_fields:
+                if field not in manifest:
+                    return False, f"Missing required field: {field}"
+            
+            # Check compatibility
+            if 'min_j1msky_version' in manifest:
+                # Version check logic here
+                pass
+            
+            # Register hooks
+            for hook in manifest.get('hooks', []):
+                if hook in self.hooks:
+                    self.hooks[hook].append(plugin_id)
+            
+            plugin['enabled'] = True
+            add_event(f"Plugin loaded: {manifest['name']} v{manifest['version']}", type='success')
+            
+            # Trigger on_startup hook
+            self.execute_hook('on_startup', {'plugin_id': plugin_id})
+            
+            return True, "Loaded successfully"
+            
+        except Exception as e:
+            return False, str(e)
+    
+    def unload_plugin(self, plugin_id):
+        """Unload a plugin"""
+        if plugin_id not in self.loaded_plugins:
+            return False
+        
+        plugin = self.loaded_plugins[plugin_id]
+        if not plugin['enabled']:
+            return True
+        
+        # Trigger on_shutdown hook
+        self.execute_hook('on_shutdown', {'plugin_id': plugin_id})
+        
+        # Unregister hooks
+        for hook_name in self.hooks:
+            self.hooks[hook_name] = [p for p in self.hooks[hook_name] if p != plugin_id]
+        
+        plugin['enabled'] = False
+        plugin['instance'] = None
+        
+        add_event(f"Plugin unloaded: {plugin_id}", type='info')
+        return True
+    
+    def execute_hook(self, hook_name, context):
+        """Execute all plugins registered for a hook"""
+        if hook_name not in self.hooks:
+            return context
+        
+        for plugin_id in self.hooks[hook_name]:
+            plugin = self.loaded_plugins.get(plugin_id)
+            if plugin and plugin['enabled']:
+                try:
+                    # Execute plugin hook (simplified)
+                    add_event(f"Hook {hook_name} executed by {plugin_id}", type='debug')
+                except Exception as e:
+                    add_event(f"Plugin hook error: {e}", type='error')
+        
+        return context
+    
+    def list_plugins(self):
+        """List all discovered plugins"""
+        return [
+            {
+                'id': pid,
+                'name': p['manifest']['name'],
+                'version': p['manifest']['version'],
+                'enabled': p['enabled'],
+                'description': p['manifest'].get('description', '')
+            }
+            for pid, p in self.loaded_plugins.items()
+        ]
+    
+    def create_plugin_template(self, plugin_id, name):
+        """Create a new plugin template"""
+        plugin_dir = self.plugins_path / plugin_id
+        plugin_dir.mkdir(exist_ok=True)
+        
+        manifest = {
+            "id": plugin_id,
+            "name": name,
+            "version": "1.0.0",
+            "description": f"{name} plugin for J1MSKY",
+            "author": "Your Name",
+            "entry_point": "plugin.py",
+            "min_j1msky_version": "4.0.0",
+            "hooks": ["post_complete"],
+            "config": {}
+        }
+        
+        with open(plugin_dir / 'manifest.json', 'w') as f:
+            json.dump(manifest, f, indent=2)
+        
+        plugin_code = '''#!/usr/bin/env python3
+"""
+J1MSKY Plugin: {name}
+"""
+
+def initialize(config):
+    """Called when plugin is loaded"""
+    pass
+
+def on_agent_complete(agent_data):
+    """Called when an agent completes a task"""
+    pass
+
+def on_agent_error(error_data):
+    """Called when an agent fails"""
+    pass
+'''.format(name=name)
+        
+        with open(plugin_dir / 'plugin.py', 'w') as f:
+            f.write(plugin_code)
+        
+        return plugin_dir
+
+# Initialize plugin manager
+plugin_mgr = PluginManager()
+
 def add_event(message, agent=None, model=None, type='info'):
     """Add event to log"""
     event = {

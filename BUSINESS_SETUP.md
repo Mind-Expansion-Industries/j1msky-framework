@@ -854,3 +854,189 @@ Affiliate responsible for taxes.
 - HelloSign or DocuSign for e-signatures
 - Ironclad or ContractWorks for CLM (at scale)
 - Stripe Atlas for incorporation (if needed)
+
+## 15) Pricing Experiments & Optimization
+
+### A/B Testing Framework
+
+**What to Test:**
+| Element | Variation A | Variation B | Metric |
+|---------|-------------|-------------|--------|
+| **Plan Names** | Starter/Pro/Enterprise | Basic/Business/Elite | Sign-up rate |
+| **Price Points** | $49/$99/$299 | $39/$79/$249 | Conversion rate |
+| **Free Trial** | 7 days | 14 days | Trial-to-paid |
+| **Trial Type** | Feature-limited | Time-limited | Engagement |
+| **CTA Button** | "Start Free Trial" | "Get Started Free" | Click rate |
+| **Social Proof** | "Join 100+ users" | "Join 500+ users" | Trust/sales |
+
+**Testing Process:**
+1. **Hypothesis:** "Lowering Pro price from $99 to $79 will increase conversions by 20%"
+2. **Duration:** Run for at least 2 weeks or 100 conversions per variant
+3. **Traffic Split:** 50/50 for statistical significance
+4. **Measure:** Primary metric + secondary metrics (CAC, LTV, churn)
+5. **Decision:** Implement winner if statistically significant (p < 0.05)
+
+### Value Metric Testing
+
+**Current:** Per-seat pricing
+**Alternatives to test:**
+- **Usage-based:** Per task ($0.50/task)
+- **Outcome-based:** Per completed deliverable
+- **Hybrid:** Base fee + overage
+
+**Example Test:**
+```
+Control: $99/mo unlimited tasks
+Variant: $49/mo + $0.50/task after 100 tasks
+
+Analysis: Does usage-based pricing increase or decrease revenue per user?
+```
+
+### Packaging Experiments
+
+**Feature Tiering:**
+Test different feature combinations:
+
+| Feature | Test A | Test B | Test C |
+|---------|--------|--------|--------|
+| Code Team | Starter | Pro only | All plans |
+| Creative Team | Pro | All plans | Enterprise only |
+| API Access | Enterprise | Pro+ | All plans |
+| Priority Support | Enterprise | Pro+ | Add-on ($20/mo) |
+
+### Discount Strategy Testing
+
+**Annual Discount Variants:**
+- Control: 2 months free (17% discount)
+- Variant A: 20% off annual
+- Variant B: 25% off + exclusive features
+- Variant C: Month-to-month with loyalty rewards
+
+**Promotional Timing:**
+- Black Friday: Deep discount (40% off) vs exclusive bonus
+- Product Hunt launch: Free month vs extended trial
+- Referral program: $20 credit vs percentage off
+
+### Psychological Pricing Tests
+
+**Charm Pricing:**
+- $99 vs $100 (does .99 increase conversions?)
+- $97 vs $99 (specific numbers feel calculated)
+
+**Anchoring:**
+- Show Enterprise first ($299) to make Pro ($99) seem reasonable
+- Compare to competitor pricing ($200+) to show value
+
+**Decoy Effect:**
+- Starter: $49 (2 teams)
+- Pro: $99 (all teams) ← Target
+- Enterprise: $299 (all + SLA)
+
+Without Starter, Pro seems expensive. With Starter, Pro seems like a good deal.
+
+### Price Sensitivity Analysis
+
+**Van Westendorp Pricing Model:**
+Survey questions to find optimal price:
+1. At what price would you consider the product too expensive? ( ceiling)
+2. At what price would you consider the product too cheap? (floor)
+3. At what price would you consider it starting to get expensive? (stretch)
+4. At what price would you consider it a bargain? (sweet spot)
+
+**Implementation:**
+```
+Send survey to 50 trial users who didn't convert
+Analyze response distribution
+Optimal price = where "too cheap" and "too expensive" intersect
+```
+
+### Freemium vs Free Trial
+
+**Current: Free Trial Model**
+- 14-day trial of full product
+- Requires credit card
+- Converts to paid or churns
+
+**Freemium Alternative:**
+- Free forever with limits (50 tasks/mo)
+- Watermarked outputs
+- Upgrade prompts at usage thresholds
+
+**Comparison:**
+| Metric | Free Trial | Freemium |
+|--------|------------|----------|
+| Sign-ups | Lower | Higher |
+| Activation | Higher | Lower |
+| Time to pay | Faster | Slower |
+| Support burden | Lower | Higher |
+| Viral potential | Lower | Higher |
+
+### Regional Pricing
+
+**Geographic Price Adjustments:**
+
+| Region | Adjustment | Rationale |
+|--------|------------|-----------|
+| US/Canada | Baseline | Target market |
+| Western Europe | +20% | Higher willingness to pay |
+| Eastern Europe | -20% | Market penetration |
+| India/Southeast Asia | -40% | PPP adjustment |
+| Latin America | -30% | Market conditions |
+
+**Implementation:**
+- Detect location via IP
+- Show localized pricing with local currency
+- Accept local payment methods
+
+### Dynamic Pricing (Advanced)
+
+**Time-Based:**
+- Higher prices during peak hours (business hours)
+- Lower prices for overnight processing
+
+**Demand-Based:**
+- Surge pricing when many users active
+- Discounts during low usage periods
+
+**Segment-Based:**
+- Students: 50% off with .edu email
+- Non-profits: Free or heavily discounted
+- Open source: Free for public projects
+
+### Measuring Success
+
+**Key Metrics for Pricing Tests:**
+1. **Conversion Rate:** Trial to paid
+2. **ARPU:** Average revenue per user
+3. **LTV:** Customer lifetime value
+4. **Churn:** Cancellation rate
+5. **Expansion Revenue:** Upsells and upgrades
+6. **CAC Payback:** Time to recover acquisition cost
+
+**Warning Signs:**
+- Increased churn after price increase
+- Decreased sign-ups with higher prices
+- Support tickets about "too expensive"
+- Competitor wins on price
+
+### Pricing Optimization Roadmap
+
+**Month 1-2: Quick Wins**
+- Test charm pricing ($99 vs $100)
+- Optimize free trial length
+- A/B test CTA buttons
+
+**Month 3-4: Structural Tests**
+- Test annual discount levels
+- Experiment with feature gating
+- Survey for price sensitivity
+
+**Month 5-6: Advanced Optimization**
+- Implement regional pricing
+- Test usage-based component
+- Evaluate freemium option
+
+**Ongoing:**
+- Quarterly price reviews
+- Annual market analysis
+- Competitive pricing monitoring

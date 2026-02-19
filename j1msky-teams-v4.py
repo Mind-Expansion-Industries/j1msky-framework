@@ -912,8 +912,10 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
             for model_id, model in MODEL_AGENTS.items():
                 status = model['status']
                 last_used = model.get('last_used', 'Never')
-                if last_used != 'Never':
-                    last_used = last_used.split('T')[1][:5] if 'T' in last_used else last_used
+                if last_used and last_used != 'Never':
+                    last_used = last_used.split('T')[1][:5] if 'T' in last_used else last_used[:10]
+                else:
+                    last_used = 'Never'
                 
                 models_html += f'''
                 <div class="model-card {status}" onclick="spawnAgent('{model_id}')" style="cursor: pointer;">

@@ -429,6 +429,250 @@ def spawn_agent(task):
 
 ---
 
+## 🔒 Security Best Practices
+
+### API Key Management
+
+#### Key Rotation Policy
+```
+Production Keys:
+├── Rotate every 90 days
+├── Keep 2 active keys during transition
+├── Revoke old key 24h after confirming new key works
+└── Never commit keys to version control
+```
+
+#### Environment-Based Keys
+```python
+# Development
+J1MSKY_API_KEY=dev_sk_xxx
+
+# Staging
+J1MSKY_API_KEY=staging_sk_xxx
+
+# Production
+J1MSKY_API_KEY=live_sk_xxx
+```
+
+#### Key Storage
+**DO:**
+- Use environment variables
+- Store in secrets manager (AWS Secrets Manager, HashiCorp Vault)
+- Use encrypted `.env` files (gitignored)
+- Rotate keys on team member departure
+
+**DON'T:**
+- Hardcode keys in source code
+- Share keys via email/Slack
+- Use same key for dev/prod
+- Include keys in logs
+
+### IP Whitelisting
+
+Restrict API access to specific IP ranges:
+
+```bash
+# Configure via API
+PUT /api/security/ip-whitelist
+{
+  "allowed_ips": [
+    "192.168.1.0/24",      # Office network
+    "10.0.0.0/8",          # VPN range
+    "203.0.113.45/32"      # Specific server
+  ],
+  "enforce": true,
+  "log_violations": true
+}
+```
+
+**Response when blocked:**
+```json
+{
+  "error": {
+    "code": 403,
+    "message": "IP not whitelisted",
+    "your_ip": "198.51.100.23",
+    "request_id": "req_abc123xyz"
+  }
+}
+```
+
+### Request Signing
+
+For high-security environments, sign requests with HMAC:
+
+```python
+import hmac
+import hashlib
+import base64
+from datetime import datetime
+
+def sign_request(api_key, api_secret, method, path, body):
+    timestamp = datetime.utcnow().isoformat()
+    
+    message = f"{timestamp}\n{method}\n{path}\n{body}"
+    signature = hmac.new(
+        api_secret.encode(),
+        message.encode(),
+        hashlib.sha256
+    ).hexdigest()
+    
+    return {
+        'Authorization': f'Bearer {api_key}',
+        'X-Timestamp': timestamp,
+        'X-Signature': signature
+    }
+
+# Usage
+headers = sign_request(
+    api_key='your_key',
+    api_secret='your_secret',
+    method='POST',
+    path='/api/spawn',
+    body='{"model":"k2p5","task":"test"}'
+)
+
+response = requests.post(url, headers=headers, json=data)
+```
+
+### Audit Logging
+
+Enable comprehensive audit logging:
+
+```bash
+# Enable audit log
+POST /api/security/audit
+{
+  "enabled": true,
+  "log_level": "verbose",
+  "retention_days": 90,
+  "include_request_body": false,
+  "include_response_body": false,
+  "events": [
+    "agent.spawn",
+    "agent.complete",
+    "agent.fail",
+    "api.key.used",
+    "config.change",
+    "security.violation"
+  ]
+}
+```
+
+**Audit Log Entry:**
+```json
+{
+  "timestamp": "2026-02-19T14:30:00Z",
+  "event": "agent.spawn",
+  "severity": "info",
+  "api_key_id": "key_abc123",
+  "ip_address": "192.168.1.100",
+  "user_agent": "j1msky-sdk/1.0.0",
+  "request_id": "req_xyz789",
+  "resource": {
+    "type": "agent",
+    "id": "subagent_1234567890_1234"
+  },
+  "details": {
+    "model": "k2p5",
+    "task_preview": "Generate report...",
+    "estimated_cost": 0.05
+  }
+}
+```
+
+### Rate Limiting & Abuse Prevention
+
+**Automatic Protections:**
+- IP-based rate limiting (separate from API key limits)
+- Anomaly detection (unusual traffic patterns)
+- Cost spike protection (auto-block if >$100/hour)
+- Concurrent agent limits per key
+
+**Manual Controls:**
+```bash
+# Block suspicious IP
+POST /api/security/block-ip
+{
+  "ip": "198.51.100.100",
+  "reason": "suspicious_activity",
+  "duration_hours": 24
+}
+
+# Revoke compromised key
+DELETE /api/keys/{key_id}
+{
+  "reason": "suspected_leak",
+  "notify_user": true
+}
+```
+
+### Data Privacy
+
+**Agent Task Data:**
+- Encrypted at rest (AES-256)
+- TLS 1.3 in transit
+- Retained for 30 days (configurable)
+- Can request immediate deletion
+
+**PII Handling:**
+```python
+# Automatic PII detection
+agent = agency.spawn(
+    model='k2p5',
+    task='Process customer data',
+    privacy={
+        'detect_pii': True,
+        'mask_pii_in_logs': True,
+        'encrypt_output': True,
+        'retention_days': 7
+    }
+)
+```
+
+**Compliance:**
+- GDPR: Right to deletion, data export
+- CCPA: Data inventory, opt-out
+- SOC 2 Type II: Available for Enterprise
+
+### Security Checklist
+
+**Pre-Production:**
+- [ ] Keys stored in secrets manager
+- [ ] IP whitelisting configured
+- [ ] Rate limits tested
+- [ ] Audit logging enabled
+- [ ] Incident response plan documented
+- [ ] Security contacts configured
+
+**Monthly Review:**
+- [ ] Review access logs for anomalies
+- [ ] Check for unused API keys
+- [ ] Verify key rotation schedule
+- [ ] Review IP whitelist accuracy
+- [ ] Test incident response
+
+**Incident Response:**
+1. **Suspected Key Leak:** Revoke immediately, rotate all keys
+2. **Abnormal Usage:** Block IP, investigate logs
+3. **Data Breach:** Notify within 72h, preserve evidence
+4. **System Compromise:** Isolate, forensics, restore from backup
+
+### Reporting Security Issues
+
+**Responsible Disclosure:**
+- Email: security@j1msky.ai
+- GPG Key: [available on security page]
+- Bounty: Up to $5,000 for critical vulnerabilities
+
+**Include:**
+- Description of vulnerability
+- Steps to reproduce
+- Potential impact
+- Suggested fix (optional)
+
+---
+
 ## 📈 Rate Limits
 
 | Endpoint | Limit | Window |

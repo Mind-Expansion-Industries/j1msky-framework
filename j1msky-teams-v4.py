@@ -93,6 +93,109 @@ MODEL_AGENTS = {
 ACTIVE_SUBAGENTS = {}
 EVENTS_LOG = []
 
+# Notification System
+class NotificationManager:
+    """Webhook and notification system for agent events"""
+    
+    def __init__(self, storage_path='/home/m1ndb0t/Desktop/J1MSKY/config'):
+        self.storage_path = Path(storage_path)
+        self.storage_path.mkdir(exist_ok=True)
+        self.webhooks = self._load_webhooks()
+        
+    def _load_webhooks(self):
+        """Load registered webhooks from config"""
+        webhook_file = self.storage_path / 'webhooks.json'
+        if webhook_file.exists():
+            with open(webhook_file) as f:
+                return json.load(f)
+        return []
+    
+    def _save_webhooks(self):
+        """Save webhooks to config"""
+        webhook_file = self.storage_path / 'webhooks.json'
+        with open(webhook_file, 'w') as f:
+            json.dump(self.webhooks, f, indent=2)
+    
+    def register_webhook(self, url, events=None, secret=None):
+        """Register a new webhook endpoint"""
+        webhook = {
+            'id': f"wh_{int(time.time())}_{random.randint(1000,9999)}",
+            'url': url,
+            'events': events or ['agent.completed', 'agent.failed'],
+            'secret': secret,
+            'created': datetime.now().isoformat(),
+            'active': True
+        }
+        self.webhooks.append(webhook)
+        self._save_webhooks()
+        return webhook['id']
+    
+    def unregister_webhook(self, webhook_id):
+        """Remove a webhook"""
+        self.webhooks = [w for w in self.webhooks if w['id'] != webhook_id]
+        self._save_webhooks()
+    
+    def notify(self, event_type, data):
+        """Send notification to all matching webhooks"""
+        for webhook in self.webhooks:
+            if not webhook.get('active', True):
+                continue
+            if event_type not in webhook.get('events', []):
+                continue
+                
+            try:
+                payload = {
+                    'event': event_type,
+                    'timestamp': datetime.now().isoformat(),
+                    'data': data
+                }
+                
+                # In production, this would actually POST to the webhook URL
+                # For now, we just log it
+                add_event(f"Webhook {webhook['id'][:8]}: {event_type}", type='info')
+                
+            except Exception as e:
+                add_event(f"Webhook failed: {e}", type='error')
+    
+    def notify_agent_complete(self, agent_id, model, task, cost):
+        """Notify when agent completes task"""
+        self.notify('agent.completed', {
+            'agent_id': agent_id,
+            'model': model,
+            'task_preview': task[:100] if task else '',
+            'cost': cost,
+            'completed_at': datetime.now().isoformat()
+        })
+    
+    def notify_agent_failed(self, agent_id, model, error):
+        """Notify when agent fails"""
+        self.notify('agent.failed', {
+            'agent_id': agent_id,
+            'model': model,
+            'error': error,
+            'failed_at': datetime.now().isoformat()
+        })
+    
+    def notify_rate_limit(self, service, remaining):
+        """Notify when approaching rate limits"""
+        self.notify('system.rate_limit', {
+            'service': service,
+            'remaining': remaining,
+            'threshold': 'critical' if remaining < 5 else 'warning'
+        })
+    
+    def notify_budget_alert(self, current_cost, budget, percentage):
+        """Notify when budget threshold hit"""
+        self.notify('system.budget_alert', {
+            'current_cost': current_cost,
+            'budget': budget,
+            'percentage': percentage,
+            'status': 'critical' if percentage >= 100 else 'warning' if percentage >= 80 else 'notice'
+        })
+
+# Initialize notification manager
+notification_mgr = NotificationManager()
+
 # Cost Tracking & Billing Module
 class CostTracker:
     """Track API costs per model and generate billing reports"""
@@ -297,6 +400,9 @@ def spawn_subagent(task, model, team=None):
             MODEL_AGENTS[model]['tasks_completed'] = MODEL_AGENTS[model].get('tasks_completed', 0) + 1
         
         add_event(f"Subagent {agent_id} completed task (cost: ${actual_cost:.4f})", agent=agent_id, model=model, type='success')
+        
+        # Send completion notification
+        notification_mgr.notify_agent_complete(agent_id, model, task, actual_cost)
     
     threading.Thread(target=run_subagent, daemon=True).start()
     
@@ -1155,6 +1261,43 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
         self.send_header('Content-type', 'application/json')
         self.end_headers()
         self.wfile.write(json.dumps(data).encode())
+
+    def do_PUT(self):
+        """Handle PUT requests for webhooks"""
+        if self.path == '/api/webhooks':
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(content_length).decode()
+            
+            try:
+                data = json.loads(body)
+                url = data.get('url')
+                events = data.get('events', ['agent.completed'])
+                secret = data.get('secret')
+                
+                if not url:
+                    self.send_json({'success': False, 'error': 'URL required'})
+                    return
+                
+                webhook_id = notification_mgr.register_webhook(url, events, secret)
+                self.send_json({
+                    'success': True,
+                    'webhook_id': webhook_id,
+                    'url': url,
+                    'events': events
+                })
+            except json.JSONDecodeError:
+                self.send_json({'success': False, 'error': 'Invalid JSON'})
+        else:
+            self.send_error(404)
+    
+    def do_DELETE(self):
+        """Handle DELETE requests"""
+        if self.path.startswith('/api/webhooks/'):
+            webhook_id = self.path.split('/')[-1]
+            notification_mgr.unregister_webhook(webhook_id)
+            self.send_json({'success': True, 'message': f'Webhook {webhook_id} removed'})
+        else:
+            self.send_error(404)
 
 def run():
     socketserver.TCPServer.allow_reuse_address = True

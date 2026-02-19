@@ -161,3 +161,112 @@
 - If dashboard down: restart service + fallback to local scripts
 - If costs spike: pause Opus + enforce Kimi-only mode
 - If churn spikes: immediate survey + retention offers
+
+## 11) Partnerships & Integrations
+
+### Affiliate Program
+**Structure:** 20% recurring commission
+
+| Tier | Monthly Referrals | Commission | Bonus |
+|------|-------------------|------------|-------|
+| **Partner** | 1-5 | 20% | None |
+| **Advocate** | 6-15 | 25% | $500 at 10 referrals |
+| **Ambassador** | 16+ | 30% | Annual retreat invite |
+
+**Affiliate Benefits:**
+- Unique referral link with 90-day cookie
+- Dashboard to track clicks, trials, conversions
+- Monthly payout via PayPal/Stripe
+- Co-marketing opportunities for top affiliates
+
+**Promotion Ideas for Affiliates:**
+- Tutorial videos ("How I automated X with J1MSKY")
+- Case studies showing ROI
+- Comparison posts vs alternatives
+- Twitter/X threads on AI automation
+
+### Reseller Program
+**For agencies, consultants, SIs:**
+
+**White-Label Tier ($499/mo):**
+- Custom branding (logo, colors, domain)
+- Your own pricing (set margins)
+- Client management dashboard
+- Priority support
+
+**Reseller Margin Structure:**
+```
+Your Cost: $499/mo base + actual API usage
+You Charge: $1,500-5,000/mo to clients
+Your Margin: 60-80%
+```
+
+**Reseller Requirements:**
+- Minimum 3 active clients
+- White-label agreement signed
+- First-line support handled by you
+- Quarterly business reviews
+
+### API Partner Integration
+**For developers building on J1MSKY:**
+
+**Integration Types:**
+1. **Plugin/Extension** — Add J1MSKY to existing tools
+2. **Workflow Automation** — Zapier, Make, n8n connectors
+3. **Custom UI** — Build your own interface on our API
+4. **Data Pipeline** — Ingest outputs into your systems
+
+**Partner Support:**
+- Free API credits for development ($100/mo)
+- Technical documentation and SDKs
+- Co-marketing on launch
+- Featured in integrations directory
+
+**Revenue Share for Paid Integrations:**
+- Integration listed in marketplace: Free
+- Paid integration sales: 70% to partner, 30% to J1MSKY
+- Processing fees split 50/50
+
+### Technology Partnerships
+**Strategic integrations:**
+
+| Category | Target Partners | Integration Value |
+|----------|-----------------|-------------------|
+| **Cloud** | AWS, GCP, Azure | Deploy agents on client infrastructure |
+| **CRM** | HubSpot, Salesforce | Auto-update contacts, log activities |
+| **Project Mgmt** | Linear, Asana, Monday | Create tasks from agent outputs |
+| **Communication** | Slack, Discord, Teams | Agent notifications in channels |
+| **Storage** | Dropbox, GDrive, S3 | Auto-save deliverables |
+| **Code** | GitHub, GitLab, Bitbucket | PR generation, code review |
+
+**Partnership Outreach Template:**
+```
+Subject: Integration Partnership — J1MSKY + [Their Product]
+
+Hi [Name],
+
+I noticed [specific use case their users have]. J1MSKY helps agencies automate [relevant task], and I think a native integration with [their product] would be valuable for both our users.
+
+Quick pitch:
+• [Their] users get AI automation without leaving their workflow
+• We handle the AI complexity, you focus on your core product
+• Joint case study + co-marketing opportunity
+
+Worth a 15-min chat this week?
+
+[Your name]
+```
+
+### Strategic Alliances
+**Complementary non-competing services:**
+
+- **Web Design Agencies** — You design, we build with agents
+- **Marketing Agencies** — They strategize, we execute with agents
+- **Consultants** — They advise, we implement at scale
+- **VC/Accelerators** — Portfolio company perk (discounted J1MSKY)
+
+**Alliance Terms:**
+- Referral fee: 10% of first year revenue
+- Co-branded landing page
+- Joint webinars/quarterly events
+- Early access to new features

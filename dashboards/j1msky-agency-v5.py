@@ -1422,21 +1422,50 @@ HTML = '''<!DOCTYPE html>
                 }
             },
             
-            update() {
-                // Simulate stats update (in real app, would fetch from API)
-                const now = new Date();
-                const timeStr = now.toLocaleTimeString('en-US', { 
-                    hour12: false, 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
-                });
-                
-                // Add subtle pulse animation to header stats
-                const badges = document.querySelectorAll('.header-stats .stat-badge');
-                badges.forEach(badge => {
-                    badge.style.animation = 'pulse 0.5s ease';
-                    setTimeout(() => badge.style.animation = '', 500);
-                });
+            async update() {
+                try {
+                    const res = await fetch('/api/live', { cache: 'no-store' });
+                    if (!res.ok) throw new Error('live endpoint error');
+                    const data = await res.json();
+
+                    // Update header badges
+                    const tempBadge = document.querySelector('.stat-badge.temp');
+                    const memBadge = document.querySelector('.stat-badge.mem');
+                    if (tempBadge) tempBadge.textContent = `${data.temp}°C`;
+                    if (memBadge) memBadge.textContent = `${data.mem}%`;
+
+                    // Ensure live panel exists
+                    let panel = document.getElementById('live-watch-panel');
+                    if (!panel) {
+                        panel = document.createElement('div');
+                        panel.id = 'live-watch-panel';
+                        panel.className = 'card';
+                        panel.innerHTML = `
+                          <div class="card-title">📡 Live Watch</div>
+                          <div id="live-watch-meta" style="font-size:12px;color:var(--text-2);margin-bottom:8px"></div>
+                          <div id="live-watch-log" style="font-family:monospace;font-size:12px;line-height:1.5;max-height:180px;overflow:auto;background:var(--bg-3);border:1px solid var(--border);border-radius:8px;padding:10px"></div>
+                        `;
+                        const dashboard = document.getElementById('dashboard');
+                        if (dashboard) dashboard.appendChild(panel);
+                    }
+
+                    const meta = document.getElementById('live-watch-meta');
+                    if (meta) meta.textContent = `req:${data.requests} • py:${data.python_procs} • updated:${data.now}`;
+
+                    const log = document.getElementById('live-watch-log');
+                    if (log) {
+                        log.innerHTML = (data.logs || []).map(l => `<div>${l.replace(/</g,'&lt;')}</div>`).join('');
+                    }
+
+                    // pulse effect
+                    const badges = document.querySelectorAll('.header-stats .stat-badge');
+                    badges.forEach(badge => {
+                        badge.style.animation = 'pulse 0.4s ease';
+                        setTimeout(() => badge.style.animation = '', 400);
+                    });
+                } catch (e) {
+                    // keep silent in UI; dashboard still usable
+                }
             }
         };
         
@@ -1542,6 +1571,45 @@ class AgencyServer(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write(html.encode())
+        elif self.path == '/api/live':
+            stats = get_stats()
+            # lightweight process count
+            py_count = 0
+            try:
+                out = subprocess.run(['bash','-lc','ps aux | grep python | grep -v grep | wc -l'], capture_output=True, text=True)
+                py_count = int((out.stdout or '0').strip() or 0)
+            except Exception:
+                py_count = 0
+
+            # gather short logs from known files
+            logs = []
+            for p in ['/tmp/alexa-bridge.log','/tmp/j1msky-agency.log','/tmp/alexa-cmd-center.log']:
+                try:
+                    if os.path.exists(p):
+                        with open(p, 'r', errors='ignore') as f:
+                            lines = f.readlines()[-3:]
+                            for ln in lines:
+                                t = ln.strip()
+                                if t:
+                                    logs.append(f"{os.path.basename(p)}: {t[:120]}")
+                except Exception:
+                    pass
+            if not logs:
+                logs = ['Live watch online', 'No recent log lines']
+
+            payload = {
+                'temp': stats.get('temp', 0),
+                'mem': stats.get('mem', 0),
+                'uptime': stats.get('uptime', '0h'),
+                'requests': REQUEST_COUNT,
+                'python_procs': py_count,
+                'now': datetime.now().strftime('%H:%M:%S'),
+                'logs': logs[:12]
+            }
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(payload).encode())
         else:
             self.send_error(404)
 

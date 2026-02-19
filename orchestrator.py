@@ -10,6 +10,7 @@ import time
 import random
 from datetime import datetime
 from pathlib import Path
+from typing import Dict, Any, Optional, List
 
 class UnifiedOrchestrator:
     def __init__(self):
@@ -205,6 +206,39 @@ class UnifiedOrchestrator:
 
 # Global orchestrator instance
 orchestrator = UnifiedOrchestrator()
+
+# Health check and monitoring
+class OrchestratorMonitor:
+    """Monitor orchestrator health and performance"""
+    
+    def __init__(self, orch: UnifiedOrchestrator):
+        self.orch = orch
+        self.start_time = datetime.now()
+        self.error_count = 0
+        self.request_count = 0
+        
+    def get_health(self) -> Dict[str, Any]:
+        """Get health status"""
+        uptime = (datetime.now() - self.start_time).total_seconds()
+        return {
+            "status": "healthy" if self.error_count < 10 else "degraded",
+            "uptime_seconds": uptime,
+            "total_requests": self.request_count,
+            "error_count": self.error_count,
+            "error_rate": self.error_count / max(self.request_count, 1),
+            "models_configured": len(self.orch.config.get("models", {})),
+        }
+    
+    def record_request(self):
+        """Record successful request"""
+        self.request_count += 1
+        
+    def record_error(self):
+        """Record error"""
+        self.error_count += 1
+
+# Initialize monitor
+monitor = OrchestratorMonitor(orchestrator)
 
 if __name__ == "__main__":
     print("J1MSKY Unified Model Orchestrator v5.1")

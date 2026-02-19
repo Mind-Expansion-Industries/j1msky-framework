@@ -337,10 +337,95 @@ console.log(result.output);
   "error": {
     "code": 429,
     "message": "Rate limit exceeded",
-    "retry_after": 3600
+    "retry_after": 3600,
+    "request_id": "req_abc123xyz"
   }
 }
 ```
+
+---
+
+## 🔁 Retry Strategies
+
+### Exponential Backoff
+Recommended approach for 429 and 503 errors:
+
+```python
+import time
+import random
+
+def exponential_backoff(attempt, base_delay=1, max_delay=60):
+    """Calculate delay with jitter"""
+    delay = min(base_delay * (2 ** attempt), max_delay)
+    jitter = random.uniform(0, 0.1 * delay)
+    return delay + jitter
+
+# Usage
+for attempt in range(5):
+    try:
+        response = api_call()
+        break
+    except RateLimitError:
+        delay = exponential_backoff(attempt)
+        time.sleep(delay)
+```
+
+### Circuit Breaker Pattern
+Prevent cascading failures:
+
+```python
+class CircuitBreaker:
+    def __init__(self, threshold=5, timeout=60):
+        self.threshold = threshold
+        self.timeout = timeout
+        self.failures = 0
+        self.last_failure = None
+        self.state = 'closed'  # closed, open, half-open
+    
+    def call(self, func, *args, **kwargs):
+        if self.state == 'open':
+            if time.time() - self.last_failure > self.timeout:
+                self.state = 'half-open'
+            else:
+                raise Exception("Circuit breaker is open")
+        
+        try:
+            result = func(*args, **kwargs)
+            if self.state == 'half-open':
+                self.state = 'closed'
+                self.failures = 0
+            return result
+        except Exception as e:
+            self.failures += 1
+            self.last_failure = time.time()
+            if self.failures >= self.threshold:
+                self.state = 'open'
+            raise e
+```
+
+### Retry Decorator
+```python
+def retry(max_attempts=3, exceptions=(Exception,), backoff=1):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            for attempt in range(max_attempts):
+                try:
+                    return func(*args, **kwargs)
+                except exceptions as e:
+                    if attempt == max_attempts - 1:
+                        raise
+                    time.sleep(backoff * (2 ** attempt))
+            return None
+        return wrapper
+    return decorator
+
+# Usage
+@retry(max_attempts=3, exceptions=(RateLimitError, ServerError))
+def spawn_agent(task):
+    return api.spawn(task)
+```
+
+---
 
 ---
 

@@ -1,0 +1,22 @@
+[2026-02-19T13:40:08-05:00] command-audit snapshot
+Traceback (most recent call last):
+  File "/home/m1ndb0t/Desktop/J1MSKY/scripts/alexa/alexa_bridge.py", line 189, in <module>
+    main()
+    ~~~~^^
+  File "/home/m1ndb0t/Desktop/J1MSKY/scripts/alexa/alexa_bridge.py", line 183, in main
+    s = HTTPServer(('0.0.0.0', port), H)
+  File "/usr/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 98] Address already in use
+---
+[2026-02-19T13:40:32-05:00] command-audit snapshot
+[traceback detected]
+OSError: [Errno 98] Address already in use
+---

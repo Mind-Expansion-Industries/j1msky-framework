@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=J1MSKY Alexa Setup
+Comment=One-click setup for Home Assistant + Alexa bridge
+Exec=/home/m1ndb0t/Desktop/J1MSKY/ALEXA_ONE_CLICK_SETUP.sh
+Icon=preferences-system
+Terminal=true
+Type=Application
+Categories=System;

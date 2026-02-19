@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.8 - Resize Flicker Reduction
-Patch release: adds swipe interval guard to prevent rapid multi-swipe transition bursts
+J1MSKY Agency v6.0.9 - Resize Flicker Reduction
+Patch release: adds transition watchdog timeout to prevent stuck in-flight navigation state
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.8</title>
+    <title>J1MSKY Agency v6.0.9</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -677,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.8</h1>
+        <h1>◈ J1MSKY Agency v6.0.9</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -917,6 +917,7 @@ HTML = '''<!DOCTYPE html>
             currentTab: 'dashboard',
             isTransitioning: false,
             pendingTab: null,
+            transitionTimeoutId: null,
             transitionCooldown: 150,
             lastTransitionTime: 0,
             history: [],
@@ -969,6 +970,10 @@ HTML = '''<!DOCTYPE html>
             reset() {
                 this.isTransitioning = false;
                 this.pendingTab = null;
+                if (this.transitionTimeoutId) {
+                    clearTimeout(this.transitionTimeoutId);
+                    this.transitionTimeoutId = null;
+                }
                 this.failedTransitions = 0;
                 hideLoading();
             }
@@ -1074,9 +1079,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.8';
+                        header.textContent = '◈ J1MSKY Agency v6.0.9';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.8';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.9';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1202,6 +1207,14 @@ HTML = '''<!DOCTYPE html>
             NavState.pendingTab = tabId;
             NavState.lastTransitionTime = Date.now();
             showLoading();
+
+            // Watchdog: prevent stuck transitioning state if a frame/update is dropped.
+            if (NavState.transitionTimeoutId) clearTimeout(NavState.transitionTimeoutId);
+            NavState.transitionTimeoutId = setTimeout(() => {
+                if (NavState.isTransitioning && NavState.pendingTab === tabId) {
+                    NavState.reset();
+                }
+            }, Math.max(1000, NavState.transitionCooldown * 6));
             
             try {
                 const panels = document.querySelectorAll('.panel');
@@ -1245,6 +1258,10 @@ HTML = '''<!DOCTYPE html>
                         setTimeout(() => {
                             NavState.isTransitioning = false;
                             NavState.pendingTab = null;
+                            if (NavState.transitionTimeoutId) {
+                                clearTimeout(NavState.transitionTimeoutId);
+                                NavState.transitionTimeoutId = null;
+                            }
                             hideLoading();
                             // Hide inactive panels for performance
                             panels.forEach(p => {
@@ -1645,7 +1662,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.8 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.9 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

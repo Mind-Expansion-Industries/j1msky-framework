@@ -29,6 +29,36 @@ http://your-pi-ip:8080/api
 
 ## 📚 Endpoints
 
+### Operational Status Endpoints
+
+#### Health Check
+**Endpoint:** `GET /health`
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "uptime_seconds": 86400,
+  "error_rate": 0.01,
+  "models_configured": 4
+}
+```
+
+#### Orchestrator Status
+**Endpoint:** `GET /orchestrator/status`
+
+**Response:**
+```json
+{
+  "timestamp": "2026-02-19T13:11:00-05:00",
+  "models_active": 4,
+  "recent_usage": 128,
+  "daily_budget": 50,
+  "today_spend": 12.43,
+  "budget_remaining": 37.57
+}
+```
+
 ### Pagination & Filtering
 
 Most list endpoints support pagination and filtering using query parameters:

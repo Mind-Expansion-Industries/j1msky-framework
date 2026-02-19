@@ -1091,3 +1091,43 @@ Optimal price = where "too cheap" and "too expensive" intersect
 - Quarterly price reviews
 - Annual market analysis
 - Competitive pricing monitoring
+
+## 17) Renewal & Expansion Operations
+
+### 90-Day Renewal Timeline
+
+- **Day -90:** Flag accounts nearing renewal; review product usage and support history
+- **Day -60:** Send value recap (outcomes, time saved, cost efficiency)
+- **Day -45:** CSM call to align on next-quarter goals
+- **Day -30:** Present renewal quote and expansion options
+- **Day -14:** Finalize legal/procurement questions
+- **Day 0:** Auto-renew or execute signed renewal order form
+
+### Renewal Risk Scoring
+
+| Signal | Weight |
+|---|---:|
+| Weekly active usage down >30% | 30 |
+| No champion engagement in 21 days | 25 |
+| >3 unresolved support tickets | 20 |
+| Budget concerns raised | 15 |
+| Competitor mention in QBR | 10 |
+
+- **0-29:** Healthy
+- **30-59:** Watchlist
+- **60+:** At-risk (exec attention)
+
+### Expansion Motions
+
+- Seat/usage expansion when adoption spreads to new team
+- Feature expansion (API, webhooks, SLA, SSO) when technical maturity increases
+- Regional rollout when one department proves ROI
+
+### QBR Structure (Quarterly Business Review)
+
+1. Outcomes delivered (KPIs vs baseline)
+2. Utilization and adoption trends
+3. Cost optimization and model mix
+4. Risks/blockers
+5. Next-quarter roadmap
+6. Commercials: renewal + expansion proposal

@@ -11,12 +11,14 @@ import random
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, Optional, List
+from collections import defaultdict
 
 class UnifiedOrchestrator:
     def __init__(self):
         self.config_path = Path("/home/m1ndb0t/Desktop/J1MSKY/config/model-stack.json")
         self.config = self.load_config()
         self.usage_log = []
+        self.daily_spend = defaultdict(float)
         
     def load_config(self):
         """Load model stack configuration"""
@@ -127,6 +129,11 @@ class UnifiedOrchestrator:
             "tokens": tokens
         }
         self.usage_log.append(usage)
+
+        # Track spend by day
+        estimated_cost = self.estimate_cost(model_alias, tokens or 1000)
+        day_key = datetime.now().strftime("%Y-%m-%d")
+        self.daily_spend[day_key] += estimated_cost
         
         # Update rate limit counter
         provider_map = {
@@ -190,14 +197,32 @@ class UnifiedOrchestrator:
         cost_per_1k = cost_map.get(model_alias, 0.003)
         return (estimated_tokens / 1000) * cost_per_1k
     
+    def get_daily_spend(self, day: Optional[str] = None) -> float:
+        """Get spend for a specific day (YYYY-MM-DD) or today."""
+        if not day:
+            day = datetime.now().strftime("%Y-%m-%d")
+        return round(self.daily_spend.get(day, 0.0), 4)
+
+    def is_budget_available(self, model_alias: str, estimated_tokens: int = 1000) -> bool:
+        """Check whether estimated call cost fits remaining daily budget."""
+        daily_budget = self.config.get("cost_tracking", {}).get("daily_budget", 50)
+        projected_cost = self.estimate_cost(model_alias, estimated_tokens)
+        today_spend = self.get_daily_spend()
+        return (today_spend + projected_cost) <= daily_budget
+
     def get_status_report(self):
         """Get current orchestrator status"""
+        today = datetime.now().strftime("%Y-%m-%d")
+        daily_budget = self.config.get("cost_tracking", {}).get("daily_budget", 50)
+        today_spend = self.get_daily_spend(today)
         return {
             "timestamp": datetime.now().isoformat(),
             "models_active": len(self.config["models"]),
             "rate_limits": self.config.get("rate_limits", {}),
             "recent_usage": len(self.usage_log),
-            "daily_budget": self.config.get("cost_tracking", {}).get("daily_budget", 50),
+            "daily_budget": daily_budget,
+            "today_spend": today_spend,
+            "budget_remaining": round(max(daily_budget - today_spend, 0), 4),
             "orchestration_mode": "unified",
             "ceo_model": "opus",
             "ops_model": "sonnet",

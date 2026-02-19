@@ -1162,3 +1162,28 @@ Optimal price = where "too cheap" and "too expensive" intersect
 - Data retention after suspension: 30 days
 - No hard deletion until final cancellation confirmation
 - Enterprise accounts require CSM notification before suspension
+
+## 19) Partner Channel Operations
+
+### Partner-Sourced Deal Stages
+
+1. **Referred Lead** → basic qualification
+2. **Co-Discovery** → partner + J1MSKY scope alignment
+3. **Joint Proposal** → ownership split and commercials
+4. **Close & Onboard** → shared implementation plan
+5. **Quarterly Review** → retention + expansion strategy
+
+### Revenue Share Governance
+
+- Standard referral share: **10% first-year ACV**
+- Co-delivery share: **20-30% of services revenue** (based on delivery split)
+- Payout cadence: monthly, net-30 after customer payment clears
+- Dispute policy: default to signed SOW split percentages
+
+### Partner Health KPIs
+
+- Leads/month per partner
+- Lead-to-close conversion by partner
+- 90-day retention of partner-sourced accounts
+- Expansion ACV from partner book
+- Time-to-first-value on partner implementations

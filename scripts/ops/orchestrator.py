@@ -221,6 +221,26 @@ class UnifiedOrchestrator:
             day = datetime.now().strftime("%Y-%m-%d")
         return round(self.daily_spend.get(day, 0.0), 4)
 
+    def get_provider_usage_snapshot(self) -> Dict[str, Any]:
+        """Return normalized provider usage with remaining headroom."""
+        snapshot = {}
+        rate_limits = self.config.get("rate_limits", {})
+        for provider, limits in rate_limits.items():
+            self._refresh_rate_limit_window(provider)
+            current = limits.get("current", 0)
+            hourly = limits.get("hourly", 100)
+            remaining = max(hourly - current, 0)
+            utilization = round((current / hourly) * 100, 2) if hourly else 0
+            snapshot[provider] = {
+                "current": current,
+                "hourly": hourly,
+                "remaining": remaining,
+                "utilization_pct": utilization,
+                "window": limits.get("window", 3600),
+                "last_reset": limits.get("last_reset")
+            }
+        return snapshot
+
     def is_budget_available(self, model_alias: str, estimated_tokens: int = 1000) -> bool:
         """Check whether estimated call cost fits remaining daily budget."""
         daily_budget = self.config.get("cost_tracking", {}).get("daily_budget", 50)
@@ -237,6 +257,7 @@ class UnifiedOrchestrator:
             "timestamp": datetime.now().isoformat(),
             "models_active": len(self.config["models"]),
             "rate_limits": self.config.get("rate_limits", {}),
+            "provider_usage": self.get_provider_usage_snapshot(),
             "recent_usage": len(self.usage_log),
             "daily_budget": daily_budget,
             "today_spend": today_spend,

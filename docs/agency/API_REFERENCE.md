@@ -17,6 +17,15 @@ Authorization: Bearer YOUR_API_KEY
 3. Generate new key
 4. Copy and store securely
 
+### API Key Scopes
+
+Keys can be scoped to reduce blast radius:
+
+- `agents:read` – list/status endpoints
+- `agents:write` – spawn/cancel endpoints
+- `billing:read` – usage and cost endpoints
+- `admin:write` – configuration and security endpoints
+
 ---
 
 ## 🌐 Base URL
@@ -77,7 +86,21 @@ Idempotency-Key: 7f8f8c5a-4d6f-4f6c-ae4b-52a7c8aa2d9b
   "recent_usage": 128,
   "daily_budget": 50,
   "today_spend": 12.43,
-  "budget_remaining": 37.57
+  "budget_remaining": 37.57,
+  "provider_usage": {
+    "anthropic": {
+      "current": 14,
+      "hourly": 50,
+      "remaining": 36,
+      "utilization_pct": 28.0
+    },
+    "kimi-coding": {
+      "current": 22,
+      "hourly": 100,
+      "remaining": 78,
+      "utilization_pct": 22.0
+    }
+  }
 }
 ```
 

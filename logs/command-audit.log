@@ -20,3 +20,11 @@ OSError: [Errno 98] Address already in use
 [traceback detected]
 OSError: [Errno 98] Address already in use
 ---
+[2026-02-19T17:12:00-05:00] command-audit snapshot
+[traceback detected]
+OSError: [Errno 98] Address already in use
+---
+[2026-02-19T17:40:06-05:00] command-audit snapshot
+[traceback detected]
+OSError: [Errno 98] Address already in use
+---

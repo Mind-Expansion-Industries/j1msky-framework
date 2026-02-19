@@ -94,6 +94,17 @@ class UnifiedOrchestrator:
         # Return best available or default to sonnet
         return available[0] if available else "sonnet"
     
+    def _refresh_rate_limit_window(self, provider: str):
+        """Reset provider counters when hourly window rolls over."""
+        rate_limits = self.config.setdefault("rate_limits", {})
+        limits = rate_limits.setdefault(provider, {"hourly": 100, "current": 0})
+        last_reset = limits.get("last_reset", time.time())
+        window_seconds = limits.get("window", 3600)
+
+        if (time.time() - last_reset) >= window_seconds:
+            limits["current"] = 0
+            limits["last_reset"] = time.time()
+
     def check_model_available(self, model_alias):
         """Check if model is within rate limits"""
         # Map alias to provider
@@ -108,7 +119,8 @@ class UnifiedOrchestrator:
         provider = provider_map.get(model_alias)
         if not provider:
             return True
-        
+
+        self._refresh_rate_limit_window(provider)
         limits = self.config.get("rate_limits", {}).get(provider, {})
         hourly_limit = limits.get("hourly", 100)
         current = limits.get("current", 0)
@@ -146,7 +158,13 @@ class UnifiedOrchestrator:
         provider = provider_map.get(model_alias)
         if provider:
             if provider not in self.config["rate_limits"]:
-                self.config["rate_limits"][provider] = {"hourly": 100, "current": 0}
+                self.config["rate_limits"][provider] = {
+                    "hourly": 100,
+                    "current": 0,
+                    "window": 3600,
+                    "last_reset": time.time()
+                }
+            self._refresh_rate_limit_window(provider)
             self.config["rate_limits"][provider]["current"] += 1
     
     def get_team_for_project(self, project_type):

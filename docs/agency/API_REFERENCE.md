@@ -29,6 +29,28 @@ http://your-pi-ip:8080/api
 
 ## 📚 Endpoints
 
+### Idempotency for Write Operations
+
+For `POST`/`PUT` endpoints, send an idempotency key to safely retry without duplicate side effects.
+
+**Header:**
+```http
+Idempotency-Key: 7f8f8c5a-4d6f-4f6c-ae4b-52a7c8aa2d9b
+```
+
+**Behavior:**
+- Same key + same payload within 24h returns the original response
+- Same key + different payload returns `409 Conflict`
+- Keys expire after 24 hours
+
+**Conflict Example:**
+```json
+{
+  "success": false,
+  "error": "Idempotency key payload mismatch"
+}
+```
+
 ### Operational Status Endpoints
 
 #### Health Check

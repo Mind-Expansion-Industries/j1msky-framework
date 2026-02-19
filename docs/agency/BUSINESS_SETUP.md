@@ -1131,3 +1131,34 @@ Optimal price = where "too cheap" and "too expensive" intersect
 4. Risks/blockers
 5. Next-quarter roadmap
 6. Commercials: renewal + expansion proposal
+
+## 18) Billing Collections & Dunning
+
+### Failed Payment Workflow
+
+- **Attempt 1 (Day 0):** Automatic retry + in-app warning
+- **Attempt 2 (Day 2):** Email reminder with card update link
+- **Attempt 3 (Day 5):** Limited functionality notice
+- **Attempt 4 (Day 7):** Service pause + recovery email
+- **Attempt 5 (Day 14):** Account cancellation warning
+
+### Dunning Messaging Principles
+
+- Assume good intent; keep tone helpful
+- Emphasize continuity of service and data safety
+- Provide one-click payment recovery
+- Escalate to human outreach for high-value accounts
+
+### Collections KPIs
+
+- Recovery rate after first failed payment (target: >60%)
+- Recovery rate after full dunning sequence (target: >80%)
+- Involuntary churn rate (target: <1.5% monthly)
+- Average days-to-recover (target: <4 days)
+
+### Policy Guardrails
+
+- Grace period: 7 days for Pro, 14 days for Enterprise
+- Data retention after suspension: 30 days
+- No hard deletion until final cancellation confirmation
+- Enterprise accounts require CSM notification before suspension

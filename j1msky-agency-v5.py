@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v5.8 - Visual Polish
-Gradient text, ripple effects, help panel styling
+J1MSKY Agency v5.9 - Session Persistence & Help Button
+Help button in header, sessionStorage for tab state, improved UX
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v5.8</title>
+    <title>J1MSKY Agency v5.9</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -133,6 +133,28 @@ HTML = '''<!DOCTYPE html>
         .header-stats {
             display: flex;
             gap: 8px;
+            align-items: center;
+        }
+        
+        .help-btn {
+            background: var(--bg-3);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-2);
+            transition: all 0.2s;
+        }
+        
+        .help-btn:hover {
+            background: var(--cyan);
+            color: var(--bg);
+            border-color: var(--cyan);
         }
         
         .stat-badge {
@@ -633,10 +655,11 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v5.8</h1>
+        <h1>◈ J1MSKY Agency v5.9</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
+            <button class="help-btn" onclick="toggleHelp()" title="Help (? or h)" aria-label="Help">?</button>
         </div>
     </header>
     
@@ -1020,9 +1043,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v5.8';
+                        header.textContent = '◈ J1MSKY Agency v5.9';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v5.8';
+                    if (title) title.textContent = 'J1MSKY Agency v5.9';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1214,7 +1237,39 @@ HTML = '''<!DOCTYPE html>
             }
         }
         
-        // Event Listeners
+        // Session persistence
+        const SessionStore = {
+            STORAGE_KEY: 'j1msky_last_tab',
+            
+            save(tabId) {
+                try {
+                    sessionStorage.setItem(this.STORAGE_KEY, tabId);
+                } catch (e) {
+                    console.warn('Session storage not available');
+                }
+            },
+            
+            load() {
+                try {
+                    return sessionStorage.getItem(this.STORAGE_KEY);
+                } catch (e) {
+                    return null;
+                }
+            },
+            
+            clear() {
+                try {
+                    sessionStorage.removeItem(this.STORAGE_KEY);
+                } catch (e) {}
+            }
+        };
+        
+        // Override showTab to save session
+        const originalShowTab = showTab;
+        showTab = function(tabId, pushState = true) {
+            SessionStore.save(tabId);
+            return originalShowTab(tabId, pushState);
+        };
         window.addEventListener('popstate', (e) => {
             if (e.state?.tab) {
                 showTab(e.state.tab, false);
@@ -1352,10 +1407,22 @@ HTML = '''<!DOCTYPE html>
             ResizeHandler.init();
             FocusManager.init();
             
+            // Determine initial tab: hash > session > default
             const hash = window.location.hash.slice(1);
-            const initialTab = (hash && document.getElementById(hash)) ? hash : 'dashboard';
+            const sessionTab = SessionStore.load();
+            const initialTab = (hash && document.getElementById(hash)) 
+                ? hash 
+                : (sessionTab && document.getElementById(sessionTab)) 
+                    ? sessionTab 
+                    : 'dashboard';
+            
             NavState.pushHistory(initialTab);
-            if (!hash) history.replaceState({ tab: 'dashboard' }, '', '#dashboard');
+            if (!hash) history.replaceState({ tab: initialTab }, '', '#' + initialTab);
+            
+            // Sync UI with initial tab
+            if (initialTab !== 'dashboard') {
+                showTab(initialTab, false);
+            }
         });
         
         // Cleanup on page unload
@@ -1387,8 +1454,8 @@ class AgencyServer(http.server.BaseHTTPRequestHandler):
 def run():
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
-        print("J1MSKY Agency v5.8 - Visual Polish")
-        print("Gradient text, ripple effects, help panel styling")
+        print("J1MSKY Agency v5.9 - Session Persistence & Help Button")
+        print("Help button in header, sessionStorage for tab state")
         print("Press '?' or 'h' for keyboard shortcuts")
         print("http://localhost:8080")
         httpd.serve_forever()

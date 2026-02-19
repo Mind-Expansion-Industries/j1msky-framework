@@ -1,0 +1,21 @@
+language: "en"
+intents:
+  J1MSKYCommandIntent:
+    data:
+      - sentences:
+          - "J1MSKY [please] {command}"
+          - "send to J1MSKY {command}"
+          - "ask J1MSKY to {command}"
+lists:
+  command:
+    values:
+      - in: "play music"
+        out: "play music"
+      - in: "pause music"
+        out: "pause music"
+      - in: "next track"
+        out: "next track"
+      - in: "open command center"
+        out: "open command center"
+      - in: "run backup"
+        out: "run backup"

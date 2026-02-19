@@ -93,6 +93,107 @@ MODEL_AGENTS = {
 ACTIVE_SUBAGENTS = {}
 EVENTS_LOG = []
 
+# Cost Tracking & Billing Module
+class CostTracker:
+    """Track API costs per model and generate billing reports"""
+    
+    MODEL_PRICING = {
+        'k2p5': {'input': 0.0005, 'output': 0.0015, 'per_1k': True},  # per 1K tokens
+        'sonnet': {'input': 0.003, 'output': 0.015, 'per_1k': True},
+        'opus': {'input': 0.015, 'output': 0.075, 'per_1k': True},
+        'minimax-m2.5': {'input': 0.0001, 'output': 0.0001, 'per_1k': True}
+    }
+    
+    def __init__(self, storage_path='/home/m1ndb0t/Desktop/J1MSKY/logs'):
+        self.storage_path = Path(storage_path)
+        self.storage_path.mkdir(exist_ok=True)
+        self.daily_usage = self._load_daily_usage()
+        self.session_start = datetime.now()
+        
+    def _load_daily_usage(self):
+        """Load today's usage from file"""
+        today = datetime.now().strftime('%Y-%m-%d')
+        usage_file = self.storage_path / f'usage_{today}.json'
+        if usage_file.exists():
+            with open(usage_file) as f:
+                return json.load(f)
+        return {'models': {}, 'total_cost': 0.0, 'tasks_completed': 0}
+    
+    def _save_daily_usage(self):
+        """Save usage to file"""
+        today = datetime.now().strftime('%Y-%m-%d')
+        usage_file = self.storage_path / f'usage_{today}.json'
+        with open(usage_file, 'w') as f:
+            json.dump(self.daily_usage, f, indent=2)
+    
+    def record_usage(self, model, input_tokens=0, output_tokens=0, task_type='unknown'):
+        """Record token usage and calculate cost"""
+        if model not in self.MODEL_PRICING:
+            return 0.0
+            
+        pricing = self.MODEL_PRICING[model]
+        
+        # Calculate cost
+        input_cost = (input_tokens / 1000) * pricing['input'] if pricing['per_1k'] else input_tokens * pricing['input']
+        output_cost = (output_tokens / 1000) * pricing['output'] if pricing['per_1k'] else output_tokens * pricing['output']
+        total_cost = input_cost + output_cost
+        
+        # Update daily usage
+        if model not in self.daily_usage['models']:
+            self.daily_usage['models'][model] = {
+                'input_tokens': 0, 'output_tokens': 0, 
+                'cost': 0.0, 'calls': 0
+            }
+        
+        self.daily_usage['models'][model]['input_tokens'] += input_tokens
+        self.daily_usage['models'][model]['output_tokens'] += output_tokens
+        self.daily_usage['models'][model]['cost'] += total_cost
+        self.daily_usage['models'][model]['calls'] += 1
+        self.daily_usage['total_cost'] += total_cost
+        self.daily_usage['tasks_completed'] += 1
+        
+        # Persist to disk
+        self._save_daily_usage()
+        
+        return total_cost
+    
+    def get_daily_report(self):
+        """Get daily usage report"""
+        return {
+            'date': datetime.now().strftime('%Y-%m-%d'),
+            'session_duration_minutes': (datetime.now() - self.session_start).seconds / 60,
+            **self.daily_usage
+        }
+    
+    def get_model_breakdown(self):
+        """Get cost breakdown by model"""
+        return self.daily_usage['models']
+    
+    def estimate_task_cost(self, model, estimated_input=1000, estimated_output=500):
+        """Estimate cost before running task"""
+        if model not in self.MODEL_PRICING:
+            return 0.0
+        pricing = self.MODEL_PRICING[model]
+        input_cost = (estimated_input / 1000) * pricing['input']
+        output_cost = (estimated_output / 1000) * pricing['output']
+        return round(input_cost + output_cost, 4)
+    
+    def check_budget_alert(self, daily_budget=50.0):
+        """Check if approaching daily budget"""
+        current_cost = self.daily_usage['total_cost']
+        percentage = (current_cost / daily_budget) * 100
+        
+        if percentage >= 100:
+            return 'critical', f'Budget exceeded: ${current_cost:.2f} / ${daily_budget:.2f}'
+        elif percentage >= 80:
+            return 'warning', f'Budget at {percentage:.0f}%: ${current_cost:.2f} / ${daily_budget:.2f}'
+        elif percentage >= 50:
+            return 'notice', f'Budget at {percentage:.0f}%: ${current_cost:.2f} / ${daily_budget:.2f}'
+        return 'ok', f'Budget healthy: ${current_cost:.2f} / ${daily_budget:.2f}'
+
+# Initialize global cost tracker
+cost_tracker = CostTracker()
+
 def add_event(message, agent=None, model=None, type='info'):
     """Add event to log"""
     event = {
@@ -139,10 +240,18 @@ def spawn_subagent(task, model, team=None):
         add_event(f"Rate limited: {provider}. Cannot spawn {model}", type='error')
         return None
     
+    # Estimate cost before spawning
+    estimated_cost = cost_tracker.estimate_task_cost(model, estimated_input=len(task) * 4, estimated_output=500)
+    
+    # Check budget alert
+    budget_status, budget_msg = cost_tracker.check_budget_alert(daily_budget=50.0)
+    if budget_status == 'critical':
+        add_event(f"Budget critical - spawning with caution: {budget_msg}", type='warning')
+    
     # Record usage
     use_service(provider.split(':')[0])
     
-    # Create subagent record
+    # Create subagent record with cost tracking
     ACTIVE_SUBAGENTS[agent_id] = {
         'id': agent_id,
         'task': task,
@@ -152,7 +261,9 @@ def spawn_subagent(task, model, team=None):
         'created': datetime.now().isoformat(),
         'started': None,
         'completed': None,
-        'result': None
+        'result': None,
+        'estimated_cost': estimated_cost,
+        'actual_cost': 0.0
     }
     
     # Update model agent status
@@ -160,7 +271,7 @@ def spawn_subagent(task, model, team=None):
         MODEL_AGENTS[model]['last_used'] = datetime.now().isoformat()
         MODEL_AGENTS[model]['status'] = 'working'
     
-    add_event(f"Spawned {model} subagent for: {task[:50]}...", agent=agent_id, model=model, type='success')
+    add_event(f"Spawned {model} subagent for: {task[:50]}... (est: ${estimated_cost:.4f})", agent=agent_id, model=model, type='success')
     
     # Simulate subagent work (in real impl, this would call sessions_spawn)
     def run_subagent():
@@ -172,11 +283,20 @@ def spawn_subagent(task, model, team=None):
         ACTIVE_SUBAGENTS[agent_id]['completed'] = datetime.now().isoformat()
         ACTIVE_SUBAGENTS[agent_id]['result'] = f"Task completed using {model}"
         
+        # Record actual cost (simulated)
+        actual_cost = cost_tracker.record_usage(
+            model=model,
+            input_tokens=len(task) * 4,  # Rough estimate
+            output_tokens=500,
+            task_type='subagent_task'
+        )
+        ACTIVE_SUBAGENTS[agent_id]['actual_cost'] = actual_cost
+        
         if model in MODEL_AGENTS:
             MODEL_AGENTS[model]['status'] = 'active'
             MODEL_AGENTS[model]['tasks_completed'] = MODEL_AGENTS[model].get('tasks_completed', 0) + 1
         
-        add_event(f"Subagent {agent_id} completed task", agent=agent_id, model=model, type='success')
+        add_event(f"Subagent {agent_id} completed task (cost: ${actual_cost:.4f})", agent=agent_id, model=model, type='success')
     
     threading.Thread(target=run_subagent, daemon=True).start()
     

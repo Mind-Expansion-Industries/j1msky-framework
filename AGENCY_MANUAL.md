@@ -356,6 +356,222 @@ Automatically selects cheapest model for the task.
 
 ---
 
+## 🛠️ TROUBLESHOOTING GUIDE
+
+### Quick Diagnostics
+
+Run this checklist first:
+```bash
+# Check system health
+curl http://localhost:8080/api/system
+
+# Check rate limits
+curl http://localhost:8080/api/rate-limits
+
+# View recent logs
+tail -f /tmp/teams-v4.log
+```
+
+### Common Issues
+
+#### Dashboard Won't Load
+
+**Symptoms:** Browser shows "Connection refused" or timeout
+
+**Solutions:**
+1. **Check if service is running:**
+   ```bash
+   ps aux | grep j1msky-teams
+   ```
+   If not running: `./start-teams-v4.sh`
+
+2. **Check port availability:**
+   ```bash
+   sudo lsof -i :8080
+   ```
+   If port busy: `sudo kill -9 <PID>` then restart
+
+3. **Firewall issues:**
+   ```bash
+   sudo ufw allow 8080/tcp
+   ```
+
+4. **Check for errors:**
+   ```bash
+   cat /tmp/teams-v4.log | grep ERROR
+   ```
+
+#### Agent Spawn Failed
+
+**Symptoms:** "Rate limited" or "Failed to spawn agent" error
+
+**Solutions:**
+1. **Check rate limits:**
+   - Wait for rate limit reset (shown in dashboard)
+   - Switch to cheaper model (Kimi K2.5 vs Sonnet)
+
+2. **Check API keys:**
+   ```bash
+   cat config/api-keys.json
+   ```
+   Verify keys are valid and not expired
+
+3. **Model availability:**
+   - Some models may be temporarily unavailable
+   - Try alternative model
+
+#### High Costs / Budget Alerts
+
+**Symptoms:** Daily cost exceeding $50, budget warnings
+
+**Solutions:**
+1. **Switch default model:**
+   - Edit `config/model-defaults.json`
+   - Set `"default": "k2p5"` (cheapest)
+
+2. **Review expensive tasks:**
+   ```bash
+   cat logs/usage_$(date +%Y-%m-%d).json
+   ```
+   Identify which agents/tasks cost most
+
+3. **Set hard budget cap:**
+   - Dashboard → Settings → Budget Cap
+   - Set to $30/day to force cost-conscious model selection
+
+#### Slow Response Times
+
+**Symptoms:** Agents taking 10+ minutes to complete simple tasks
+
+**Solutions:**
+1. **Check system resources:**
+   ```bash
+   htop  # Check CPU/RAM
+   vcgencmd measure_temp  # Check temperature
+   ```
+   If temp > 80°C: Improve cooling, reduce overclock
+
+2. **Too many concurrent agents:**
+   - Limit to 3-5 active agents on Pi 4
+   - Queue tasks instead of spawning all at once
+
+3. **Network issues:**
+   ```bash
+   ping -c 4 api.openai.com
+   ```
+   Check internet connectivity
+
+#### Agent Returns Poor Results
+
+**Symptoms:** Output is wrong, incomplete, or off-topic
+
+**Solutions:**
+1. **Improve task description:**
+   - Be specific and detailed
+   - Include examples
+   - Define expected output format
+
+2. **Use correct model:**
+   - Code → Kimi K2.5
+   - Writing → Sonnet
+   - Complex reasoning → Opus
+
+3. **Break into smaller tasks:**
+   - Instead of one big task, chain 3-4 smaller ones
+   - Use teams for complex workflows
+
+#### Git Sync Issues
+
+**Symptoms:** "Failed to commit" or merge conflicts
+
+**Solutions:**
+1. **Check git status:**
+   ```bash
+   cd /home/m1ndb0t/Desktop/J1MSKY
+   git status
+   ```
+
+2. **Manual sync:**
+   ```bash
+   git add -A
+   git commit -m "Manual sync"
+   git pull origin main --rebase
+   git push
+   ```
+
+3. **Reset if needed:**
+   ```bash
+   git reset --hard HEAD  # Discard local changes
+   git pull
+   ```
+
+### Error Code Reference
+
+| Code | Meaning | Fix |
+|------|---------|-----|
+| `E001` | Rate limit exceeded | Wait 1 hour or switch model |
+| `E002` | API key invalid | Check/replace API key |
+| `E003` | Model unavailable | Try different model |
+| `E004` | Task timeout | Break into smaller tasks |
+| `E005` | Out of memory | Reduce concurrent agents |
+| `E006` | Disk full | Clean up logs: `rm logs/*.old` |
+| `E007` | Network timeout | Check internet connection |
+| `E008` | Permission denied | Check file permissions |
+
+### Recovery Procedures
+
+#### Full System Restart
+
+When everything is broken:
+```bash
+# 1. Stop all services
+pkill -f j1msky
+
+# 2. Clear temporary files
+rm -f /tmp/teams-v4.log
+rm -f /tmp/*.pid
+
+# 3. Check disk space
+df -h
+
+# 4. Restart
+./start-teams-v4.sh
+
+# 5. Verify
+sleep 5
+curl http://localhost:8080/api/system
+```
+
+#### Database Reset (Last Resort)
+
+**WARNING:** This clears all task history!
+```bash
+# Backup first
+cp logs/usage_*.json logs/backup/
+
+# Reset
+rm -f logs/usage_*.json
+rm -f config/state.json
+
+# Restart
+./start-teams-v4.sh
+```
+
+### Getting Help
+
+**Before asking for help, gather:**
+1. Output of `curl http://localhost:8080/api/system`
+2. Last 50 lines of `/tmp/teams-v4.log`
+3. Recent changes made (config edits, etc.)
+4. Steps to reproduce the issue
+
+**Support channels:**
+- GitHub Issues: github.com/Mind-Expansion-Industries/j1msky-framework
+- Discord: discord.gg/j1msky (community)
+- Email: support@j1msky.ai (paid users)
+
+---
+
 ## 🔮 FUTURE FEATURES
 
 Coming soon:

@@ -6,7 +6,55 @@
 - **Enterprise**: $299+/mo (custom SLA)
 - **Pay-per-task**: $0.50 / $2.00 / $5.00 tiers
 
-## 2) Revenue Workflow
+## 2) Competitive Positioning
+
+### Market Landscape
+
+| Competitor | Their Strength | Our Advantage |
+|------------|----------------|---------------|
+| **AutoGPT** | Open source, viral | Easier setup, better UI |
+| **ChatGPT Plus** | Brand recognition | Specialized agents, automation |
+| **Claude for Work** | Strong reasoning | Multi-model, cost control |
+| **CrewAI** | Framework flexibility | Pre-built teams, less coding |
+| **LangChain** | Developer ecosystem | Production-ready, managed |
+| **Replit Agent** | IDE integration | Self-hosted, private data |
+
+### Value Proposition
+
+**For Technical Founders:**
+- "Deploy AI teams in minutes, not months"
+- Self-hosted = data stays private
+- Cheaper than hiring junior devs
+
+**For Business Owners:**
+- "24/7 AI workforce for less than minimum wage"
+- No training needed - agents come pre-skilled
+- Scale up/down instantly
+
+**For Agencies:**
+- "10x your team without 10x headcount"
+- White-label ready
+- Pass costs to clients + margin
+
+### Differentiation Strategy
+
+1. **Hardware-First**: Optimized for Raspberry Pi = edge deployment
+2. **Model Agnostic**: Use best model for each task, not locked to one
+3. **Cost Transparency**: Real-time cost tracking per task
+4. **Team-Based**: Pre-configured teams vs. DIY agents
+5. **Offline Capable**: Runs without cloud dependencies
+
+### Pricing Comparison
+
+| Provider | Monthly Cost | Limitations |
+|----------|--------------|-------------|
+| ChatGPT Plus | $20 | Single user, web only |
+| Claude Pro | $20 | Limited to Anthropic models |
+| AutoGPT Cloud | $50-200 | Usage based, unpredictable |
+| **J1MSKY Starter** | **$49** | **2 teams, self-hosted** |
+| **J1MSKY Pro** | **$99** | **All teams, unlimited** |
+
+## 3) Revenue Workflow
 1. Lead comes in (DM/form)
 2. Qualify use-case (code/content/research/business)
 3. Assign plan + expected monthly volume

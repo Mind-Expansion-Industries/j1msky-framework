@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.3 - Navigation Persistence Fixes
-Patch release: preserve session tab state and tighten transition behavior
+J1MSKY Agency v6.0.4 - Resize Flicker Reduction
+Patch release: smoother resize/orientation behavior and safer layout refresh
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.3</title>
+    <title>J1MSKY Agency v6.0.4</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -675,7 +675,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.3</h1>
+        <h1>◈ J1MSKY Agency v6.0.4</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1063,9 +1063,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.3';
+                        header.textContent = '◈ J1MSKY Agency v6.0.4';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.3';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.4';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1108,17 +1108,21 @@ HTML = '''<!DOCTYPE html>
                 const width = entry?.contentRect?.width || window.innerWidth;
                 if (Math.abs(width - this.lastWidth) < 50) return;
                 this.lastWidth = width;
-                
-                // Force layout recalculation on significant resize
-                document.body.style.display = 'none';
-                document.body.offsetHeight;
-                document.body.style.display = '';
-                
-                // Re-ensure active panel is visible
-                const active = document.querySelector('.panel.active');
-                if (active) {
-                    active.style.display = 'block';
-                }
+
+                // Smooth layout refresh without body hide/show flicker.
+                requestAnimationFrame(() => {
+                    // Re-ensure active panel is visible
+                    const active = document.querySelector('.panel.active');
+                    if (active) {
+                        active.style.display = 'block';
+                    }
+
+                    // Keep help overlay consistent through resize/orientation changes.
+                    if (typeof helpVisible !== 'undefined' && helpVisible) {
+                        const helpPanel = document.getElementById('help');
+                        if (helpPanel) helpPanel.style.display = 'block';
+                    }
+                });
             },
             
             destroy() {
@@ -1618,7 +1622,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.3 - Keyboard Safety Patch          ║")
+        print("║          J1MSKY Agency v6.0.4 - Resize Smoothness Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

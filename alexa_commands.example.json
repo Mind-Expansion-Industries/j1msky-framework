@@ -11,6 +11,13 @@
     "volume up": {"type": "ha_service", "domain": "media_player", "service": "volume_up", "entity_id": "media_player.echo_dot"},
     "volume down": {"type": "ha_service", "domain": "media_player", "service": "volume_down", "entity_id": "media_player.echo_dot"},
     "run backup": {"type": "shell", "command": "cd ~/Desktop/J1MSKY && git add -A && git commit -m '[ALEXA] backup trigger' || true"},
-    "open command center": {"type": "shell", "command": "cd ~/Desktop/J1MSKY && ./start-office-windowed.sh"}
+    "open command center": {"type": "shell", "command": "cd ~/Desktop/J1MSKY && ./start-office-windowed.sh"},
+    "youtube pause": {"type": "shell", "command": "cd ~/Desktop/J1MSKY && ./youtube-control.sh pause"},
+    "youtube play": {"type": "shell", "command": "cd ~/Desktop/J1MSKY && ./youtube-control.sh play"},
+    "youtube next": {"type": "shell", "command": "cd ~/Desktop/J1MSKY && ./youtube-control.sh next"},
+    "set audio alexa": {"type": "shell", "command": "cd ~/Desktop/J1MSKY && ./set-audio-profile.sh alexa"},
+    "set audio jack": {"type": "shell", "command": "cd ~/Desktop/J1MSKY && ./set-audio-profile.sh jack"},
+    "set audio hdmi1": {"type": "shell", "command": "cd ~/Desktop/J1MSKY && ./set-audio-profile.sh hdmi1"},
+    "set audio hdmi2": {"type": "shell", "command": "cd ~/Desktop/J1MSKY && ./set-audio-profile.sh hdmi2"}
   }
 }

@@ -3,13 +3,23 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import json, urllib.request
 
 HTML='''<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>J1MSKY Alexa Command Center</title>
-<style>body{font-family:Arial;background:#0b0f14;color:#e6f1ff;margin:0;padding:18px}button{width:100%;padding:14px;margin:8px 0;border:0;border-radius:10px;background:#22d3ee;color:#03131a;font-weight:700} .card{max-width:680px;margin:auto;background:#111a2b;border:1px solid #223;border-radius:12px;padding:16px}</style></head><body><div class="card"><h2>J1MSKY Alexa Command Center</h2>
+<title>jimsky Alexa Command Center</title>
+<style>body{font-family:Arial;background:#0b0f14;color:#e6f1ff;margin:0;padding:18px}button{width:100%;padding:14px;margin:8px 0;border:0;border-radius:10px;background:#22d3ee;color:#03131a;font-weight:700} .card{max-width:680px;margin:auto;background:#111a2b;border:1px solid #223;border-radius:12px;padding:16px}</style></head><body><div class="card"><h2>jimsky Alexa Command Center</h2>
 <button onclick="send('play music')">▶ Play Music</button>
 <button onclick="send('pause music')">⏸ Pause Music</button>
 <button onclick="send('next track')">⏭ Next Track</button>
 <button onclick="send('volume up')">🔊 Volume Up</button>
 <button onclick="send('volume down')">🔉 Volume Down</button>
+<hr style="border-color:#223; margin:10px 0"/>
+<button onclick="send('set audio alexa')">🟦 Output: Alexa BT</button>
+<button onclick="send('set audio jack')">🟩 Output: 3.5mm Jack</button>
+<button onclick="send('set audio hdmi1')">🟨 Output: HDMI 1</button>
+<button onclick="send('set audio hdmi2')">🟧 Output: HDMI 2</button>
+<hr style="border-color:#223; margin:10px 0"/>
+<button onclick="send('youtube pause')">⏸ YouTube Pause</button>
+<button onclick="send('youtube play')">▶ YouTube Play</button>
+<button onclick="send('youtube next')">⏭ YouTube Next</button>
+<hr style="border-color:#223; margin:10px 0"/>
 <button onclick="send('open command center')">🖥 Open Command Center</button>
 <button onclick="send('run backup')">💾 Run Backup</button>
 <pre id="out"></pre>

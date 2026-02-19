@@ -42,6 +42,34 @@
     "open command center": {
       "type": "shell",
       "command": "cd ~/Desktop/J1MSKY && ./start-office-windowed.sh"
+    },
+    "youtube pause": {
+      "type": "shell",
+      "command": "cd ~/Desktop/J1MSKY && ./youtube-control.sh pause"
+    },
+    "youtube play": {
+      "type": "shell",
+      "command": "cd ~/Desktop/J1MSKY && ./youtube-control.sh play"
+    },
+    "youtube next": {
+      "type": "shell",
+      "command": "cd ~/Desktop/J1MSKY && ./youtube-control.sh next"
+    },
+    "set audio alexa": {
+      "type": "shell",
+      "command": "cd ~/Desktop/J1MSKY && ./set-audio-profile.sh alexa"
+    },
+    "set audio jack": {
+      "type": "shell",
+      "command": "cd ~/Desktop/J1MSKY && ./set-audio-profile.sh jack"
+    },
+    "set audio hdmi1": {
+      "type": "shell",
+      "command": "cd ~/Desktop/J1MSKY && ./set-audio-profile.sh hdmi1"
+    },
+    "set audio hdmi2": {
+      "type": "shell",
+      "command": "cd ~/Desktop/J1MSKY && ./set-audio-profile.sh hdmi2"
     }
   },
   "local_mode": {

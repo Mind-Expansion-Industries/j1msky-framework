@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=jimsky Output: HDMI 2
+Comment=Switch audio output to HDMI 2
+Exec=/bin/bash -lc 'cd /home/m1ndb0t/Desktop/J1MSKY && ./set-audio-profile.sh hdmi2'
+Icon=video-display
+Terminal=true
+Type=Application
+Categories=AudioVideo;Settings;

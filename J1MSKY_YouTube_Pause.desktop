@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=jimsky YouTube: Pause
+Comment=Send pause command to browser media
+Exec=/bin/bash -lc 'cd /home/m1ndb0t/Desktop/J1MSKY && ./youtube-control.sh pause'
+Icon=media-playback-pause
+Terminal=false
+Type=Application
+Categories=AudioVideo;

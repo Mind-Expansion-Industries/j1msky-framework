@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=jimsky YouTube: Play
+Comment=Send play command to browser media
+Exec=/bin/bash -lc 'cd /home/m1ndb0t/Desktop/J1MSKY && ./youtube-control.sh play'
+Icon=media-playback-start
+Terminal=false
+Type=Application
+Categories=AudioVideo;

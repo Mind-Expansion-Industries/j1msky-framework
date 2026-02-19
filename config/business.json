@@ -1,0 +1,127 @@
+{
+  "business": {
+    "name": "J1MSKY Agency",
+    "tagline": "AI-Powered Agency That Works While You Sleep",
+    "version": "5.0",
+    "pricing": {
+      "plans": [
+        {
+          "id": "starter",
+          "name": "Starter",
+          "price": 49,
+          "period": "month",
+          "features": [
+            "2 Agent Teams",
+            "100 Tasks/month",
+            "Basic Analytics",
+            "Email Support"
+          ],
+          "limits": {
+            "agents": 2,
+            "tasks_per_month": 100,
+            "api_calls_per_hour": 50
+          }
+        },
+        {
+          "id": "professional",
+          "name": "Professional",
+          "price": 99,
+          "period": "month",
+          "popular": true,
+          "features": [
+            "All 4 Agent Teams",
+            "Unlimited Tasks",
+            "Advanced Analytics",
+            "Priority Support",
+            "Custom Branding"
+          ],
+          "limits": {
+            "agents": 4,
+            "tasks_per_month": -1,
+            "api_calls_per_hour": 200
+          }
+        },
+        {
+          "id": "enterprise",
+          "name": "Enterprise",
+          "price": 299,
+          "period": "month",
+          "features": [
+            "Unlimited Everything",
+            "Dedicated Infrastructure",
+            "SLA Guarantee",
+            "24/7 Support",
+            "Custom Development"
+          ],
+          "limits": {
+            "agents": -1,
+            "tasks_per_month": -1,
+            "api_calls_per_hour": 1000
+          }
+        }
+      ],
+      "pay_per_task": {
+        "enabled": true,
+        "pricing": {
+          "simple": { "price": 0.50, "description": "Quick tasks (< 5 min)" },
+          "medium": { "price": 2.00, "description": "Standard tasks (5-15 min)" },
+          "complex": { "price": 5.00, "description": "Complex tasks (15+ min)" }
+        }
+      }
+    },
+    "models": {
+      "k2p5": {
+        "name": "Kimi K2.5",
+        "description": "Fast, efficient coding",
+        "cost_per_1k_tokens": 0.001,
+        "speed": "fast",
+        "best_for": ["coding", "quick_tasks", "prototyping"]
+      },
+      "sonnet": {
+        "name": "Claude Sonnet",
+        "description": "Balanced creativity and analysis",
+        "cost_per_1k_tokens": 0.003,
+        "speed": "medium",
+        "best_for": ["writing", "analysis", "documentation"]
+      },
+      "opus": {
+        "name": "Claude Opus",
+        "description": "Deep reasoning and complex tasks",
+        "cost_per_1k_tokens": 0.015,
+        "speed": "slow",
+        "best_for": ["architecture", "strategy", "complex_reasoning"]
+      }
+    },
+    "teams": {
+      "code": {
+        "name": "Code Team",
+        "description": "Programming and development tasks",
+        "models": ["k2p5", "sonnet"],
+        "specialties": ["programming", "debugging", "code_review"]
+      },
+      "creative": {
+        "name": "Creative Team",
+        "description": "Content creation and design",
+        "models": ["sonnet", "opus"],
+        "specialties": ["writing", "design", "content"]
+      },
+      "research": {
+        "name": "Research Team",
+        "description": "Analysis and intelligence gathering",
+        "models": ["sonnet", "k2p5"],
+        "specialties": ["research", "analysis", "data_gathering"]
+      },
+      "business": {
+        "name": "Business Team",
+        "description": "Strategy and business operations",
+        "models": ["opus", "sonnet"],
+        "specialties": ["strategy", "planning", "revenue"]
+      }
+    },
+    "stripe": {
+      "webhook_secret": "PLACEHOLDER",
+      "success_url": "http://localhost:8080/billing/success",
+      "cancel_url": "http://localhost:8080/billing/cancel"
+    }
+  }
+}

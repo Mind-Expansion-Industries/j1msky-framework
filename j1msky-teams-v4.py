@@ -1084,6 +1084,20 @@ def use_service(service):
     if service in RATE_LIMITS:
         RATE_LIMITS[service]['requests'] += 1
 
+
+def validate_model(model):
+    """Validate requested model against supported model agents."""
+    return model in MODEL_AGENTS
+
+
+def sanitize_task(task, max_len=2000):
+    """Normalize and constrain incoming task text."""
+    if not isinstance(task, str):
+        return ""
+    cleaned = " ".join(task.strip().split())
+    return cleaned[:max_len]
+
+
 def spawn_subagent(task, model, team=None):
     """Spawn a subagent with specific model"""
     agent_id = f"subagent_{int(time.time())}_{random.randint(1000,9999)}"
@@ -1981,7 +1995,14 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
         
         if self.path == '/api/spawn':
             model = params.get('model', ['k2p5'])[0]
-            task = params.get('task', ['No task'])[0]
+            task = sanitize_task(params.get('task', ['No task'])[0])
+
+            if not validate_model(model):
+                self.send_json({'success': False, 'error': f'Unsupported model: {model}'})
+                return
+            if not task:
+                self.send_json({'success': False, 'error': 'Task cannot be empty'})
+                return
             
             agent_id = spawn_subagent(task, model)
             
@@ -1992,8 +2013,12 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
                 
         elif self.path == '/api/spawn-team':
             team_id = params.get('team', ['team_coding'])[0]
-            task = params.get('task', ['No task'])[0]
+            task = sanitize_task(params.get('task', ['No task'])[0])
             
+            if not task:
+                self.send_json({'success': False, 'error': 'Task cannot be empty'})
+                return
+
             team = AGENT_TEAMS.get(team_id)
             if team:
                 # Spawn primary model from team

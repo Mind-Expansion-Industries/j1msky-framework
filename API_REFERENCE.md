@@ -474,6 +474,25 @@ console.log(result.output);
 }
 ```
 
+### Request Validation Rules
+
+All write endpoints enforce basic validation:
+
+| Field | Rule |
+|------|------|
+| `task` | Required, non-empty string, max 2000 chars |
+| `model` | Must be one of: `k2p5`, `sonnet`, `opus` |
+| `team` | Must match a registered team id |
+| `priority` | `low`, `normal`, or `high` |
+
+**Validation Error Example:**
+```json
+{
+  "success": false,
+  "error": "Task cannot be empty"
+}
+```
+
 ---
 
 ## 🔁 Retry Strategies

@@ -558,6 +558,57 @@ Would you be interested in a brief interview or demo?
 - YouTube views and retention
 - Newsletter subscribers
 
+## 16) Customer Success & Support Playbook
+
+### Support Tiers
+
+| Plan | Channel | First Response SLA | Resolution Target |
+|------|---------|--------------------|-------------------|
+| Starter | Email | 24 hours | 3 business days |
+| Pro | Email + Chat | 8 hours | 1-2 business days |
+| Enterprise | Dedicated Slack + Call | 1 hour | Same day for critical |
+
+### Ticket Priority Definitions
+
+- **P1 Critical**: Production down, data loss risk, billing failure
+- **P2 High**: Core workflow broken, major degradation
+- **P3 Medium**: Non-critical bug, workaround exists
+- **P4 Low**: Cosmetic issue, feature request
+
+### Incident Communication Template
+
+```
+Subject: [J1MSKY Incident] [Status] [Issue]
+
+What happened:
+[1-2 sentence summary]
+
+Impact:
+[Who is affected + what is affected]
+
+Current status:
+[Investigating / Mitigated / Resolved]
+
+Next update:
+[Timestamp]
+```
+
+### Onboarding-to-Adoption Program (First 30 Days)
+
+- Day 1: Kickoff + first successful task
+- Day 3: Workflow review + optimization suggestions
+- Day 7: Usage report + model cost tuning
+- Day 14: Team deployment session
+- Day 30: ROI review + expansion proposal
+
+### Expansion Signals
+
+Trigger an upsell conversation when:
+- User hits 80% of plan limits for 2+ weeks
+- User asks for API access, webhooks, or SSO
+- Team adoption expands beyond 2 departments
+- SLA/support requests exceed current plan scope
+
 ## 14) Legal & Contracts
 
 ### Terms of Service Template

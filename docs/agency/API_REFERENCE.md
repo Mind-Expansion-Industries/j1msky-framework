@@ -104,6 +104,32 @@ Idempotency-Key: 7f8f8c5a-4d6f-4f6c-ae4b-52a7c8aa2d9b
 }
 ```
 
+#### Budget-Aware Model Recommendation
+**Endpoint:** `POST /orchestrator/recommend-model`
+
+**Request:**
+```json
+{
+  "task_type": "coding",
+  "complexity": "medium",
+  "priority": "normal",
+  "estimated_tokens": 2500
+}
+```
+
+**Response:**
+```json
+{
+  "recommended_model": "k2p5",
+  "budget_available": true,
+  "daily_budget": 50,
+  "today_spend": 12.43,
+  "budget_remaining": 37.57
+}
+```
+
+Use this endpoint when you need a model choice that respects daily spend limits.
+
 ### Pagination & Filtering
 
 Most list endpoints support pagination and filtering using query parameters:

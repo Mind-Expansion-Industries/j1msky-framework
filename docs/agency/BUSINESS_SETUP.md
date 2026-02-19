@@ -1187,3 +1187,35 @@ Optimal price = where "too cheap" and "too expensive" intersect
 - 90-day retention of partner-sourced accounts
 - Expansion ACV from partner book
 - Time-to-first-value on partner implementations
+
+## 20) Win-Back Program (Churn Recovery)
+
+### Churn Segments
+
+- **Price-driven churn**: left due to budget pressure
+- **Value-gap churn**: did not reach activation or ROI
+- **Operational churn**: support/implementation friction
+- **Champion churn**: internal owner left company
+
+### Re-Engagement Cadence
+
+- **Day 7:** polite check-in + short feedback form
+- **Day 21:** tailored reactivation offer (discount or onboarding support)
+- **Day 45:** case study showing outcomes in similar segment
+- **Day 90:** final win-back touchpoint + roadmap updates
+
+### Offer Matrix
+
+| Segment | Offer | Goal |
+|---|---|---|
+| Price-driven | 25% for 3 months | recover budget-constrained accounts |
+| Value-gap | free implementation workshop | improve activation |
+| Operational | priority support for 30 days | remove friction |
+| Champion churn | exec onboarding session | rebuild internal ownership |
+
+### Win-Back KPIs
+
+- Reactivation rate (target: >12%)
+- 90-day retention after reactivation (target: >75%)
+- Payback period on incentive offers (target: <2 months)
+- Net recovered MRR per quarter

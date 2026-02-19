@@ -248,6 +248,28 @@ class UnifiedOrchestrator:
         today_spend = self.get_daily_spend()
         return (today_spend + projected_cost) <= daily_budget
 
+    def get_model_for_task_with_budget(self, task_type, complexity="medium", priority="normal", estimated_tokens: int = 1000):
+        """
+        Select a model while enforcing daily budget constraints.
+        Falls back to cheaper available models if preferred model exceeds remaining budget.
+        """
+        preferred_model = self.get_model_for_task(task_type, complexity, priority)
+        if self.is_budget_available(preferred_model, estimated_tokens):
+            return preferred_model
+
+        # Budget-aware fallbacks ordered by relative cost efficiency
+        cost_ordered = ["k2p5", "minimax-m2.5", "sonnet", "codex", "opus"]
+        for model in cost_ordered:
+            if self.check_model_available(model) and self.is_budget_available(model, estimated_tokens):
+                return model
+
+        # If no model fits budget, return cheapest available to avoid hard failure
+        for model in cost_ordered:
+            if self.check_model_available(model):
+                return model
+
+        return "sonnet"
+
     def get_status_report(self):
         """Get current orchestrator status"""
         today = datetime.now().strftime("%Y-%m-%d")

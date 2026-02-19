@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.7 - Resize Flicker Reduction
-Patch release: prevents overlapping live fetches and skips hidden-tab update churn
+J1MSKY Agency v6.0.8 - Resize Flicker Reduction
+Patch release: adds swipe interval guard to prevent rapid multi-swipe transition bursts
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.7</title>
+    <title>J1MSKY Agency v6.0.8</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -677,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.7</h1>
+        <h1>◈ J1MSKY Agency v6.0.8</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -982,6 +982,8 @@ HTML = '''<!DOCTYPE html>
             threshold: 80,
             maxTime: 300,
             edgeThreshold: 20, // Ignore swipes starting too close to edge
+            minIntervalMs: 180,
+            lastSwipeAt: 0,
             isTracking: false,
             
             init() {
@@ -1022,6 +1024,11 @@ HTML = '''<!DOCTYPE html>
                 if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) return; // Mostly vertical
                 if (Math.abs(deltaX) < this.threshold) return;
                 
+                // Guard against swipe burst spam
+                const now = Date.now();
+                if (now - this.lastSwipeAt < this.minIntervalMs) return;
+                this.lastSwipeAt = now;
+
                 // Execute navigation
                 if (deltaX > 0) {
                     showTab(NavState.getPrevTab());
@@ -1067,9 +1074,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.7';
+                        header.textContent = '◈ J1MSKY Agency v6.0.8';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.7';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.8';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1638,7 +1645,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.7 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.8 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

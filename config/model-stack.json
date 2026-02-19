@@ -1,0 +1,102 @@
+{
+  "models": {
+    "anthropic": {
+      "provider": "anthropic",
+      "auth": "anthropic:default",
+      "status": "active",
+      "models": {
+        "claude-opus-4-6": {
+          "alias": "opus",
+          "role": "CEO/Mastermind",
+          "cost_per_1k": 0.015,
+          "frequency": "1x per hour",
+          "tasks": ["architecture", "strategy", "complex_reasoning"],
+          "fallback": "sonnet"
+        },
+        "claude-sonnet-4-6": {
+          "alias": "sonnet",
+          "role": "Operations Manager",
+          "cost_per_1k": 0.003,
+          "frequency": "continuous",
+          "tasks": ["implementation", "documentation", "continuity"],
+          "fallback": "k2p5"
+        }
+      }
+    },
+    "kimi-coding": {
+      "provider": "kimi-coding",
+      "auth": "kimi-coding:default",
+      "status": "active",
+      "models": {
+        "k2p5": {
+          "alias": "k2p5",
+          "role": "Lead Developer",
+          "cost_per_1k": 0.001,
+          "frequency": "as_needed",
+          "tasks": ["coding", "architecture", "technical_design"],
+          "fallback": "minimax-m2.5"
+        }
+      }
+    },
+    "minimax-portal": {
+      "provider": "minimax-portal",
+      "auth": "minimax-portal:default",
+      "status": "active",
+      "expires": "365d",
+      "models": {
+        "MiniMax-M2.5": {
+          "alias": "minimax-m2.5",
+          "role": "Senior Developer",
+          "cost_per_1k": 0.001,
+          "frequency": "high",
+          "tasks": ["fast_coding", "implementation", "prototyping"],
+          "fallback": "k2p5"
+        }
+      }
+    },
+    "openai-codex": {
+      "provider": "openai-codex",
+      "auth": "openai-codex:default",
+      "status": "active",
+      "expires": "10d",
+      "usage": {
+        "hours_remaining": 5,
+        "percentage": 100
+      },
+      "models": {
+        "codex": {
+          "alias": "codex",
+          "role": "Specialist Developer",
+          "cost_per_1k": 0.002,
+          "frequency": "specialist",
+          "tasks": ["api_integration", "specialized_coding", "tool_building"],
+          "fallback": "minimax-m2.5"
+        }
+      }
+    }
+  },
+  "orchestration": {
+    "ceo_layer": ["opus"],
+    "operations_layer": ["sonnet"],
+    "technical_leads": ["k2p5"],
+    "engineering_team": ["minimax-m2.5", "codex"],
+    "fallback_chain": {
+      "opus": "sonnet",
+      "sonnet": "k2p5",
+      "k2p5": "minimax-m2.5",
+      "minimax-m2.5": "codex",
+      "codex": "sonnet"
+    }
+  },
+  "rate_limits": {
+    "anthropic": {"hourly": 50, "current": 0},
+    "kimi-coding": {"hourly": 100, "current": 0},
+    "minimax-portal": {"hourly": 100, "current": 0},
+    "openai-codex": {"hourly": 20, "current": 0}
+  },
+  "cost_tracking": {
+    "enabled": true,
+    "daily_budget": 50.00,
+    "alert_threshold": 0.8
+  }
+}

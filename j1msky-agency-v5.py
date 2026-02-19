@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.2 - Navigation Persistence Fixes
+J1MSKY Agency v6.0.3 - Navigation Persistence Fixes
 Patch release: preserve session tab state and tighten transition behavior
 """
 
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.2</title>
+    <title>J1MSKY Agency v6.0.3</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -583,6 +583,18 @@ HTML = '''<!DOCTYPE html>
             width: 200%;
             height: 200%;
         }
+
+        .nav-item:focus-visible,
+        .quick-btn:focus-visible,
+        .btn-primary:focus-visible,
+        .help-btn:focus-visible,
+        .agent-action:focus-visible,
+        .form-input:focus-visible,
+        .form-select:focus-visible,
+        .form-textarea:focus-visible {
+            outline: 2px solid var(--cyan);
+            outline-offset: 2px;
+        }
         
         .cost-indicator {
             display: flex;
@@ -663,7 +675,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.2</h1>
+        <h1>◈ J1MSKY Agency v6.0.3</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1051,9 +1063,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.2';
+                        header.textContent = '◈ J1MSKY Agency v6.0.3';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.2';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.3';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1291,7 +1303,14 @@ HTML = '''<!DOCTYPE html>
             }
         });
         
+        function isTypingTarget(el) {
+            if (!el) return false;
+            const tag = (el.tagName || '').toLowerCase();
+            return el.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select';
+        }
+
         document.addEventListener('keydown', (e) => {
+            if (isTypingTarget(e.target)) return;
             if (e.altKey && e.key === 'ArrowLeft') {
                 e.preventDefault();
                 const prev = NavState.goBack();
@@ -1345,6 +1364,7 @@ HTML = '''<!DOCTYPE html>
         
         // Close help on Escape key
         document.addEventListener('keydown', (e) => {
+            if (isTypingTarget(e.target)) return;
             if (e.key === 'Escape' && helpVisible) {
                 e.preventDefault();
                 toggleHelp();
@@ -1530,7 +1550,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.2 - Stability Patch          ║")
+        print("║          J1MSKY Agency v6.0.3 - Keyboard Safety Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

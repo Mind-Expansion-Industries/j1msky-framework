@@ -167,7 +167,7 @@ class FlipperGUI:
                           font=('Courier', 9),
                           bg='#1a1a1f', fg='#00ffff',
                           relief='flat')
-          btn.pack(fill='x', padx=5, pady=2)
+            btn.pack(fill='x', padx=5, pady=2)
             
         # Custom frequency
         custom_frame = tk.Frame(left, bg='#0a0a0f')

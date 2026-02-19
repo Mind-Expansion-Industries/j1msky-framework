@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0 - Real-time Stats & Polished Interactions
-Milestone release with live updates, session persistence, error boundaries
+J1MSKY Agency v6.0.2 - Navigation Persistence Fixes
+Patch release: preserve session tab state and tighten transition behavior
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0</title>
+    <title>J1MSKY Agency v6.0.2</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -663,7 +663,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0</h1>
+        <h1>◈ J1MSKY Agency v6.0.2</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1051,9 +1051,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0';
+                        header.textContent = '◈ J1MSKY Agency v6.0.2';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.2';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1165,6 +1165,11 @@ HTML = '''<!DOCTYPE html>
                 return;
             }
             
+            // If help overlay is open, close it before navigating.
+            if (typeof helpVisible !== 'undefined' && helpVisible) {
+                toggleHelp();
+            }
+
             // Begin transition
             NavState.isTransitioning = true;
             NavState.lastTransitionTime = Date.now();
@@ -1496,7 +1501,7 @@ HTML = '''<!DOCTYPE html>
         window.addEventListener('beforeunload', () => {
             ResizeHandler.destroy();
             StatsUpdater.stop();
-            SessionStore.clear();
+            // Keep SessionStore intact so tab persistence survives refresh/reopen.
         });
     </script>
 </body>
@@ -1525,7 +1530,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║           J1MSKY Agency v6.0 - Milestone Release         ║")
+        print("║          J1MSKY Agency v6.0.2 - Stability Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

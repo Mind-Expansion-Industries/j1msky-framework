@@ -163,6 +163,7 @@ HTML = '''<!DOCTYPE html>
             border-radius: 20px;
             font-size: 11px;
             border: 1px solid var(--border);
+            transition: opacity 0.3s ease;
         }
         
         .stat-badge.temp { color: var(--green); border-color: var(--green); }
@@ -505,6 +506,13 @@ HTML = '''<!DOCTYPE html>
             }
             .nav-item span {
                 transition: none;
+            }
+            .stat-card:hover {
+                transform: none;
+                box-shadow: none;
+            }
+            body.navigating::after {
+                animation: none;
             }
         }
         
@@ -1416,6 +1424,8 @@ HTML = '''<!DOCTYPE html>
             }
         `;
         document.head.appendChild(style);
+        
+        // Error Boundary for uncaught errors
         window.addEventListener('error', (e) => {
             console.error('Global error:', e.message);
             NavState.reset();
@@ -1485,6 +1495,8 @@ HTML = '''<!DOCTYPE html>
         // Cleanup on page unload
         window.addEventListener('beforeunload', () => {
             ResizeHandler.destroy();
+            StatsUpdater.stop();
+            SessionStore.clear();
         });
     </script>
 </body>

@@ -1,12 +1,1 @@
-[Unit]
-Description=J1MSKY Keep Alexa Output Active
-After=pipewire.service wireplumber.service bluetooth.target
-
-[Service]
-Type=simple
-ExecStart=/bin/bash /home/m1ndb0t/Desktop/J1MSKY/audio-keep-alexa.sh
-Restart=always
-RestartSec=2
-
-[Install]
-WantedBy=default.target
+scripts/audio/j1msky-audio-keep.service

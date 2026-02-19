@@ -643,6 +643,239 @@ class MetricsCollector:
 # Initialize metrics collector
 metrics = MetricsCollector()
 
+# Workflow Engine for Multi-Agent Pipelines
+class WorkflowEngine:
+    """
+    Define and execute multi-step agent workflows.
+    Allows chaining multiple agents with conditional logic.
+    """
+    
+    def __init__(self, storage_path='/home/m1ndb0t/Desktop/J1MSKY/workflows'):
+        self.storage_path = Path(storage_path)
+        self.storage_path.mkdir(exist_ok=True)
+        self.active_workflows = {}
+        self._lock = threading.Lock()
+        
+    def create_workflow(self, name, steps, description=''):
+        """
+        Create a reusable workflow definition.
+        
+        Steps format:
+        [
+            {
+                'name': 'research',
+                'model': 'sonnet',
+                'task_template': 'Research: {topic}',
+                'output_var': 'research_result',
+                'condition': None  # Optional: only run if condition met
+            },
+            {
+                'name': 'write',
+                'model': 'k2p5',
+                'task_template': 'Write based on: {research_result}',
+                'input_vars': ['research_result'],
+                'output_var': 'final_output'
+            }
+        ]
+        """
+        workflow = {
+            'id': f"wf_{int(time.time())}_{random.randint(1000,9999)}",
+            'name': name,
+            'description': description,
+            'steps': steps,
+            'created_at': datetime.now().isoformat(),
+            'usage_count': 0
+        }
+        
+        # Save workflow definition
+        wf_file = self.storage_path / f"{workflow['id']}.json"
+        with open(wf_file, 'w') as f:
+            json.dump(workflow, f, indent=2)
+        
+        return workflow['id']
+    
+    def execute_workflow(self, workflow_id, inputs, callback=None):
+        """
+        Execute a workflow with given inputs.
+        Returns execution ID for tracking.
+        """
+        # Load workflow
+        wf_file = self.storage_path / f"{workflow_id}.json"
+        if not wf_file.exists():
+            return None, f"Workflow {workflow_id} not found"
+        
+        with open(wf_file) as f:
+            workflow = json.load(f)
+        
+        execution_id = f"exec_{int(time.time())}_{random.randint(1000,9999)}"
+        
+        execution = {
+            'id': execution_id,
+            'workflow_id': workflow_id,
+            'workflow_name': workflow['name'],
+            'status': 'running',
+            'inputs': inputs,
+            'outputs': {},
+            'step_results': [],
+            'started_at': datetime.now().isoformat(),
+            'completed_at': None,
+            'total_cost': 0.0
+        }
+        
+        with self._lock:
+            self.active_workflows[execution_id] = execution
+        
+        # Start execution in background
+        threading.Thread(
+            target=self._run_workflow,
+            args=(execution, workflow, callback),
+            daemon=True
+        ).start()
+        
+        return execution_id, None
+    
+    def _run_workflow(self, execution, workflow, callback=None):
+        """Internal method to run workflow steps"""
+        try:
+            context = execution['inputs'].copy()
+            
+            for i, step in enumerate(workflow['steps']):
+                step_name = step['name']
+                add_event(f"Workflow {execution['id'][:8]}: Starting step '{step_name}'", type='info')
+                
+                # Check condition if present
+                if 'condition' in step and step['condition']:
+                    if not self._evaluate_condition(step['condition'], context):
+                        add_event(f"Step {step_name} skipped (condition not met)", type='info')
+                        continue
+                
+                # Build task from template
+                task_template = step['task_template']
+                try:
+                    task = task_template.format(**context)
+                except KeyError as e:
+                    error = f"Missing variable {e} for step {step_name}"
+                    add_event(error, type='error')
+                    execution['status'] = 'failed'
+                    execution['error'] = error
+                    if callback:
+                        callback(execution)
+                    return
+                
+                # Spawn agent for this step
+                model = step.get('model', 'k2p5')
+                agent_id = spawn_subagent(task, model)
+                
+                if not agent_id:
+                    error = f"Failed to spawn agent for step {step_name}"
+                    add_event(error, type='error')
+                    execution['status'] = 'failed'
+                    execution['error'] = error
+                    if callback:
+                        callback(execution)
+                    return
+                
+                # Wait for completion (in real impl, this would be async)
+                # For now, we simulate waiting
+                max_wait = 300  # 5 minutes
+                waited = 0
+                while waited < max_wait:
+                    if agent_id in ACTIVE_SUBAGENTS:
+                        agent = ACTIVE_SUBAGENTS[agent_id]
+                        if agent['status'] == 'completed':
+                            break
+                        elif agent['status'] == 'failed':
+                            error = f"Step {step_name} failed"
+                            add_event(error, type='error')
+                            execution['status'] = 'failed'
+                            execution['error'] = error
+                            if callback:
+                                callback(execution)
+                            return
+                    time.sleep(1)
+                    waited += 1
+                
+                # Get result and add to context
+                result = ACTIVE_SUBAGENTS.get(agent_id, {}).get('result', 'No result')
+                output_var = step.get('output_var', f'step_{i}_output')
+                context[output_var] = result
+                
+                # Track cost
+                step_cost = ACTIVE_SUBAGENTS.get(agent_id, {}).get('actual_cost', 0)
+                execution['total_cost'] += step_cost
+                
+                execution['step_results'].append({
+                    'step': step_name,
+                    'agent_id': agent_id,
+                    'output': result,
+                    'cost': step_cost
+                })
+                
+                add_event(f"Step {step_name} completed (${step_cost:.4f})", type='success')
+            
+            # Workflow complete
+            execution['status'] = 'completed'
+            execution['completed_at'] = datetime.now().isoformat()
+            execution['outputs'] = {k: v for k, v in context.items() 
+                                   if k not in execution['inputs']}
+            
+            # Update workflow usage count
+            workflow['usage_count'] = workflow.get('usage_count', 0) + 1
+            wf_file = self.storage_path / f"{workflow['id']}.json"
+            with open(wf_file, 'w') as f:
+                json.dump(workflow, f, indent=2)
+            
+            add_event(f"Workflow {execution['id'][:8]} completed (${execution['total_cost']:.4f})", type='success')
+            
+        except Exception as e:
+            execution['status'] = 'failed'
+            execution['error'] = str(e)
+            add_event(f"Workflow error: {e}", type='error')
+        
+        finally:
+            if callback:
+                callback(execution)
+    
+    def _evaluate_condition(self, condition, context):
+        """Evaluate a simple condition against context"""
+        # Simple condition evaluation: "variable == value" or "variable != value"
+        try:
+            if '==' in condition:
+                var, val = condition.split('==')
+                return context.get(var.strip()) == val.strip().strip('"\'')
+            elif '!=' in condition:
+                var, val = condition.split('!=')
+                return context.get(var.strip()) != val.strip().strip('"\'')
+        except:
+            pass
+        return True
+    
+    def get_execution_status(self, execution_id):
+        """Get status of a workflow execution"""
+        with self._lock:
+            return self.active_workflows.get(execution_id)
+    
+    def list_workflows(self):
+        """List all available workflow definitions"""
+        workflows = []
+        for wf_file in self.storage_path.glob('*.json'):
+            try:
+                with open(wf_file) as f:
+                    wf = json.load(f)
+                    workflows.append({
+                        'id': wf['id'],
+                        'name': wf['name'],
+                        'description': wf.get('description', ''),
+                        'steps': len(wf['steps']),
+                        'usage_count': wf.get('usage_count', 0)
+                    })
+            except:
+                pass
+        return workflows
+
+# Initialize workflow engine
+workflow_engine = WorkflowEngine()
+
 def add_event(message, agent=None, model=None, type='info'):
     """Add event to log"""
     event = {

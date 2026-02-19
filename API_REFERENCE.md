@@ -885,6 +885,117 @@ fixed_code = fixer.wait_for_completion()
 
 ---
 
+## 📋 API Versioning
+
+### Version Strategy
+
+J1MSKY uses **URL-based versioning** for API changes:
+
+```
+http://your-pi-ip:8080/api/v1/spawn    # Current stable
+http://your-pi-ip:8080/api/v2/spawn    # Future version
+```
+
+**Version Lifecycle:**
+| Phase | Duration | Support Level |
+|-------|----------|---------------|
+| Beta | 1-2 months | Community only |
+| Stable | 12+ months | Full support |
+| Deprecated | 6 months | Security fixes only |
+| Sunset | - | Removed |
+
+**Current Versions:**
+- `v4.0` (Stable) - Current production version
+- `v3.2` (Deprecated) - End of life: June 2026
+
+### Deprecation Headers
+
+When using deprecated endpoints, you'll receive headers:
+
+```http
+Deprecation: true
+Sunset: Sat, 01 Jun 2026 00:00:00 GMT
+Link: </api/v4/spawn>; rel="successor-version"
+```
+
+### Migration Guide
+
+**Upgrading from v3 to v4:**
+
+| v3 Endpoint | v4 Equivalent | Changes |
+|-------------|---------------|---------|
+| `POST /agent` | `POST /spawn` | Renamed for clarity |
+| `GET /status` | `GET /agent/{id}` | Returns full status object |
+| `DELETE /cancel` | `DELETE /agent/{id}` | Consistent naming |
+
+**Breaking Changes in v4:**
+1. **Authentication:** Header changed from `X-API-Key` to `Authorization: Bearer`
+2. **Rate Limiting:** New rate limit headers added
+3. **Error Format:** Standardized error response structure
+4. **Pagination:** Cursor-based pagination for list endpoints
+
+---
+
+## 📝 Changelog
+
+### v4.0.0 (2026-02-19)
+**Major Release - Multi-Model Agent Teams**
+
+**Added:**
+- Multi-model agent team support (Code, Creative, Research, Business)
+- Rate limit tracking and management
+- Subagent spawning with automatic model selection
+- Webhook notifications for agent events
+- Cost tracking and billing reports
+- Pagination and filtering on list endpoints
+- Security features: IP whitelisting, request signing, audit logging
+
+**Changed:**
+- API authentication now uses Bearer tokens
+- Rate limit response includes `retry_after` header
+- Standardized error response format across all endpoints
+
+**Removed:**
+- Legacy v2 endpoints (sunset as of 2026-01-01)
+
+### v3.2.0 (2025-12-15)
+**Maintenance Release**
+
+**Added:**
+- Health check endpoint (`GET /health`)
+- System metrics endpoint (`GET /metrics`)
+
+**Fixed:**
+- Rate limit counter not resetting correctly
+- Memory leak in long-running agents
+
+### v3.1.0 (2025-11-01)
+**Feature Release**
+
+**Added:**
+- Batch agent spawning (`POST /spawn-batch`)
+- Agent priority levels (low, normal, high)
+- Custom timeout configuration per agent
+
+**Changed:**
+- Improved error messages for invalid models
+- Reduced default agent timeout from 10min to 5min
+
+### v3.0.0 (2025-09-15)
+**Major Release - Business Tier**
+
+**Added:**
+- Enterprise authentication with API keys
+- Usage-based billing integration
+- Team management endpoints
+- Role-based access control (RBAC)
+
+**Breaking Changes:**
+- All endpoints now require authentication
+- Response format changed to include metadata wrapper
+
+---
+
 ## 📚 Resources
 
 - **Full Docs:** https://docs.j1msky.ai

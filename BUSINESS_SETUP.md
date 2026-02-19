@@ -557,3 +557,300 @@ Would you be interested in a brief interview or demo?
 - Email open rates (target: >25%)
 - YouTube views and retention
 - Newsletter subscribers
+
+## 14) Legal & Contracts
+
+### Terms of Service Template
+
+```
+TERMS OF SERVICE
+
+Last Updated: [Date]
+
+1. ACCEPTANCE OF TERMS
+By accessing or using J1MSKY ("Service"), you agree to be bound by these Terms.
+
+2. DESCRIPTION OF SERVICE
+J1MSKY provides AI agent automation tools. We do not guarantee specific results
+or outcomes from use of the Service.
+
+3. USER RESPONSIBILITIES
+- You are responsible for all content processed through the Service
+- You must have rights to any data you submit
+- You may not use the Service for illegal activities
+
+4. PAYMENT TERMS
+- Subscription fees are billed in advance
+- No refunds for partial months
+- We may suspend service for non-payment
+
+5. LIMITATION OF LIABILITY
+J1MSKY's liability is limited to fees paid in the 12 months preceding any claim.
+
+6. TERMINATION
+Either party may terminate with 30 days notice. Data will be retained for 30 days
+post-termination then deleted.
+
+7. GOVERNING LAW
+These terms are governed by [State/Country] law.
+
+Contact: legal@j1msky.ai
+```
+
+### Privacy Policy Template
+
+```
+PRIVACY POLICY
+
+Last Updated: [Date]
+
+1. INFORMATION WE COLLECT
+- Account information (email, name)
+- Usage data (tasks, API calls)
+- Payment information (processed by Stripe)
+
+2. HOW WE USE INFORMATION
+- Provide and improve the Service
+- Process payments
+- Send service updates
+- Comply with legal obligations
+
+3. DATA RETENTION
+- Task data: 30 days
+- Account data: Until account deletion
+- Payment records: 7 years (legal requirement)
+
+4. YOUR RIGHTS (GDPR/CCPA)
+- Access your data
+- Request deletion
+- Export your data
+- Opt out of marketing
+
+5. SECURITY
+We use industry-standard security measures including encryption and access controls.
+
+6. THIRD PARTIES
+We share data with:
+- Payment processors (Stripe)
+- Cloud providers (AWS)
+- Analytics (Google Analytics)
+
+Contact: privacy@j1msky.ai
+```
+
+### Master Services Agreement (Enterprise)
+
+```
+MASTER SERVICES AGREEMENT
+
+This Agreement is between J1MSKY ("Provider") and [CLIENT] ("Client").
+
+1. SERVICES
+Provider will provide AI agent services as described in Exhibit A (SOW).
+
+2. FEES
+- Monthly fee as specified in Order Form
+- Overages billed at $X per additional task
+- Annual price increases capped at 5%
+
+3. SERVICE LEVEL AGREEMENT (SLA)
+- 99.9% uptime (excluding scheduled maintenance)
+- 4-hour response for critical issues
+- 24-hour response for standard issues
+- 99.5% accuracy rate for agent outputs
+
+4. DATA SECURITY
+- SOC 2 Type II certified
+- Data encrypted at rest and in transit
+- Annual security audits
+- Breach notification within 24 hours
+
+5. INTELLECTUAL PROPERTY
+- Client retains rights to their data
+- Provider retains rights to underlying technology
+- Joint ownership of custom developments
+
+6. LIMITATION OF LIABILITY
+- Provider liability capped at 12 months fees
+- Excludes gross negligence/willful misconduct
+- Client indemnifies Provider for data misuse
+
+7. TERM & TERMINATION
+- Initial term: 12 months
+- Auto-renewal unless 60-day notice given
+- Data return within 30 days of termination
+
+8. DISPUTE RESOLUTION
+- Mediation required before litigation
+- Binding arbitration for disputes under $50K
+- Governing law: [State]
+```
+
+### Data Processing Agreement (DPA)
+
+```
+DATA PROCESSING AGREEMENT
+
+This DPA supplements the Terms of Service for GDPR compliance.
+
+1. ROLES
+- Client is Data Controller
+- J1MSKY is Data Processor
+
+2. PROCESSING DETAILS
+- Subject matter: AI agent task automation
+- Duration: Term of agreement
+- Data subjects: Client's end users
+- Categories: As specified by Client
+
+3. PROCESSOR OBLIGATIONS
+- Process only on documented instructions
+- Ensure confidentiality
+- Implement security measures
+- Notify of breaches within 24 hours
+- Assist with data subject requests
+- Delete/return data on termination
+
+4. SUBPROCESSORS
+Approved subprocessors:
+- Amazon Web Services (hosting)
+- OpenAI/Anthropic (AI models)
+- Stripe (payments)
+
+5. DATA TRANSFERS
+Data may be transferred to US-based servers.
+Standard Contractual Clauses apply.
+
+6. AUDIT RIGHTS
+Client may audit Provider once per year
+with 30 days notice.
+```
+
+### Consulting Agreement Template
+
+```
+CONSULTING AGREEMENT
+
+Client: [Name]
+Consultant: J1MSKY
+Date: [Date]
+
+SCOPE OF WORK:
+- Setup and configuration of J1MSKY platform
+- Custom workflow development
+- Training sessions (up to 4 hours)
+- 30 days of email support
+
+FEES:
+- Fixed fee: $[Amount]
+- Payment: 50% upfront, 50% on completion
+- Additional work: $200/hour
+
+DELIVERABLES:
+1. Configured J1MSKY instance
+2. Custom workflows (up to 3)
+3. Documentation
+4. Training recording
+
+TIMELINE:
+- Project start: [Date]
+- Completion: [Date]
+
+ACCEPTANCE:
+Client has 5 business days to review deliverables.
+Acceptance deemed if no objections raised.
+
+LIMITATION OF LIABILITY:
+Consultant's liability limited to fees paid.
+```
+
+### Non-Disclosure Agreement (NDA)
+
+```
+MUTUAL NON-DISCLOSURE AGREEMENT
+
+This NDA is between J1MSKY and [COUNTERPARTY].
+
+1. DEFINITION OF CONFIDENTIAL INFORMATION
+Information marked "Confidential" or reasonably understood to be confidential.
+
+2. OBLIGATIONS OF RECEIVING PARTY
+- Use only for stated purpose
+- Limit disclosure to need-to-know personnel
+- Protect with same care as own confidential info
+- Return or destroy upon request
+
+3. EXCLUSIONS
+Information that is:
+- Publicly available
+- Already known to recipient
+- Independently developed
+- Rightfully received from third party
+
+4. TERM
+3 years from disclosure date.
+
+5. REMEDIES
+Injunctive relief available for breaches.
+```
+
+### Affiliate Agreement
+
+```
+AFFILIATE PROGRAM AGREEMENT
+
+1. COMMISSION STRUCTURE
+- 20% recurring commission on referred subscriptions
+- Payments made monthly (Net-30)
+- Minimum payout: $50
+
+2. PROMOTION GUIDELINES
+- May not make false claims
+- Must disclose affiliate relationship
+- May not bid on trademarked keywords
+- May not use spam tactics
+
+3. COOKIE DURATION
+90 days from referral click.
+
+4. TERMINATION
+Either party may terminate with 30 days notice.
+Commissions for existing referrals continue for 6 months.
+
+5. PAYMENT
+Via PayPal or bank transfer.
+Affiliate responsible for taxes.
+```
+
+### Contract Checklist
+
+**Before sending any contract:**
+- [ ] Company name and address correct
+- [ ] Client name and address correct
+- [ ] Pricing matches quote
+- [ ] Start date and term specified
+- [ ] Termination clause included
+- [ ] Liability cap appropriate
+- [ ] Governing law specified
+- [ ] Signature blocks complete
+- [ ] Reviewed by legal counsel (for deals >$10K)
+
+**Contract Management:**
+- Store signed contracts in `contracts/` folder
+- Name format: `CLIENT-YYYY-MM-DD-CONTRACT-TYPE.pdf`
+- Calendar reminders for renewal dates
+- Track deliverables against SOWs
+
+### Legal Resources
+
+**When to consult a lawyer:**
+- Enterprise deals >$50K/year
+- Custom development agreements
+- Patent/IP issues
+- Employment matters
+- Regulatory compliance questions
+
+**Recommended contract tools:**
+- HelloSign or DocuSign for e-signatures
+- Ironclad or ContractWorks for CLM (at scale)
+- Stripe Atlas for incorporation (if needed)

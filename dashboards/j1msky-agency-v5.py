@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.5 - Resize Flicker Reduction
-Patch release: improved scroll containment and safer history/overlay transitions
+J1MSKY Agency v6.0.6 - Resize Flicker Reduction
+Patch release: duplicate-transition guards and smoother touch scrolling
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.5</title>
+    <title>J1MSKY Agency v6.0.6</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -240,6 +240,7 @@ HTML = '''<!DOCTYPE html>
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
             overscroll-behavior-y: contain;
+            touch-action: pan-y;
         }
         
         .card {
@@ -676,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.5</h1>
+        <h1>◈ J1MSKY Agency v6.0.6</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -915,6 +916,7 @@ HTML = '''<!DOCTYPE html>
         const NavState = {
             currentTab: 'dashboard',
             isTransitioning: false,
+            pendingTab: null,
             transitionCooldown: 150,
             lastTransitionTime: 0,
             history: [],
@@ -966,6 +968,7 @@ HTML = '''<!DOCTYPE html>
             
             reset() {
                 this.isTransitioning = false;
+                this.pendingTab = null;
                 this.failedTransitions = 0;
                 hideLoading();
             }
@@ -1064,9 +1067,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.5';
+                        header.textContent = '◈ J1MSKY Agency v6.0.6';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.5';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.6';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1160,14 +1163,14 @@ HTML = '''<!DOCTYPE html>
                 return;
             }
             
+            // Prevent duplicate or conflicting transitions
+            if (tabId === NavState.currentTab || tabId === NavState.pendingTab) {
+                return;
+            }
+
             // Check transition availability
             if (!NavState.canTransition()) {
                 console.log('Navigation blocked: cooldown or in progress');
-                return;
-            }
-            
-            // Prevent navigating to same tab
-            if (tabId === NavState.currentTab) {
                 return;
             }
             
@@ -1189,6 +1192,7 @@ HTML = '''<!DOCTYPE html>
 
             // Begin transition
             NavState.isTransitioning = true;
+            NavState.pendingTab = tabId;
             NavState.lastTransitionTime = Date.now();
             showLoading();
             
@@ -1233,6 +1237,7 @@ HTML = '''<!DOCTYPE html>
                         // Cleanup after transition
                         setTimeout(() => {
                             NavState.isTransitioning = false;
+                            NavState.pendingTab = null;
                             hideLoading();
                             // Hide inactive panels for performance
                             panels.forEach(p => {
@@ -1628,7 +1633,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.5 - History/Scroll Stability Patch          ║")
+        print("║          J1MSKY Agency v6.0.6 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

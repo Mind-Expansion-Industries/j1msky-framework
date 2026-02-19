@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v5.5 - Robust Navigation with Error Recovery
-Enhanced state handling, passive event listeners, viewport fixes
+J1MSKY Agency v5.6 - Final Polish
+ResizeObserver, orientation handling, keyboard help, accessibility
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v5.5</title>
+    <title>J1MSKY Agency v5.6</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -586,7 +586,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v5.5</h1>
+        <h1>◈ J1MSKY Agency v5.6</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -774,6 +774,32 @@ HTML = '''<!DOCTYPE html>
         </div>
     </main>
     
+    <div id="help" class="panel" tabindex="-1">
+        <div class="card">
+            <div class="card-title">⌨️ Keyboard Shortcuts</div>
+            <div class="agent-list">
+                <div class="agent-item">
+                    <div class="agent-info">
+                        <div class="agent-name">1 - 4</div>
+                        <div class="agent-status">Navigate to tab 1-4</div>
+                    </div>
+                </div>
+                <div class="agent-item">
+                    <div class="agent-info">
+                        <div class="agent-name">Alt + ←</div>
+                        <div class="agent-status">Go back</div>
+                    </div>
+                </div>
+                <div class="agent-item">
+                    <div class="agent-info">
+                        <div class="agent-name">Swipe Left/Right</div>
+                        <div class="agent-status">Next/Previous tab (mobile)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <nav class="bottom-nav">
         <button class="nav-item active" onclick="showTab('dashboard')" aria-label="Dashboard">
             <span>🏠</span>
@@ -947,9 +973,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v5.5';
+                        header.textContent = '◈ J1MSKY Agency v5.6';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v5.5';
+                    if (title) title.textContent = 'J1MSKY Agency v5.6';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -961,10 +987,72 @@ HTML = '''<!DOCTYPE html>
             }
         };
         
-        // Loading indicator
-        function showLoading() {
-            document.body.classList.add('navigating');
-        }
+        // ResizeObserver for responsive adjustments
+        const ResizeHandler = {
+            observer: null,
+            lastWidth: 0,
+            debounceTimer: null,
+            
+            init() {
+                if (window.ResizeObserver) {
+                    this.observer = new ResizeObserver(entries => {
+                        clearTimeout(this.debounceTimer);
+                        this.debounceTimer = setTimeout(() => this.handleResize(entries[0]), 100);
+                    });
+                    this.observer.observe(document.body);
+                } else {
+                    // Fallback for older browsers
+                    window.addEventListener('resize', () => {
+                        clearTimeout(this.debounceTimer);
+                        this.debounceTimer = setTimeout(() => this.handleResize(), 100);
+                    });
+                }
+                
+                // Orientation change (mobile)
+                window.addEventListener('orientationchange', () => {
+                    setTimeout(() => this.handleResize(), 300);
+                });
+            },
+            
+            handleResize(entry) {
+                const width = entry?.contentRect?.width || window.innerWidth;
+                if (Math.abs(width - this.lastWidth) < 50) return;
+                this.lastWidth = width;
+                
+                // Force layout recalculation on significant resize
+                document.body.style.display = 'none';
+                document.body.offsetHeight;
+                document.body.style.display = '';
+                
+                // Re-ensure active panel is visible
+                const active = document.querySelector('.panel.active');
+                if (active) {
+                    active.style.display = 'block';
+                }
+            },
+            
+            destroy() {
+                if (this.observer) {
+                    this.observer.disconnect();
+                }
+            }
+        };
+        
+        // Focus management for accessibility
+        const FocusManager = {
+            init() {
+                // Restore focus after navigation
+                document.addEventListener('click', (e) => {
+                    if (e.target.closest('.nav-item')) {
+                        // Move focus to main content after nav click
+                        setTimeout(() => {
+                            const active = document.querySelector('.panel.active');
+                            if (active) active.focus();
+                        }, 100);
+                    }
+                });
+            }
+        };
         
         function hideLoading() {
             document.body.classList.remove('navigating');
@@ -1093,6 +1181,12 @@ HTML = '''<!DOCTYPE html>
                 e.preventDefault();
                 const prev = NavState.goBack();
                 if (prev) showTab(prev);
+                return;
+            }
+            if (e.key === '?' || e.key === 'h' || e.key === 'H') {
+                e.preventDefault();
+                toggleHelp();
+                return;
             }
             if (!e.ctrlKey && !e.metaKey && !e.altKey) {
                 const num = parseInt(e.key);
@@ -1102,6 +1196,25 @@ HTML = '''<!DOCTYPE html>
                 }
             }
         });
+        
+        // Toggle help panel
+        let helpVisible = false;
+        function toggleHelp() {
+            helpVisible = !helpVisible;
+            const helpPanel = document.getElementById('help');
+            const mainPanels = document.querySelectorAll('.main .panel');
+            
+            if (helpVisible) {
+                mainPanels.forEach(p => p.style.display = 'none');
+                helpPanel.style.display = 'block';
+                helpPanel.classList.add('active');
+            } else {
+                helpPanel.style.display = 'none';
+                helpPanel.classList.remove('active');
+                const current = document.getElementById(NavState.currentTab);
+                if (current) current.style.display = 'block';
+            }
+        }
         
         // Visibility handling
         document.addEventListener('visibilitychange', () => {
@@ -1128,11 +1241,18 @@ HTML = '''<!DOCTYPE html>
         document.addEventListener('DOMContentLoaded', () => {
             TouchHandler.init();
             ConnectionHandler.init();
+            ResizeHandler.init();
+            FocusManager.init();
             
             const hash = window.location.hash.slice(1);
             const initialTab = (hash && document.getElementById(hash)) ? hash : 'dashboard';
             NavState.pushHistory(initialTab);
             if (!hash) history.replaceState({ tab: 'dashboard' }, '', '#dashboard');
+        });
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            ResizeHandler.destroy();
         });
     </script>
 </body>
@@ -1159,9 +1279,9 @@ class AgencyServer(http.server.BaseHTTPRequestHandler):
 def run():
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
-        print("J1MSKY Agency v5.5 - Robust Navigation with Error Recovery")
-        print("Enhanced state handling, passive event listeners, viewport fixes")
-        print("Gesture support: swipe left/right to navigate")
+        print("J1MSKY Agency v5.6 - Final Polish")
+        print("ResizeObserver, orientation handling, keyboard help")
+        print("Press '?' or 'h' for keyboard shortcuts")
         print("http://localhost:8080")
         httpd.serve_forever()
 

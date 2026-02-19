@@ -571,6 +571,14 @@
         <h2>Ready for Daily Fresh Art?</h2>
         <p>Join 2,000+ subscribers getting beautiful wallpapers every morning.</p>
         <a href="#pricing" class="hero-cta">Start Your Free Trial →</a>
+
+        <div style="max-width:520px;margin:2rem auto 0;background:#12121a;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1rem;">
+            <p style="margin-bottom:0.8rem;color:#9ca3af;font-size:0.95rem;">Want launch updates + promo codes?</p>
+            <form onsubmit="captureLead(event)" style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center;">
+                <input id="lead-email" type="email" required placeholder="you@email.com" style="flex:1;min-width:220px;padding:0.8rem;border-radius:10px;border:1px solid rgba(255,255,255,0.18);background:#0f0f16;color:#f3f4f6;">
+                <button class="btn" type="submit" style="max-width:180px;">Notify Me</button>
+            </form>
+        </div>
     </section>
 
     <footer>
@@ -591,8 +599,29 @@
             }
         }
 
+        // Replace with your real Stripe payment links
+        const CHECKOUT_LINKS = {
+            free: 'mailto:hello@wallpaperdaily.ai?subject=WallpaperDaily%20Free%20Signup',
+            daily: 'https://buy.stripe.com/test_daily_placeholder',
+            pro: 'https://buy.stripe.com/test_pro_placeholder'
+        };
+
         function showSignup(plan) {
-            alert(`Sign up for ${plan} plan\n\nIn production, this would open:\n• Stripe checkout modal, or\n• Email signup form, or\n• Account creation page`);
+            const url = CHECKOUT_LINKS[plan] || CHECKOUT_LINKS.free;
+            if (url.includes('placeholder')) {
+                alert(`Checkout link for ${plan} is not configured yet.\n\nUpdate CHECKOUT_LINKS in index.html with your Stripe payment links.`);
+                return;
+            }
+            window.location.href = url;
+        }
+
+        function captureLead(e) {
+            e.preventDefault();
+            const email = document.getElementById('lead-email').value;
+            // Replace this with your backend endpoint / ConvertKit / Mailchimp form action
+            console.log('Lead captured:', { email, source: 'website-wallpaper', ts: new Date().toISOString() });
+            alert('Thanks! You are on the list.\n\nNext step: connect this form to your email provider.');
+            e.target.reset();
         }
     </script>
 </body>

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Thermal Wallpaper Studio
+Comment=AI wallpaper generator with thermal reactivity
+Exec=/home/m1ndb0t/Desktop/J1MSKY/apps/thermal-wallpaper-studio/launch.sh
+Icon=/home/m1ndb0t/Desktop/J1MSKY/apps/thermal-wallpaper-studio/assets/icon.png
+Type=Application
+Categories=Graphics;Utility;
+Terminal=false
+StartupNotify=true

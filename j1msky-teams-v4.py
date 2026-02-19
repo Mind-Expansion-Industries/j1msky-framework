@@ -196,6 +196,159 @@ class NotificationManager:
 # Initialize notification manager
 notification_mgr = NotificationManager()
 
+# Task Queue System for Rate Limit Management
+class TaskQueue:
+    """Persistent task queue for handling rate limits and deferred execution"""
+    
+    def __init__(self, storage_path='/home/m1ndb0t/Desktop/J1MSKY/logs'):
+        self.storage_path = Path(storage_path)
+        self.storage_path.mkdir(exist_ok=True)
+        self.queue_file = self.storage_path / 'task_queue.json'
+        self._queue = self._load_queue()
+        self._lock = threading.Lock()
+        self._processing = False
+        self._worker_thread = None
+        
+    def _load_queue(self):
+        """Load queue from disk"""
+        if self.queue_file.exists():
+            try:
+                with open(self.queue_file) as f:
+                    return json.load(f)
+            except:
+                return []
+        return []
+    
+    def _save_queue(self):
+        """Save queue to disk"""
+        with open(self.queue_file, 'w') as f:
+            json.dump(self._queue, f, indent=2)
+    
+    def enqueue(self, task, model, team=None, priority='normal', delay_seconds=0):
+        """Add task to queue"""
+        with self._lock:
+            queue_item = {
+                'id': f"queued_{int(time.time())}_{random.randint(1000,9999)}",
+                'task': task,
+                'model': model,
+                'team': team,
+                'priority': priority,
+                'created_at': datetime.now().isoformat(),
+                'execute_after': (datetime.now() + timedelta(seconds=delay_seconds)).isoformat(),
+                'attempts': 0,
+                'max_attempts': 3,
+                'status': 'queued'
+            }
+            
+            # Insert based on priority (higher priority = earlier in queue)
+            priority_order = {'high': 0, 'normal': 1, 'low': 2}
+            insert_idx = len(self._queue)
+            for i, item in enumerate(self._queue):
+                if priority_order.get(priority, 1) < priority_order.get(item.get('priority', 'normal'), 1):
+                    insert_idx = i
+                    break
+            
+            self._queue.insert(insert_idx, queue_item)
+            self._save_queue()
+            
+            add_event(f"Task queued: {task[:40]}... (priority: {priority})", type='info')
+            return queue_item['id']
+    
+    def dequeue(self):
+        """Get next ready task from queue"""
+        with self._lock:
+            now = datetime.now()
+            for i, item in enumerate(self._queue):
+                if item['status'] != 'queued':
+                    continue
+                execute_after = datetime.fromisoformat(item['execute_after'])
+                if now >= execute_after:
+                    self._queue.pop(i)
+                    self._save_queue()
+                    return item
+            return None
+    
+    def get_queue_status(self):
+        """Get current queue statistics"""
+        with self._lock:
+            pending = [q for q in self._queue if q['status'] == 'queued']
+            return {
+                'total_queued': len(pending),
+                'high_priority': len([q for q in pending if q.get('priority') == 'high']),
+                'normal_priority': len([q for q in pending if q.get('priority') == 'normal']),
+                'low_priority': len([q for q in pending if q.get('priority') == 'low']),
+                'next_available': self._get_next_available()
+            }
+    
+    def _get_next_available(self):
+        """Get timestamp of next available task"""
+        for item in self._queue:
+            if item['status'] == 'queued':
+                return item['execute_after']
+        return None
+    
+    def start_worker(self):
+        """Start background worker to process queued tasks"""
+        if self._processing:
+            return
+        
+        self._processing = True
+        self._worker_thread = threading.Thread(target=self._worker_loop, daemon=True)
+        self._worker_thread.start()
+        add_event("Task queue worker started", type='info')
+    
+    def stop_worker(self):
+        """Stop background worker"""
+        self._processing = False
+        if self._worker_thread:
+            self._worker_thread.join(timeout=5)
+    
+    def _worker_loop(self):
+        """Background worker loop"""
+        while self._processing:
+            try:
+                # Check rate limits before processing
+                provider = 'kimi'  # Default check
+                is_limited, remaining = check_rate_limit(provider)
+                
+                if is_limited:
+                    # Rate limited, wait and retry
+                    time.sleep(30)
+                    continue
+                
+                # Get next task
+                queued_task = self.dequeue()
+                if queued_task:
+                    # Attempt to spawn
+                    agent_id = spawn_subagent(
+                        queued_task['task'],
+                        queued_task['model'],
+                        queued_task.get('team')
+                    )
+                    
+                    if not agent_id and queued_task['attempts'] < queued_task['max_attempts']:
+                        # Re-queue with exponential backoff
+                        queued_task['attempts'] += 1
+                        delay = 60 * (2 ** queued_task['attempts'])  # 2min, 4min, 8min
+                        self.enqueue(
+                            queued_task['task'],
+                            queued_task['model'],
+                            queued_task.get('team'),
+                            queued_task.get('priority', 'normal'),
+                            delay
+                        )
+                        add_event(f"Task re-queued (attempt {queued_task['attempts']})", type='warning')
+                
+                # Sleep before next check
+                time.sleep(10)
+                
+            except Exception as e:
+                add_event(f"Queue worker error: {e}", type='error')
+                time.sleep(30)
+
+# Initialize global task queue
+task_queue = TaskQueue()
+
 # Cost Tracking & Billing Module
 class CostTracker:
     """Track API costs per model and generate billing reports"""

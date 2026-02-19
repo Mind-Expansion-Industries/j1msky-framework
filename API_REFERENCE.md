@@ -29,6 +29,76 @@ http://your-pi-ip:8080/api
 
 ## 📚 Endpoints
 
+### Pagination & Filtering
+
+Most list endpoints support pagination and filtering using query parameters:
+
+**Query Parameters:**
+| Parameter | Type | Description | Example |
+|-----------|------|-------------|---------|
+| `limit` | integer | Max results per page (default: 20, max: 100) | `?limit=50` |
+| `offset` | integer | Skip N results for pagination | `?offset=100` |
+| `cursor` | string | Opaque cursor for cursor-based pagination | `?cursor=abc123` |
+| `sort` | string | Sort field and direction (prefix - for desc) | `?sort=-created_at` |
+| `filter` | object | JSON-encoded filter criteria | See below |
+
+**Filter Syntax:**
+```
+GET /agents?filter={"status":"running","model":"k2p5"}
+GET /agents?filter={"created_after":"2026-02-01","cost_gt":0.50}
+```
+
+**Available Operators:**
+- `eq` - Equal (default)
+- `ne` - Not equal
+- `gt`, `gte` - Greater than, greater than or equal
+- `lt`, `lte` - Less than, less than or equal  
+- `in` - In array
+- `contains` - String contains
+- `starts_with`, `ends_with` - String prefix/suffix
+
+**Pagination Response:**
+```json
+{
+  "data": [...],
+  "pagination": {
+    "total": 250,
+    "limit": 20,
+    "offset": 40,
+    "has_more": true,
+    "next_offset": 60,
+    "previous_offset": 20
+  },
+  "links": {
+    "self": "/agents?limit=20&offset=40",
+    "next": "/agents?limit=20&offset=60",
+    "prev": "/agents?limit=20&offset=20",
+    "first": "/agents?limit=20&offset=0",
+    "last": "/agents?limit=20&offset=240"
+  }
+}
+```
+
+**Cursor-Based Pagination (for real-time data):**
+```bash
+# First request
+GET /events?limit=50
+
+# Response includes cursor
+{
+  "data": [...],
+  "pagination": {
+    "cursor": "eyJpZCI6MTIzNDV9",
+    "has_more": true
+  }
+}
+
+# Subsequent request
+GET /events?limit=50&cursor=eyJpZCI6MTIzNDV9
+```
+
+---
+
 ### 1. Spawn Agent
 Create a new agent to complete a task.
 
@@ -108,7 +178,68 @@ curl -X POST http://localhost:8080/api/spawn-team \
 
 ---
 
-### 3. Get Agent Status
+### 3. List Agents
+List all agents with filtering and pagination.
+
+**Endpoint:** `GET /agents`
+
+**Query Parameters:**
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `status` | string | Filter by status: `spawning`, `running`, `completed`, `failed` |
+| `model` | string | Filter by model: `k2p5`, `sonnet`, `opus` |
+| `team` | string | Filter by team ID |
+| `created_after` | string | ISO date, agents created after |
+| `cost_gt` | number | Filter by cost greater than |
+| `sort` | string | Sort field: `created_at`, `cost`, `status` |
+| `limit` | integer | Results per page (1-100) |
+| `offset` | integer | Pagination offset |
+
+**Example:**
+```bash
+# Get running agents using k2p5, sorted by creation date
+GET /agents?status=running&model=k2p5&sort=-created_at&limit=20
+
+# Get high-cost agents from this month
+GET /agents?cost_gt=1.00&created_after=2026-02-01&limit=50
+```
+
+**Response:**
+```json
+{
+  "data": [
+    {
+      "agent_id": "subagent_1234567890_1234",
+      "model": "k2p5",
+      "status": "running",
+      "task": "Write blog post...",
+      "team": "team_creative",
+      "created_at": "2026-02-19T10:00:00Z",
+      "started_at": "2026-02-19T10:00:05Z",
+      "estimated_cost": 0.05,
+      "actual_cost": 0.03
+    }
+  ],
+  "pagination": {
+    "total": 156,
+    "limit": 20,
+    "offset": 0,
+    "has_more": true
+  },
+  "meta": {
+    "total_cost": 45.67,
+    "by_model": {
+      "k2p5": 23,
+      "sonnet": 15,
+      "opus": 8
+    }
+  }
+}
+```
+
+---
+
+### 4. Get Agent Status
 Check the status of a spawned agent.
 
 **Endpoint:** `GET /agent/{agent_id}`
@@ -136,10 +267,10 @@ curl http://localhost:8080/api/agent/subagent_1234567890_1234 \
 
 ---
 
-### 4. List Active Agents
+### 5. List Active Agents
 Get all currently running agents.
 
-**Endpoint:** `GET /agents`
+**Endpoint:** `GET /agents/active`
 
 **Response:**
 ```json

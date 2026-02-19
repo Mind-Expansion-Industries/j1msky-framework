@@ -270,3 +270,118 @@ Worth a 15-min chat this week?
 - Co-branded landing page
 - Joint webinars/quarterly events
 - Early access to new features
+
+## 12) Financial Projections & Unit Economics
+
+### Unit Economics Model
+
+**Per Customer (Pro Plan - $99/mo):**
+```
+Revenue:                    $99.00
+├── API Costs (avg):       -$25.00  (25% of revenue)
+├── Infrastructure:         -$5.00  (server, bandwidth)
+├── Payment Processing:     -$3.00  (Stripe ~3%)
+├── Support (amortized):    -$8.00  (20 min @ $24/hr)
+└── Gross Profit:           $58.00  (59% margin)
+```
+
+**Customer Acquisition:**
+```
+CAC Payback Period:         2-3 months
+LTV:CAC Ratio:              5:1 (target)
+Monthly Churn Target:       <5%
+Annual Churn Target:        <40%
+```
+
+### 12-Month Revenue Projection
+
+| Month | New MRR | Churn | Net MRR | Total MRR | ARR |
+|-------|---------|-------|---------|-----------|-----|
+| 1 | $500 | $0 | +$500 | $500 | $6,000 |
+| 2 | $800 | $25 | +$775 | $1,275 | $15,300 |
+| 3 | $1,200 | $64 | +$1,136 | $2,411 | $28,932 |
+| 4 | $1,500 | $121 | +$1,379 | $3,790 | $45,480 |
+| 5 | $2,000 | $190 | +$1,810 | $5,600 | $67,200 |
+| 6 | $2,500 | $280 | +$2,220 | $7,820 | $93,840 |
+| 7 | $3,000 | $391 | +$2,609 | $10,429 | $125,148 |
+| 8 | $3,500 | $521 | +$2,979 | $13,408 | $160,896 |
+| 9 | $4,000 | $670 | +$3,330 | $16,738 | $200,856 |
+| 10 | $4,500 | $837 | +$3,663 | $20,401 | $244,812 |
+| 11 | $5,000 | $1,020 | +$3,980 | $24,381 | $292,572 |
+| 12 | $5,500 | $1,219 | +$4,281 | $28,662 | $343,944 |
+
+**Assumptions:**
+- Average customer pays $99/mo (Pro plan)
+- Monthly churn rate: 5% (industry average for SMB SaaS)
+- Linear growth in new MRR (accelerates with word-of-mouth)
+- No major seasonality
+
+### Cost Structure (Monthly at $20K MRR)
+
+| Category | Amount | % of Revenue |
+|----------|--------|--------------|
+| API Costs | $5,000 | 25% |
+| Infrastructure | $500 | 2.5% |
+| Payment Processing | $600 | 3% |
+| Customer Support | $1,600 | 8% |
+| Marketing/Ads | $2,000 | 10% |
+| Tools/Software | $300 | 1.5% |
+| **Total COGS** | **$10,000** | **50%** |
+| **Gross Margin** | **$10,000** | **50%** |
+
+### Break-Even Analysis
+
+**Fixed Costs (founder salary, base infra):** $3,000/mo
+**Variable Costs:** ~50% of revenue
+
+**Break-even:** $6,000 MRR
+- At $6,000 MRR: Revenue = $6,000, Costs = $3,000 + $3,000 = $6,000
+
+### Funding Requirements
+
+**Bootstrap Path ($0 funding):**
+- Months 1-6: Founder works part-time elsewhere
+- MRR target by month 6: $5,000 (quit day job)
+- MRR target by month 12: $20,000 (hire first support)
+
+**Accelerated Path ($50K seed):**
+- Full-time founder from day 1
+- $20K marketing spend over 6 months
+- Hire contractor support at month 6
+- Target: $30K MRR by month 12
+
+### Key Metrics Dashboard
+
+**Weekly Tracking:**
+- New trials started
+- Trial-to-paid conversion rate
+- Churned customers
+- API cost per customer
+- Support ticket volume
+
+**Monthly Review:**
+- MRR growth rate (target: >10%)
+- Gross margin (target: >50%)
+- CAC by channel
+- LTV by plan
+- Net Promoter Score
+
+### Scenario Planning
+
+**Best Case (Viral Growth):**
+- Word-of-mouth drives 30% MoM growth
+- Enterprise clients land at month 9
+- Year 1 ARR: $600K
+- Hiring: 2 support, 1 dev by EOY
+
+**Base Case (Steady Growth):**
+- Content + ads drive 15% MoM growth
+- Focus on SMB market
+- Year 1 ARR: $350K
+- Hiring: 1 support by EOY
+
+**Worst Case (Slow Growth):**
+- 5% MoM growth, high churn
+- Pivot to agency/consulting model
+- Year 1 ARR: $100K
+- Survival: Keep day job, nights/weekends only

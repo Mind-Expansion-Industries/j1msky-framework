@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v5.2 - Enhanced Dashboard
-Added: Real-time updates, cost tracking, improved mobile UX
+J1MSKY Agency v5.3 - Responsive UI with Hardened Navigation
+Mobile/Tablet/Desktop adaptive with state management and glitch reduction
 """
 
 import http.server
@@ -60,17 +60,34 @@ HTML = '''<!DOCTYPE html>
             --text: #e0e0e0;
             --text-2: #888888;
             --border: #333333;
+            --nav-height: 70px;
+            --header-height: 56px;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
         
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+        
+        /* Prevent body scroll when navigating */
+        body.navigating { overflow: hidden; }
         
         body {
             background: var(--bg);
             color: var(--text);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             min-height: 100vh;
+            min-height: 100dvh; /* Dynamic viewport height for mobile */
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            /* CSS containment for performance */
+            contain: layout style paint;
         }
         
         .header {
@@ -80,9 +97,15 @@ HTML = '''<!DOCTYPE html>
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
             z-index: 100;
+            /* GPU acceleration */
+            transform: translateZ(0);
+            will-change: transform;
         }
         
         .header h1 {
@@ -112,28 +135,45 @@ HTML = '''<!DOCTYPE html>
             bottom: 0;
             left: 0;
             right: 0;
+            height: var(--nav-height);
             background: var(--bg-2);
             border-top: 1px solid var(--border);
             display: flex;
             justify-content: space-around;
-            padding: 8px 0;
+            align-items: center;
             z-index: 100;
-            padding-bottom: env(safe-area-inset-bottom, 8px);
+            /* iOS safe area + fixed height for consistency */
+            padding-bottom: var(--safe-bottom);
+            /* GPU acceleration for smooth transitions */
+            transform: translateZ(0);
+            will-change: transform;
+            /* Prevent rubber-banding issues */
+            overscroll-behavior: none;
         }
         
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             gap: 4px;
-            padding: 8px 12px;
+            padding: 8px 16px;
             background: none;
             border: none;
             color: var(--text-2);
-            font-size: 10px;
+            font-size: 11px;
             cursor: pointer;
-            transition: all 0.2s;
-            min-width: 60px;
+            transition: color 0.15s ease-out;
+            min-width: 64px;
+            min-height: 48px; /* WCAG minimum touch target */
+            /* Better touch response */
+            touch-action: manipulation;
+            -webkit-touch-callout: none;
+        }
+        
+        .nav-item:active {
+            transform: scale(0.95);
+            transition: transform 0.1s;
         }
         
         .nav-item.active {
@@ -141,14 +181,25 @@ HTML = '''<!DOCTYPE html>
         }
         
         .nav-item span {
-            font-size: 20px;
+            font-size: 22px;
+            line-height: 1;
+            transition: transform 0.2s ease-out;
+        }
+        
+        .nav-item.active span {
+            transform: translateY(-2px);
         }
         
         .main {
             padding: 16px;
-            padding-bottom: 100px;
-            max-width: 1200px;
+            /* Account for fixed header + nav + safe areas */
+            padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+            padding-top: calc(var(--header-height) + 16px);
+            max-width: 1400px;
             margin: 0 auto;
+            /* Smooth scrolling */
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
         }
         
         .card {
@@ -388,16 +439,28 @@ HTML = '''<!DOCTYPE html>
         
         .panel {
             display: none;
+            /* Containment for better render performance */
+            contain: layout style paint;
         }
         
         .panel.active {
             display: block;
-            animation: fadeIn 0.3s;
+            animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            .panel.active {
+                animation: none;
+            }
+            .nav-item span {
+                transition: none;
+            }
         }
         
         .cost-indicator {
@@ -415,18 +478,71 @@ HTML = '''<!DOCTYPE html>
             font-weight: 600;
         }
         
+        /* Tablet */
         @media (min-width: 768px) {
+            :root {
+                --nav-height: 64px;
+                --header-height: 60px;
+            }
             .header { padding: 16px 24px; }
-            .header h1 { font-size: 22px; }
-            .main { padding: 24px; padding-bottom: 100px; }
-            .quick-grid { grid-template-columns: repeat(4, 1fr); }
+            .header h1 { font-size: 20px; }
+            .main { padding: 24px; padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 24px); padding-top: calc(var(--header-height) + 24px); }
+            .quick-grid { grid-template-columns: repeat(3, 1fr); }
             .stats-grid { grid-template-columns: repeat(4, 1fr); }
+            .nav-item { font-size: 12px; }
+            .nav-item span { font-size: 24px; }
+        }
+        
+        /* Desktop */
+        @media (min-width: 1024px) {
+            :root {
+                --nav-height: 0px; /* Side nav on desktop */
+            }
+            .header { padding: 16px 32px; }
+            .header h1 { font-size: 24px; }
+            .main { 
+                padding: 32px; 
+                padding-bottom: 32px;
+                padding-top: calc(var(--header-height) + 32px);
+                max-width: 1400px;
+            }
+            .quick-grid { grid-template-columns: repeat(4, 1fr); }
+            .bottom-nav {
+                position: fixed;
+                left: 0;
+                top: var(--header-height);
+                bottom: 0;
+                width: 240px;
+                height: auto;
+                flex-direction: column;
+                justify-content: flex-start;
+                padding: 16px 0;
+                border-top: none;
+                border-right: 1px solid var(--border);
+            }
+            .nav-item {
+                flex-direction: row;
+                justify-content: flex-start;
+                gap: 12px;
+                padding: 16px 24px;
+                width: 100%;
+                font-size: 14px;
+            }
+            .nav-item span { font-size: 20px; }
+            body { padding-left: 240px; }
+        }
+        
+        /* Large desktop */
+        @media (min-width: 1440px) {
+            .main { max-width: 1600px; }
+            .bottom-nav { width: 260px; }
+            body { padding-left: 260px; }
         }
     </style>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v5.2</h1>
+        <h1>◈ J1MSKY Agency v5.3</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -615,32 +731,187 @@ HTML = '''<!DOCTYPE html>
     </main>
     
     <nav class="bottom-nav">
-        <button class="nav-item active" onclick="showTab('dashboard')">
+        <button class="nav-item active" onclick="showTab('dashboard')" aria-label="Dashboard">
             <span>🏠</span>
             Home
         </button>
-        <button class="nav-item" onclick="showTab('models')">
+        <button class="nav-item" onclick="showTab('models')" aria-label="Models">
             <span>🤖</span>
             Models
         </button>
-        <button class="nav-item" onclick="showTab('spawn')">
+        <button class="nav-item" onclick="showTab('spawn')" aria-label="Spawn Agent">
             <span>🚀</span>
             Spawn
         </button>
-        <button class="nav-item" onclick="showTab('teams')">
+        <button class="nav-item" onclick="showTab('teams')" aria-label="Teams">
             <span>👥</span>
             Teams
         </button>
     </nav>
     
     <script>
-        function showTab(tabId) {
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            event.target.classList.add('active');
-            window.scrollTo(0, 0);
+        // Navigation State Management
+        const NavState = {
+            currentTab: 'dashboard',
+            isTransitioning: false,
+            transitionCooldown: 200, // ms
+            lastTransitionTime: 0,
+            history: [],
+            maxHistory: 10,
+            
+            canTransition() {
+                const now = Date.now();
+                if (this.isTransitioning) return false;
+                if (now - this.lastTransitionTime < this.transitionCooldown) return false;
+                return true;
+            },
+            
+            pushHistory(tabId) {
+                if (this.history.length >= this.maxHistory) {
+                    this.history.shift();
+                }
+                this.history.push(tabId);
+            },
+            
+            goBack() {
+                if (this.history.length < 2) return false;
+                this.history.pop(); // Remove current
+                const previous = this.history[this.history.length - 1];
+                return previous;
+            }
+        };
+        
+        // Debounce utility
+        function debounce(fn, ms) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => fn.apply(this, args), ms);
+            };
         }
+        
+        function showTab(tabId, pushState = true) {
+            // Validate transition
+            if (!NavState.canTransition()) {
+                console.log('Navigation blocked: cooldown active');
+                return;
+            }
+            if (tabId === NavState.currentTab) return;
+            
+            // Set transitioning state
+            NavState.isTransitioning = true;
+            NavState.lastTransitionTime = Date.now();
+            document.body.classList.add('navigating');
+            
+            // Update UI
+            const panels = document.querySelectorAll('.panel');
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            // Hide all panels
+            panels.forEach(p => {
+                p.classList.remove('active');
+                p.style.display = 'none';
+            });
+            
+            // Reset nav items
+            navItems.forEach(n => n.classList.remove('active'));
+            
+            // Show target panel with slight delay for transition
+            requestAnimationFrame(() => {
+                const targetPanel = document.getElementById(tabId);
+                if (targetPanel) {
+                    targetPanel.style.display = 'block';
+                    // Force reflow
+                    void targetPanel.offsetHeight;
+                    targetPanel.classList.add('active');
+                }
+                
+                // Update nav active state
+                const tabIndex = ['dashboard', 'models', 'spawn', 'teams'].indexOf(tabId);
+                if (tabIndex >= 0 && navItems[tabIndex]) {
+                    navItems[tabIndex].classList.add('active');
+                }
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                
+                // Update state
+                NavState.currentTab = tabId;
+                if (pushState) {
+                    NavState.pushHistory(tabId);
+                    history.pushState({ tab: tabId }, '', '#' + tabId);
+                }
+                
+                // Clear transitioning state
+                setTimeout(() => {
+                    NavState.isTransitioning = false;
+                    document.body.classList.remove('navigating');
+                }, NavState.transitionCooldown);
+            });
+        }
+        
+        // Handle browser back/forward
+        window.addEventListener('popstate', (e) => {
+            if (e.state && e.state.tab) {
+                showTab(e.state.tab, false);
+            } else {
+                // Default to dashboard
+                showTab('dashboard', false);
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.altKey && e.key === 'ArrowLeft') {
+                e.preventDefault();
+                const previous = NavState.goBack();
+                if (previous) showTab(previous);
+            }
+            // Number keys for tabs
+            if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+                const tabs = ['dashboard', 'models', 'spawn', 'teams'];
+                const num = parseInt(e.key);
+                if (num >= 1 && num <= tabs.length) {
+                    e.preventDefault();
+                    showTab(tabs[num - 1]);
+                }
+            }
+        });
+        
+        // Handle visibility change (reduce work when hidden)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                document.body.classList.add('paused');
+            } else {
+                document.body.classList.remove('paused');
+                // Force redraw on return
+                requestAnimationFrame(() => {
+                    const active = document.querySelector('.panel.active');
+                    if (active) active.style.display = 'block';
+                });
+            }
+        });
+        
+        // Initialize history
+        document.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash.slice(1);
+            if (hash && document.getElementById(hash)) {
+                showTab(hash, false);
+            } else {
+                NavState.pushHistory('dashboard');
+                history.replaceState({ tab: 'dashboard' }, '', '#dashboard');
+            }
+        });
+        
+        // Prevent double-tap zoom on iOS
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
     </script>
 </body>
 </html>'''
@@ -666,8 +937,9 @@ class AgencyServer(http.server.BaseHTTPRequestHandler):
 def run():
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
-        print("J1MSKY Agency v5.2 - Enhanced Dashboard")
-        print("All 5 models integrated")
+        print("J1MSKY Agency v5.3 - Responsive UI with Hardened Navigation")
+        print("Mobile/Tablet/Desktop adaptive layout")
+        print("Navigation state management with cooldown protection")
         print("http://localhost:8080")
         httpd.serve_forever()
 

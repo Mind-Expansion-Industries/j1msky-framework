@@ -7,7 +7,7 @@ J1MSKY Alexa Bridge (MVP)
 """
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs, urlparse
-import json, os, subprocess, urllib.request
+import json, os, subprocess, urllib.request, shlex
 
 CONFIG_PATH = os.path.expanduser('~/Desktop/J1MSKY/alexa_commands.json')
 DEFAULT_CONFIG = {
@@ -16,10 +16,20 @@ DEFAULT_CONFIG = {
     "token": "REPLACE_ME_LONG_LIVED_TOKEN",
     "enabled": False
   },
+  "local_mode": {
+    "enabled": True,
+    "streams": [
+      "https://stream.live.vc.bbcmedia.co.uk/bbc_radio_one",
+      "https://stream.live.vc.bbcmedia.co.uk/bbc_6music",
+      "https://ice1.somafm.com/groovesalad-128-mp3"
+    ]
+  },
   "actions": {
-    "play music": {"type": "ha_service", "domain": "media_player", "service": "media_play", "entity_id": "media_player.echo_dot"},
-    "pause music": {"type": "ha_service", "domain": "media_player", "service": "media_pause", "entity_id": "media_player.echo_dot"},
-    "next track": {"type": "ha_service", "domain": "media_player", "service": "media_next_track", "entity_id": "media_player.echo_dot"},
+    "play music": {"type": "music", "op": "play"},
+    "pause music": {"type": "music", "op": "pause"},
+    "next track": {"type": "music", "op": "next"},
+    "volume up": {"type": "music", "op": "volup"},
+    "volume down": {"type": "music", "op": "voldown"},
     "morning ops": {"type": "shell", "command": "cd ~/Desktop/J1MSKY && ./start-office-windowed.sh"},
     "run backup": {"type": "shell", "command": "cd ~/Desktop/J1MSKY && git add -A && git commit -m '[ALEXA] backup trigger' || true"}
   }
@@ -59,6 +69,61 @@ def run_shell(command):
         return False, str(e)
 
 
+def _state_path():
+    return os.path.expanduser('~/Desktop/J1MSKY/.alexa_bridge_state.json')
+
+
+def _load_state():
+    p = _state_path()
+    if os.path.exists(p):
+        try:
+            with open(p, 'r') as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {"stream_index": 0, "volume": 100}
+
+
+def _save_state(state):
+    with open(_state_path(), 'w') as f:
+        json.dump(state, f)
+
+
+def _music_action(cfg, op):
+    state = _load_state()
+    streams = cfg.get('local_mode', {}).get('streams', [])
+    if not streams:
+        return False, 'No streams configured in local_mode.streams'
+
+    if op == 'play':
+        idx = state.get('stream_index', 0) % len(streams)
+        url = streams[idx]
+        # stop old player then start
+        subprocess.run('pkill -f "cvlc --intf dummy"', shell=True)
+        cmd = f"nohup cvlc --intf dummy --play-and-exit {shlex.quote(url)} >/tmp/alexa-music.log 2>&1 &"
+        subprocess.run(cmd, shell=True)
+        return True, f'Playing stream {idx+1}/{len(streams)}'
+
+    if op == 'pause':
+        subprocess.run('pkill -f "cvlc --intf dummy"', shell=True)
+        return True, 'Playback stopped'
+
+    if op == 'next':
+        state['stream_index'] = (state.get('stream_index', 0) + 1) % len(streams)
+        _save_state(state)
+        return _music_action(cfg, 'play')
+
+    if op == 'volup':
+        subprocess.run('pactl set-sink-volume @DEFAULT_SINK@ +5%', shell=True)
+        return True, 'Volume increased'
+
+    if op == 'voldown':
+        subprocess.run('pactl set-sink-volume @DEFAULT_SINK@ -5%', shell=True)
+        return True, 'Volume decreased'
+
+    return False, f'Unknown music op: {op}'
+
+
 def handle_command(text):
     cfg = load_config()
     t = text.strip().lower()
@@ -66,7 +131,19 @@ def handle_command(text):
     if not action:
         return False, f'Unknown command: {text}'
     if action['type'] == 'ha_service':
-        return call_ha_service(cfg, action)
+        ok, msg = call_ha_service(cfg, action)
+        # fallback to local music if HA disabled and this is media control
+        if not ok and cfg.get('local_mode', {}).get('enabled') and action.get('service', '').startswith('media_'):
+            op_map = {
+                'media_play': 'play',
+                'media_pause': 'pause',
+                'media_next_track': 'next'
+            }
+            op = op_map.get(action.get('service', ''), 'play')
+            return _music_action(cfg, op)
+        return ok, msg
+    if action['type'] == 'music':
+        return _music_action(cfg, action.get('op', 'play'))
     if action['type'] == 'shell':
         return run_shell(action['command'])
     return False, 'Unsupported action type'

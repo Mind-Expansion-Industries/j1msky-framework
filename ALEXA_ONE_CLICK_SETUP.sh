@@ -19,14 +19,33 @@ if [ ! -f "$CFG" ]; then
   echo "Created $CFG from example"
 fi
 
-# 3) Ask for Home Assistant details (optional but recommended)
-read -rp "Home Assistant base URL [http://homeassistant.local:8123]: " HA_URL
-HA_URL=${HA_URL:-http://homeassistant.local:8123}
-read -rp "Home Assistant Long-Lived Token (leave blank to skip for now): " HA_TOKEN
-read -rp "Echo media_player entity_id [media_player.echo_dot]: " ECHO_ENTITY
-ECHO_ENTITY=${ECHO_ENTITY:-media_player.echo_dot}
+# 3) Beginner-friendly setup mode
+read -rp "Use LOCAL mode first (no Home Assistant needed)? [Y/n]: " LOCAL_FIRST
+LOCAL_FIRST=${LOCAL_FIRST:-Y}
 
-python3 - <<PY
+if [[ "$LOCAL_FIRST" =~ ^[Yy]$ ]]; then
+  HA_URL="http://homeassistant.local:8123"
+  HA_TOKEN=""
+  ECHO_ENTITY="media_player.echo_dot"
+  python3 - <<PY
+import json
+p='$CFG'
+with open(p,'r') as f:
+    c=json.load(f)
+c.setdefault('home_assistant',{})['enabled']=False
+c.setdefault('local_mode',{})['enabled']=True
+with open(p,'w') as f:
+    json.dump(c,f,indent=2)
+print('Configured LOCAL mode in',p)
+PY
+else
+  read -rp "Home Assistant base URL [http://homeassistant.local:8123]: " HA_URL
+  HA_URL=${HA_URL:-http://homeassistant.local:8123}
+  read -rp "Home Assistant Long-Lived Token (leave blank to skip for now): " HA_TOKEN
+  read -rp "Echo media_player entity_id [media_player.echo_dot]: " ECHO_ENTITY
+  ECHO_ENTITY=${ECHO_ENTITY:-media_player.echo_dot}
+
+  python3 - <<PY
 import json
 p='$CFG'
 with open(p,'r') as f:
@@ -37,6 +56,7 @@ if '$HA_TOKEN'.strip():
     c['home_assistant']['enabled']=True
 else:
     c['home_assistant']['enabled']=False
+c.setdefault('local_mode',{})['enabled']=True
 acts=c.setdefault('actions',{})
 for k in ['play music','pause music','next track','volume up','volume down']:
     if k in acts and acts[k].get('type')=='ha_service':
@@ -45,6 +65,7 @@ with open(p,'w') as f:
     json.dump(c,f,indent=2)
 print('Updated',p)
 PY
+fi
 
 # 4) Install Home Assistant package files if HA config path exists
 HA_PATHS=("/config" "$HOME/.homeassistant" "/home/homeassistant/.homeassistant")
@@ -78,11 +99,15 @@ curl -s http://127.0.0.1:8091/health || true
 echo
 cat <<EOF
 Setup complete.
-Next:
+
+Quick test now (works in LOCAL mode too):
+curl -X POST http://127.0.0.1:8091/command -H 'Content-Type: application/json' -d '{"command":"play music"}'
+
+If using Home Assistant mode:
 1) Restart Home Assistant
 2) In HA Developer Tools -> Services, run script.j1msky_play_music
 3) If it fails, check token/entity in $CFG
 
-Quick test command:
-curl -X POST http://127.0.0.1:8091/command -H 'Content-Type: application/json' -d '{"command":"play music"}'
+Open local command center:
+http://127.0.0.1:8092
 EOF

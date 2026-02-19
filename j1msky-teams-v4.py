@@ -450,6 +450,199 @@ class CostTracker:
 # Initialize global cost tracker
 cost_tracker = CostTracker()
 
+# Metrics and Analytics Module
+class MetricsCollector:
+    """Collect and aggregate system metrics for monitoring and optimization"""
+    
+    def __init__(self, storage_path='/home/m1ndb0t/Desktop/J1MSKY/logs'):
+        self.storage_path = Path(storage_path)
+        self.storage_path.mkdir(exist_ok=True)
+        self.metrics_file = self.storage_path / 'metrics.json'
+        self._metrics = self._load_metrics()
+        self._lock = threading.Lock()
+        
+    def _load_metrics(self):
+        """Load metrics from disk"""
+        if self.metrics_file.exists():
+            try:
+                with open(self.metrics_file) as f:
+                    return json.load(f)
+            except:
+                return self._init_metrics()
+        return self._init_metrics()
+    
+    def _init_metrics(self):
+        """Initialize default metrics structure"""
+        return {
+            'agents': {
+                'total_spawned': 0,
+                'total_completed': 0,
+                'total_failed': 0,
+                'by_model': {},
+                'by_team': {},
+                'by_status': {}
+            },
+            'performance': {
+                'avg_completion_time': 0,
+                'total_runtime_seconds': 0,
+                'tasks_per_hour': []
+            },
+            'costs': {
+                'total_spent': 0.0,
+                'by_model': {},
+                'by_day': {}
+            },
+            'errors': {
+                'total': 0,
+                'by_type': {},
+                'recent': []
+            },
+            'system': {
+                'uptime_seconds': 0,
+                'start_time': datetime.now().isoformat(),
+                'restart_count': 0
+            }
+        }
+    
+    def _save_metrics(self):
+        """Save metrics to disk"""
+        with open(self.metrics_file, 'w') as f:
+            json.dump(self._metrics, f, indent=2)
+    
+    def record_agent_spawn(self, model, team=None):
+        """Record agent spawn event"""
+        with self._lock:
+            self._metrics['agents']['total_spawned'] += 1
+            
+            # By model
+            if model not in self._metrics['agents']['by_model']:
+                self._metrics['agents']['by_model'][model] = {'spawned': 0, 'completed': 0, 'failed': 0}
+            self._metrics['agents']['by_model'][model]['spawned'] += 1
+            
+            # By team
+            if team:
+                if team not in self._metrics['agents']['by_team']:
+                    self._metrics['agents']['by_team'][team] = {'spawned': 0, 'completed': 0}
+                self._metrics['agents']['by_team'][team]['spawned'] += 1
+            
+            self._save_metrics()
+    
+    def record_agent_complete(self, model, duration_seconds, cost, team=None):
+        """Record agent completion"""
+        with self._lock:
+            self._metrics['agents']['total_completed'] += 1
+            
+            # Update model stats
+            if model in self._metrics['agents']['by_model']:
+                self._metrics['agents']['by_model'][model]['completed'] += 1
+            
+            # Update team stats
+            if team and team in self._metrics['agents']['by_team']:
+                self._metrics['agents']['by_team'][team]['completed'] += 1
+            
+            # Update performance metrics
+            perf = self._metrics['performance']
+            total_tasks = self._metrics['agents']['total_completed']
+            old_avg = perf['avg_completion_time']
+            perf['avg_completion_time'] = ((old_avg * (total_tasks - 1)) + duration_seconds) / total_tasks
+            perf['total_runtime_seconds'] += duration_seconds
+            
+            # Update costs
+            today = datetime.now().strftime('%Y-%m-%d')
+            self._metrics['costs']['total_spent'] += cost
+            
+            if model not in self._metrics['costs']['by_model']:
+                self._metrics['costs']['by_model'][model] = 0.0
+            self._metrics['costs']['by_model'][model] += cost
+            
+            if today not in self._metrics['costs']['by_day']:
+                self._metrics['costs']['by_day'][today] = 0.0
+            self._metrics['costs']['by_day'][today] += cost
+            
+            self._save_metrics()
+    
+    def record_agent_fail(self, model, error_type='unknown'):
+        """Record agent failure"""
+        with self._lock:
+            self._metrics['agents']['total_failed'] += 1
+            
+            if model in self._metrics['agents']['by_model']:
+                self._metrics['agents']['by_model'][model]['failed'] += 1
+            
+            # Track errors
+            self._metrics['errors']['total'] += 1
+            if error_type not in self._metrics['errors']['by_type']:
+                self._metrics['errors']['by_type'][error_type] = 0
+            self._metrics['errors']['by_type'][error_type] += 1
+            
+            # Keep recent errors (last 20)
+            self._metrics['errors']['recent'].append({
+                'time': datetime.now().isoformat(),
+                'model': model,
+                'type': error_type
+            })
+            self._metrics['errors']['recent'] = self._metrics['errors']['recent'][-20:]
+            
+            self._save_metrics()
+    
+    def get_dashboard_metrics(self):
+        """Get metrics formatted for dashboard display"""
+        with self._lock:
+            uptime = datetime.now() - datetime.fromisoformat(self._metrics['system']['start_time'])
+            
+            return {
+                'agents': {
+                    'total_spawned': self._metrics['agents']['total_spawned'],
+                    'total_completed': self._metrics['agents']['total_completed'],
+                    'total_failed': self._metrics['agents']['total_failed'],
+                    'success_rate': (
+                        self._metrics['agents']['total_completed'] / 
+                        max(self._metrics['agents']['total_spawned'], 1) * 100
+                    )
+                },
+                'performance': {
+                    'avg_completion_time': round(self._metrics['performance']['avg_completion_time'], 1),
+                    'uptime_hours': round(uptime.total_seconds() / 3600, 1)
+                },
+                'costs': {
+                    'total_spent': round(self._metrics['costs']['total_spent'], 2),
+                    'today': round(self._metrics['costs']['by_day'].get(datetime.now().strftime('%Y-%m-%d'), 0), 2)
+                },
+                'breakdown': {
+                    'by_model': self._metrics['agents']['by_model'],
+                    'by_team': self._metrics['agents']['by_team']
+                }
+            }
+    
+    def get_health_status(self):
+        """Get system health status"""
+        with self._lock:
+            total = self._metrics['agents']['total_spawned']
+            failed = self._metrics['agents']['total_failed']
+            error_rate = failed / max(total, 1)
+            
+            # Determine health status
+            if error_rate > 0.2:  # >20% error rate
+                status = 'critical'
+                message = f'High failure rate: {error_rate*100:.1f}%'
+            elif error_rate > 0.1:  # >10% error rate
+                status = 'warning'
+                message = f'Elevated failure rate: {error_rate*100:.1f}%'
+            else:
+                status = 'healthy'
+                message = 'System operating normally'
+            
+            return {
+                'status': status,
+                'message': message,
+                'error_rate': round(error_rate * 100, 1),
+                'total_agents': total,
+                'failed_agents': failed
+            }
+
+# Initialize metrics collector
+metrics = MetricsCollector()
+
 def add_event(message, agent=None, model=None, type='info'):
     """Add event to log"""
     event = {
@@ -488,12 +681,16 @@ def spawn_subagent(task, model, team=None):
     """Spawn a subagent with specific model"""
     agent_id = f"subagent_{int(time.time())}_{random.randint(1000,9999)}"
     
+    # Record metrics for spawn attempt
+    metrics.record_agent_spawn(model, team)
+    
     # Check rate limit for model provider
     provider = MODEL_AGENTS.get(model, {}).get('provider', 'kimi-coding')
     is_limited, remaining = check_rate_limit(provider.split(':')[0])
     
     if is_limited:
         add_event(f"Rate limited: {provider}. Cannot spawn {model}", type='error')
+        metrics.record_agent_fail(model, 'rate_limited')
         return None
     
     # Estimate cost before spawning
@@ -553,6 +750,10 @@ def spawn_subagent(task, model, team=None):
             MODEL_AGENTS[model]['tasks_completed'] = MODEL_AGENTS[model].get('tasks_completed', 0) + 1
         
         add_event(f"Subagent {agent_id} completed task (cost: ${actual_cost:.4f})", agent=agent_id, model=model, type='success')
+        
+        # Record metrics
+        duration = 7  # Simulated 7 seconds (2 + 5 from run_subagent)
+        metrics.record_agent_complete(model, duration, actual_cost, team)
         
         # Send completion notification
         notification_mgr.notify_agent_complete(agent_id, model, task, actual_cost)

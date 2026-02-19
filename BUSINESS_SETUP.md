@@ -385,3 +385,175 @@ Annual Churn Target:        <40%
 - Pivot to agency/consulting model
 - Year 1 ARR: $100K
 - Survival: Keep day job, nights/weekends only
+
+## 13) Marketing Playbook
+
+### Content Marketing Strategy
+
+**Blog Topics (2x/week):**
+- **How-to Guides**: "Automate X with AI Agents"
+- **Case Studies**: Real customer success stories
+- **Comparisons**: J1MSKY vs alternatives
+- **Industry Trends**: AI automation insights
+- **Technical Deep Dives**: For developer audience
+
+**SEO Keywords to Target:**
+- High volume: "AI automation", "AI agents", "automate tasks"
+- Long tail: "self-hosted AI agents", "private AI automation", "Raspberry Pi AI"
+- Comparison: "AutoGPT alternative", "CrewAI vs", "AI agent framework"
+
+### Social Media Strategy
+
+**Twitter/X (Daily):**
+- Morning: Tips & tricks thread (3-5 tweets)
+- Afternoon: Customer wins / testimonials
+- Evening: Engage with community, reply to mentions
+- Weekend: Behind-the-scenes, founder journey
+
+**LinkedIn (3x/week):**
+- Monday: Industry insights / thought leadership
+- Wednesday: Product updates / feature highlights
+- Friday: Customer success stories
+
+**YouTube (Weekly):**
+- Tutorial videos (5-10 min)
+- Setup guides
+- Live coding with agents
+- Customer interviews
+
+### Launch Campaign Templates
+
+**Product Hunt Launch:**
+```
+Tagline: "Deploy AI teams that work while you sleep"
+Description: Self-hosted AI agent system for agencies and developers
+Topics: Productivity, Developer Tools, Artificial Intelligence
+Maker Comment: Share origin story, invite feedback
+```
+
+**Hacker News Show HN:**
+```
+Title: "Show HN: I built an AI agent system that runs on a Raspberry Pi"
+Body: 
+- Problem: Cloud AI is expensive, not private
+- Solution: Self-hosted multi-model agent teams
+- Stack: Python, Raspberry Pi, multiple LLMs
+- Live demo: [link]
+- GitHub: [link]
+```
+
+**Reddit Launch:**
+- r/selfhosted: Focus on privacy, self-hosting
+- r/MachineLearning: Technical architecture
+- r/Entrepreneur: Business use cases
+- r/SaaS: Growth journey
+
+### Paid Advertising
+
+**Google Ads (Start with $500/mo):**
+- Campaign 1: Brand keywords ("J1MSKY", "AI agent teams")
+- Campaign 2: Problem keywords ("automate repetitive tasks")
+- Campaign 3: Competitor keywords ("AutoGPT alternative")
+
+**Twitter Ads ($300/mo):**
+- Target: Developers, agency owners, indie hackers
+- Format: Video showing dashboard in action
+- CTA: "Start free trial"
+
+**LinkedIn Ads ($500/mo - B2B focus):**
+- Target: Agency owners, CTOs, operations managers
+- Format: Carousel ads showing ROI calculator
+- CTA: "Book demo"
+
+### Community Building
+
+**Discord Server Structure:**
+- #general: Chat, introductions
+- #showcase: Share what you built
+- #help: Technical support
+- #feature-requests: Vote on new features
+- #partnerships: Collaboration opportunities
+- #off-topic: Random chat
+
+**Engagement Tactics:**
+- Weekly AMA (Ask Me Anything) sessions
+- Monthly challenges ("Build X with agents")
+- Recognition program: Active contributors get Pro free
+- Early access to beta features for community
+
+### PR and Media Outreach
+
+**Press Release Angles:**
+- "Former [Big Tech] engineer builds AI agency on $100 hardware"
+- "Open-source alternative to $100K/year automation consultants"
+- "Raspberry Pi AI agents: The democratization of automation"
+
+**Target Publications:**
+- Tech blogs: TechCrunch, The Verge, Ars Technica
+- Developer: Hacker Noon, Dev.to, CSS-Tricks
+- Business: Forbes, Fast Company, Inc.
+- Niche: Raspberry Pi blog, Self-Hosted podcast
+
+**Outreach Template:**
+```
+Subject: Story idea: [Angle]
+
+Hi [Name],
+
+I noticed your coverage of [related topic]. I built J1MSKY, 
+a self-hosted AI agent system that [unique value prop].
+
+Key stats:
+- [X] users in first month
+- Saves [Y] hours/week per user
+- Runs on $100 Raspberry Pi vs $1000s in cloud costs
+
+Would you be interested in a brief interview or demo?
+
+[Your name]
+[Links: Website, GitHub, Demo video]
+```
+
+### Referral Program (Word-of-Mouth)
+
+**Program Structure:**
+- Give $20, Get $20
+- Referrer gets $20 credit
+- New user gets $20 off first month
+- Unlimited referrals
+
+**Promotion:**
+- In-dashboard referral widget
+- Email drip campaign
+- Social sharing buttons
+- Leaderboard (top referrers get featured)
+
+### Events and Webinars
+
+**Monthly Webinar Series:**
+- "Building Your First AI Agent" (beginner)
+- "Advanced Agent Workflows" (intermediate)
+- "Scaling AI Automation" (advanced)
+- Guest speakers from community
+
+**Virtual Summit (Quarterly):**
+- Full-day event
+- Multiple tracks: Technical, Business, Use Cases
+- Sponsorship opportunities
+- Record and repurpose content
+
+### Metrics to Track
+
+**Marketing Funnel:**
+- Website visitors
+- Trial signups (target: 5% of visitors)
+- Trial-to-paid conversion (target: 20%)
+- CAC by channel
+- Time to first value
+
+**Content Performance:**
+- Blog traffic and engagement
+- Social media reach and engagement
+- Email open rates (target: >25%)
+- YouTube views and retention
+- Newsletter subscribers

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v5.3 - Responsive UI with Hardened Navigation
-Mobile/Tablet/Desktop adaptive with state management and glitch reduction
+J1MSKY Agency v5.4 - Polished UI with Swipe Navigation
+Enhanced mobile/tablet/desktop responsiveness with gesture support
 """
 
 import http.server
@@ -43,10 +43,11 @@ HTML = '''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>J1MSKY Agency v5.2</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>J1MSKY Agency v5.4</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -463,6 +464,37 @@ HTML = '''<!DOCTYPE html>
             }
         }
         
+        /* Loading state */
+        body.navigating .main {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        
+        body.navigating::after {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            margin: -20px 0 0 -20px;
+            border: 3px solid var(--bg-3);
+            border-top-color: var(--cyan);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            z-index: 1000;
+            pointer-events: none;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Offline state */
+        body.offline .header h1 {
+            color: var(--red);
+        }
+        
         .cost-indicator {
             display: flex;
             justify-content: space-between;
@@ -754,10 +786,11 @@ HTML = '''<!DOCTYPE html>
         const NavState = {
             currentTab: 'dashboard',
             isTransitioning: false,
-            transitionCooldown: 200, // ms
+            transitionCooldown: 150, // Reduced for snappier feel
             lastTransitionTime: 0,
             history: [],
             maxHistory: 10,
+            tabs: ['dashboard', 'models', 'spawn', 'teams'],
             
             canTransition() {
                 const now = Date.now();
@@ -770,121 +803,177 @@ HTML = '''<!DOCTYPE html>
                 if (this.history.length >= this.maxHistory) {
                     this.history.shift();
                 }
-                this.history.push(tabId);
+                // Don't push duplicates
+                if (this.history[this.history.length - 1] !== tabId) {
+                    this.history.push(tabId);
+                }
             },
             
             goBack() {
                 if (this.history.length < 2) return false;
-                this.history.pop(); // Remove current
+                this.history.pop();
                 const previous = this.history[this.history.length - 1];
                 return previous;
+            },
+            
+            getNextTab() {
+                const idx = this.tabs.indexOf(this.currentTab);
+                return this.tabs[(idx + 1) % this.tabs.length];
+            },
+            
+            getPrevTab() {
+                const idx = this.tabs.indexOf(this.currentTab);
+                return this.tabs[(idx - 1 + this.tabs.length) % this.tabs.length];
             }
         };
         
-        // Debounce utility
-        function debounce(fn, ms) {
-            let timeout;
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => fn.apply(this, args), ms);
-            };
+        // Touch/Swipe Handling
+        const TouchHandler = {
+            startX: 0,
+            startY: 0,
+            startTime: 0,
+            threshold: 80, // min swipe distance
+            maxTime: 300,  // max swipe time
+            
+            init() {
+                document.addEventListener('touchstart', this.onStart.bind(this), { passive: true });
+                document.addEventListener('touchend', this.onEnd.bind(this), { passive: true });
+            },
+            
+            onStart(e) {
+                this.startX = e.touches[0].clientX;
+                this.startY = e.touches[0].clientY;
+                this.startTime = Date.now();
+            },
+            
+            onEnd(e) {
+                const deltaX = e.changedTouches[0].clientX - this.startX;
+                const deltaY = e.changedTouches[0].clientY - this.startY;
+                const deltaTime = Date.now() - this.startTime;
+                
+                // Ignore if too slow or mostly vertical
+                if (deltaTime > this.maxTime || Math.abs(deltaY) > Math.abs(deltaX)) return;
+                
+                // Swipe left = next, swipe right = previous
+                if (Math.abs(deltaX) > this.threshold) {
+                    if (deltaX > 0) {
+                        showTab(NavState.getPrevTab());
+                    } else {
+                        showTab(NavState.getNextTab());
+                    }
+                }
+            }
+        };
+        
+        // Online/Offline Detection
+        const ConnectionHandler = {
+            init() {
+                window.addEventListener('online', () => this.updateStatus(true));
+                window.addEventListener('offline', () => this.updateStatus(false));
+                this.updateStatus(navigator.onLine);
+            },
+            
+            updateStatus(isOnline) {
+                const header = document.querySelector('.header h1');
+                if (!header) return;
+                
+                if (isOnline) {
+                    header.style.color = 'var(--cyan)';
+                    header.textContent = '◈ J1MSKY Agency v5.4';
+                } else {
+                    header.style.color = 'var(--red)';
+                    header.textContent = '◈ Agency (Offline)';
+                }
+            }
+        };
+        
+        // Loading indicator
+        function showLoading() {
+            document.body.classList.add('navigating');
+        }
+        
+        function hideLoading() {
+            document.body.classList.remove('navigating');
         }
         
         function showTab(tabId, pushState = true) {
-            // Validate transition
-            if (!NavState.canTransition()) {
-                console.log('Navigation blocked: cooldown active');
-                return;
-            }
+            if (!NavState.canTransition()) return;
             if (tabId === NavState.currentTab) return;
+            if (!document.getElementById(tabId)) return;
             
-            // Set transitioning state
             NavState.isTransitioning = true;
             NavState.lastTransitionTime = Date.now();
-            document.body.classList.add('navigating');
+            showLoading();
             
-            // Update UI
             const panels = document.querySelectorAll('.panel');
             const navItems = document.querySelectorAll('.nav-item');
             
-            // Hide all panels
+            // Hide current panel
             panels.forEach(p => {
                 p.classList.remove('active');
-                p.style.display = 'none';
             });
             
-            // Reset nav items
-            navItems.forEach(n => n.classList.remove('active'));
-            
-            // Show target panel with slight delay for transition
+            // Show target panel
             requestAnimationFrame(() => {
                 const targetPanel = document.getElementById(tabId);
-                if (targetPanel) {
-                    targetPanel.style.display = 'block';
-                    // Force reflow
-                    void targetPanel.offsetHeight;
-                    targetPanel.classList.add('active');
-                }
+                targetPanel.style.display = 'block';
+                targetPanel.classList.add('active');
                 
-                // Update nav active state
-                const tabIndex = ['dashboard', 'models', 'spawn', 'teams'].indexOf(tabId);
-                if (tabIndex >= 0 && navItems[tabIndex]) {
-                    navItems[tabIndex].classList.add('active');
-                }
+                // Update nav
+                const tabIndex = NavState.tabs.indexOf(tabId);
+                navItems.forEach((n, i) => n.classList.toggle('active', i === tabIndex));
                 
-                // Scroll to top
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 
-                // Update state
                 NavState.currentTab = tabId;
                 if (pushState) {
                     NavState.pushHistory(tabId);
                     history.pushState({ tab: tabId }, '', '#' + tabId);
                 }
                 
-                // Clear transitioning state
                 setTimeout(() => {
                     NavState.isTransitioning = false;
-                    document.body.classList.remove('navigating');
+                    hideLoading();
+                    // Hide inactive panels after transition
+                    panels.forEach(p => {
+                        if (!p.classList.contains('active')) {
+                            p.style.display = 'none';
+                        }
+                    });
                 }, NavState.transitionCooldown);
             });
         }
         
-        // Handle browser back/forward
+        // Event Listeners
         window.addEventListener('popstate', (e) => {
-            if (e.state && e.state.tab) {
+            if (e.state?.tab) {
                 showTab(e.state.tab, false);
             } else {
-                // Default to dashboard
                 showTab('dashboard', false);
             }
         });
         
-        // Keyboard navigation
         document.addEventListener('keydown', (e) => {
             if (e.altKey && e.key === 'ArrowLeft') {
                 e.preventDefault();
-                const previous = NavState.goBack();
-                if (previous) showTab(previous);
+                const prev = NavState.goBack();
+                if (prev) showTab(prev);
             }
-            // Number keys for tabs
             if (!e.ctrlKey && !e.metaKey && !e.altKey) {
-                const tabs = ['dashboard', 'models', 'spawn', 'teams'];
                 const num = parseInt(e.key);
-                if (num >= 1 && num <= tabs.length) {
+                if (num >= 1 && num <= 4) {
                     e.preventDefault();
-                    showTab(tabs[num - 1]);
+                    showTab(NavState.tabs[num - 1]);
                 }
             }
         });
         
-        // Handle visibility change (reduce work when hidden)
+        // Visibility handling
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 document.body.classList.add('paused');
             } else {
                 document.body.classList.remove('paused');
-                // Force redraw on return
                 requestAnimationFrame(() => {
                     const active = document.querySelector('.panel.active');
                     if (active) active.style.display = 'block';
@@ -892,26 +981,24 @@ HTML = '''<!DOCTYPE html>
             }
         });
         
-        // Initialize history
-        document.addEventListener('DOMContentLoaded', () => {
-            const hash = window.location.hash.slice(1);
-            if (hash && document.getElementById(hash)) {
-                showTab(hash, false);
-            } else {
-                NavState.pushHistory('dashboard');
-                history.replaceState({ tab: 'dashboard' }, '', '#dashboard');
-            }
-        });
-        
-        // Prevent double-tap zoom on iOS
+        // Prevent double-tap zoom
         let lastTouchEnd = 0;
         document.addEventListener('touchend', (e) => {
             const now = Date.now();
-            if (now - lastTouchEnd <= 300) {
-                e.preventDefault();
-            }
+            if (now - lastTouchEnd <= 300) e.preventDefault();
             lastTouchEnd = now;
         }, { passive: false });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            TouchHandler.init();
+            ConnectionHandler.init();
+            
+            const hash = window.location.hash.slice(1);
+            const initialTab = (hash && document.getElementById(hash)) ? hash : 'dashboard';
+            NavState.pushHistory(initialTab);
+            if (!hash) history.replaceState({ tab: 'dashboard' }, '', '#dashboard');
+        });
     </script>
 </body>
 </html>'''
@@ -937,9 +1024,9 @@ class AgencyServer(http.server.BaseHTTPRequestHandler):
 def run():
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
-        print("J1MSKY Agency v5.3 - Responsive UI with Hardened Navigation")
-        print("Mobile/Tablet/Desktop adaptive layout")
-        print("Navigation state management with cooldown protection")
+        print("J1MSKY Agency v5.4 - Polished UI with Swipe Navigation")
+        print("Enhanced mobile/tablet/desktop responsiveness")
+        print("Gesture support: swipe left/right to navigate")
         print("http://localhost:8080")
         httpd.serve_forever()
 

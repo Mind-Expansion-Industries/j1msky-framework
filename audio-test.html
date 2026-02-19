@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>J1MSKY Audio Test</title>
+    <style>
+        body {
+            background: #0a0a0f;
+            color: #00ffff;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 { color: #ff00ff; }
+        button {
+            background: #1a1a2e;
+            color: #00ffff;
+            border: 2px solid #00ffff;
+            padding: 15px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 10px;
+            font-family: 'Courier New', monospace;
+        }
+        button:hover {
+            background: #00ffff;
+            color: #000;
+        }
+        #status {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #333;
+            background: #050508;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .info { color: #ffff00; }
+    </style>
+</head>
+<body>
+    <h1>◈ J1MSKY AUDIO TEST ◈</h1>
+    
+    <div id="status">
+        <p>Click buttons to test audio through your Echo/Alexa</p>
+    </div>
+    
+    <button onclick="testTone()">🎵 Play Test Tone</button>
+    <button onclick="testMic()">🎤 Test Microphone</button>
+    <button onclick="checkAudio()">🔍 Check Audio Devices</button>
+    
+    <div id="output" style="margin-top: 30px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;"></div>
+
+    <script>
+        const output = document.getElementById('output');
+        const status = document.getElementById('status');
+        
+        function log(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            output.appendChild(div);
+        }
+        
+        function testTone() {
+            log('Creating audio context...', 'info');
+            
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Create oscillator
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                
+                oscillator.frequency.value = 1000;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
+                
+                oscillator.start(audioCtx.currentTime);
+                oscillator.stop(audioCtx.currentTime + 1);
+                
+                log('✓ Playing 1000Hz test tone for 1 second', 'success');
+                log(`Audio output: ${audioCtx.destination.channelCount} channels`, 'info');
+                
+                status.innerHTML = '<p class="success">🎵 Test tone playing through your Echo!</p>';
+                
+            } catch (e) {
+                log(`✗ Error: ${e.message}`, 'error');
+                status.innerHTML = '<p class="error">✗ Audio failed. Check permissions.</p>';
+            }
+        }
+        
+        async function testMic() {
+            log('Requesting microphone access...', 'info');
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                log('✓ Microphone access granted!', 'success');
+                
+                const audioContext = new AudioContext();
+                const source = audioContext.createMediaStreamSource(stream);
+                const analyser = audioContext.createAnalyser();
+                
+                source.connect(analyser);
+                analyser.fftSize = 256;
+                
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                
+                log('Listening for 3 seconds... Speak now!', 'info');
+                status.innerHTML = '<p class="info">🎤 Speak now - listening for 3 seconds...</p>';
+                
+                let samples = 0;
+                const interval = setInterval(() => {
+                    analyser.getByteFrequencyData(dataArray);
+                    const average = dataArray.reduce((a, b) => a + b) / bufferLength;
+                    
+                    if (average > 20) {
+                        log(`Audio detected! Level: ${Math.round(average)}`, 'success');
+                        samples++;
+                    }
+                    
+                }, 100);
+                
+                setTimeout(() => {
+                    clearInterval(interval);
+                    stream.getTracks().forEach(track => track.stop());
+                    
+                    if (samples > 0) {
+                        log(`✓ Microphone working! Detected ${samples} audio samples`, 'success');
+                        status.innerHTML = '<p class="success">🎤 Microphone is working through Echo!</p>';
+                    } else {
+                        log('⚠ No audio detected. Check mic volume.', 'error');
+                        status.innerHTML = '<p class="error">⚠ No audio detected</p>';
+                    }
+                }, 3000);
+                
+            } catch (e) {
+                log(`✗ Microphone error: ${e.message}`, 'error');
+                status.innerHTML = '<p class="error">✗ Microphone access denied</p>';
+            }
+        }
+        
+        async function checkAudio() {
+            log('Checking audio devices...', 'info');
+            
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                
+                log(`Found ${devices.length} media devices:`, 'info');
+                
+                devices.forEach(device => {
+                    const kind = device.kind === 'audioinput' ? '🎤 Mic' :
+                                device.kind === 'audiooutput' ? '🔊 Speaker' : '📷 Video';
+                    const label = device.label || 'Unknown device';
+                    log(`${kind}: ${label.substring(0, 50)}`, 'info');
+                });
+                
+                // Check default
+                const audioCtx = new AudioContext();
+                log(`Default sample rate: ${audioCtx.sampleRate}Hz`, 'info');
+                
+                status.innerHTML = '<p class="success">🔍 Audio devices listed above</p>';
+                
+            } catch (e) {
+                log(`✗ Error: ${e.message}`, 'error');
+            }
+        }
+        
+        // Auto-check on load
+        checkAudio();
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+[Unit]
+Description=J1MSKY Alexa Bridge
+After=network.target bluetooth.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/m1ndb0t/Desktop/J1MSKY
+ExecStart=/usr/bin/python3 /home/m1ndb0t/Desktop/J1MSKY/scripts/alexa/alexa_bridge.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=default.target

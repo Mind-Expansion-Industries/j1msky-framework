@@ -14,6 +14,10 @@ for p in 8080 8091 8092; do
   if ss -tlnp | grep -q ":$p"; then ok "Port $p listening"; else warn "Port $p not listening"; fi
 done
 
+for svc in j1msky-agency.service j1msky-alexa-bridge.service j1msky-alexa-center.service; do
+  if systemctl --user is-active --quiet "$svc"; then ok "Service $svc active"; else warn "Service $svc inactive"; fi
+done
+
 # endpoints
 curl -fsS http://127.0.0.1:8080 >/dev/null 2>&1 && ok "Agency UI reachable" || warn "Agency UI not reachable"
 curl -fsS http://127.0.0.1:8091/health >/dev/null 2>&1 && ok "Alexa bridge healthy" || warn "Alexa bridge not healthy"

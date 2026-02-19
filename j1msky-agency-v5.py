@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v5.6 - Final Polish
-ResizeObserver, orientation handling, keyboard help, accessibility
+J1MSKY Agency v5.7 - Error Boundaries & Smooth Interactions
+Global error handling, scroll polyfill, improved help panel state
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v5.6</title>
+    <title>J1MSKY Agency v5.7</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -248,11 +248,18 @@ HTML = '''<!DOCTYPE html>
             padding: 16px;
             text-align: center;
             border: 1px solid var(--border);
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
         
         .stat-card:hover {
             border-color: var(--cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.1);
+        }
+        
+        .stat-card:active {
+            transform: translateY(0);
         }
         
         .stat-value {
@@ -586,7 +593,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v5.6</h1>
+        <h1>◈ J1MSKY Agency v5.7</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -973,9 +980,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v5.6';
+                        header.textContent = '◈ J1MSKY Agency v5.7';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v5.6';
+                    if (title) title.textContent = 'J1MSKY Agency v5.7';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1197,24 +1204,44 @@ HTML = '''<!DOCTYPE html>
             }
         });
         
-        // Toggle help panel
+        // Toggle help panel with state management
         let helpVisible = false;
         function toggleHelp() {
-            helpVisible = !helpVisible;
             const helpPanel = document.getElementById('help');
+            if (!helpPanel) return;
+            
+            helpVisible = !helpVisible;
             const mainPanels = document.querySelectorAll('.main .panel');
             
             if (helpVisible) {
-                mainPanels.forEach(p => p.style.display = 'none');
+                // Store current state before showing help
+                helpPanel.dataset.previousTab = NavState.currentTab;
+                mainPanels.forEach(p => {
+                    p.style.display = 'none';
+                    p.classList.remove('active');
+                });
                 helpPanel.style.display = 'block';
                 helpPanel.classList.add('active');
             } else {
                 helpPanel.style.display = 'none';
                 helpPanel.classList.remove('active');
-                const current = document.getElementById(NavState.currentTab);
-                if (current) current.style.display = 'block';
+                // Restore previous tab
+                const previousTab = helpPanel.dataset.previousTab || NavState.currentTab;
+                const current = document.getElementById(previousTab);
+                if (current) {
+                    current.style.display = 'block';
+                    current.classList.add('active');
+                }
             }
         }
+        
+        // Close help on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && helpVisible) {
+                e.preventDefault();
+                toggleHelp();
+            }
+        });
         
         // Visibility handling
         document.addEventListener('visibilitychange', () => {
@@ -1236,6 +1263,47 @@ HTML = '''<!DOCTYPE html>
             if (now - lastTouchEnd <= 300) e.preventDefault();
             lastTouchEnd = now;
         }, { passive: false });
+        
+        // Error Boundary for uncaught errors
+        window.addEventListener('error', (e) => {
+            console.error('Global error:', e.message);
+            NavState.reset();
+            // Prevent complete crash
+            e.preventDefault();
+        });
+        
+        window.addEventListener('unhandledrejection', (e) => {
+            console.error('Unhandled promise rejection:', e.reason);
+            NavState.reset();
+            e.preventDefault();
+        });
+        
+        // Smooth scroll polyfill for older browsers
+        if (!('scrollBehavior' in document.documentElement.style)) {
+            window.scrollTo = function(options) {
+                if (typeof options === 'object' && options.top !== undefined) {
+                    const start = window.pageYOffset;
+                    const target = options.top;
+                    const duration = 300;
+                    const startTime = performance.now();
+                    
+                    function step(currentTime) {
+                        const elapsed = currentTime - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        const ease = 1 - Math.pow(1 - progress, 3);
+                        window.scrollTo(0, start + (target - start) * ease);
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(step);
+                        }
+                    }
+                    requestAnimationFrame(step);
+                } else {
+                    // Fallback for non-object calls
+                    window.scrollTo(arguments[0], arguments[1]);
+                }
+            };
+        }
         
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
@@ -1279,8 +1347,8 @@ class AgencyServer(http.server.BaseHTTPRequestHandler):
 def run():
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
-        print("J1MSKY Agency v5.6 - Final Polish")
-        print("ResizeObserver, orientation handling, keyboard help")
+        print("J1MSKY Agency v5.7 - Error Boundaries & Smooth Interactions")
+        print("Global error handling, scroll polyfill, improved help panel")
         print("Press '?' or 'h' for keyboard shortcuts")
         print("http://localhost:8080")
         httpd.serve_forever()

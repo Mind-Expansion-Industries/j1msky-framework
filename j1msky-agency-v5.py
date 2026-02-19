@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v5.7 - Error Boundaries & Smooth Interactions
-Global error handling, scroll polyfill, improved help panel state
+J1MSKY Agency v5.8 - Visual Polish
+Gradient text, ripple effects, help panel styling
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v5.7</title>
+    <title>J1MSKY Agency v5.8</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -123,7 +123,10 @@ HTML = '''<!DOCTYPE html>
         
         .header h1 {
             font-size: 18px;
-            color: var(--cyan);
+            background: linear-gradient(90deg, var(--cyan), var(--green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             font-weight: 700;
         }
         
@@ -514,6 +517,43 @@ HTML = '''<!DOCTYPE html>
             color: var(--red);
         }
         
+        /* Help panel specific styles */
+        #help {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        #help .agent-item {
+            cursor: default;
+        }
+        
+        #help .agent-item:hover {
+            border-left-color: var(--cyan);
+        }
+        
+        /* Ripple effect for buttons */
+        .nav-item, .quick-btn, .btn-primary {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-item::after, .quick-btn::after, .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+        
+        .nav-item:active::after, .quick-btn:active::after, .btn-primary:active::after {
+            width: 200%;
+            height: 200%;
+        }
+        
         .cost-indicator {
             display: flex;
             justify-content: space-between;
@@ -593,7 +633,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v5.7</h1>
+        <h1>◈ J1MSKY Agency v5.8</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -980,9 +1020,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v5.7';
+                        header.textContent = '◈ J1MSKY Agency v5.8';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v5.7';
+                    if (title) title.textContent = 'J1MSKY Agency v5.8';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1347,8 +1387,8 @@ class AgencyServer(http.server.BaseHTTPRequestHandler):
 def run():
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
-        print("J1MSKY Agency v5.7 - Error Boundaries & Smooth Interactions")
-        print("Global error handling, scroll polyfill, improved help panel")
+        print("J1MSKY Agency v5.8 - Visual Polish")
+        print("Gradient text, ripple effects, help panel styling")
         print("Press '?' or 'h' for keyboard shortcuts")
         print("http://localhost:8080")
         httpd.serve_forever()

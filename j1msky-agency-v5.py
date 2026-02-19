@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v5.4 - Polished UI with Swipe Navigation
-Enhanced mobile/tablet/desktop responsiveness with gesture support
+J1MSKY Agency v5.5 - Robust Navigation with Error Recovery
+Enhanced state handling, passive event listeners, viewport fixes
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v5.4</title>
+    <title>J1MSKY Agency v5.5</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -83,12 +83,24 @@ HTML = '''<!DOCTYPE html>
             color: var(--text);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             min-height: 100vh;
-            min-height: 100dvh; /* Dynamic viewport height for mobile */
+            min-height: 100dvh;
+            min-height: -webkit-fill-available; /* iOS Safari fix */
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            /* CSS containment for performance */
             contain: layout style paint;
+        }
+        
+        /* Fix for mobile viewport height with dynamic toolbars */
+        @supports (height: 100dvh) {
+            body {
+                min-height: 100dvh;
+            }
+        }
+        
+        /* iOS momentum scrolling */
+        .main {
+            -webkit-overflow-scrolling: touch;
         }
         
         .header {
@@ -574,7 +586,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v5.3</h1>
+        <h1>◈ J1MSKY Agency v5.5</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -786,11 +798,13 @@ HTML = '''<!DOCTYPE html>
         const NavState = {
             currentTab: 'dashboard',
             isTransitioning: false,
-            transitionCooldown: 150, // Reduced for snappier feel
+            transitionCooldown: 150,
             lastTransitionTime: 0,
             history: [],
             maxHistory: 10,
             tabs: ['dashboard', 'models', 'spawn', 'teams'],
+            failedTransitions: 0,
+            maxRetries: 3,
             
             canTransition() {
                 const now = Date.now();
@@ -803,7 +817,6 @@ HTML = '''<!DOCTYPE html>
                 if (this.history.length >= this.maxHistory) {
                     this.history.shift();
                 }
-                // Don't push duplicates
                 if (this.history[this.history.length - 1] !== tabId) {
                     this.history.push(tabId);
                 }
@@ -812,8 +825,7 @@ HTML = '''<!DOCTYPE html>
             goBack() {
                 if (this.history.length < 2) return false;
                 this.history.pop();
-                const previous = this.history[this.history.length - 1];
-                return previous;
+                return this.history[this.history.length - 1];
             },
             
             getNextTab() {
@@ -824,65 +836,127 @@ HTML = '''<!DOCTYPE html>
             getPrevTab() {
                 const idx = this.tabs.indexOf(this.currentTab);
                 return this.tabs[(idx - 1 + this.tabs.length) % this.tabs.length];
+            },
+            
+            recordSuccess() {
+                this.failedTransitions = 0;
+            },
+            
+            recordFailure() {
+                this.failedTransitions++;
+                return this.failedTransitions < this.maxRetries;
+            },
+            
+            reset() {
+                this.isTransitioning = false;
+                this.failedTransitions = 0;
+                hideLoading();
             }
         };
         
-        // Touch/Swipe Handling
+        // Touch/Swipe Handling with improved edge rejection
         const TouchHandler = {
             startX: 0,
             startY: 0,
             startTime: 0,
-            threshold: 80, // min swipe distance
-            maxTime: 300,  // max swipe time
+            threshold: 80,
+            maxTime: 300,
+            edgeThreshold: 20, // Ignore swipes starting too close to edge
+            isTracking: false,
             
             init() {
-                document.addEventListener('touchstart', this.onStart.bind(this), { passive: true });
-                document.addEventListener('touchend', this.onEnd.bind(this), { passive: true });
+                const opts = { passive: true };
+                document.addEventListener('touchstart', this.onStart.bind(this), opts);
+                document.addEventListener('touchend', this.onEnd.bind(this), opts);
+                document.addEventListener('touchcancel', this.onCancel.bind(this), opts);
             },
             
             onStart(e) {
-                this.startX = e.touches[0].clientX;
-                this.startY = e.touches[0].clientY;
+                const touch = e.touches[0];
+                const viewportWidth = window.innerWidth;
+                
+                // Ignore edge touches (iOS edge swipe gestures)
+                if (touch.clientX < this.edgeThreshold || 
+                    touch.clientX > viewportWidth - this.edgeThreshold) {
+                    this.isTracking = false;
+                    return;
+                }
+                
+                this.startX = touch.clientX;
+                this.startY = touch.clientY;
                 this.startTime = Date.now();
+                this.isTracking = true;
             },
             
             onEnd(e) {
-                const deltaX = e.changedTouches[0].clientX - this.startX;
-                const deltaY = e.changedTouches[0].clientY - this.startY;
+                if (!this.isTracking) return;
+                this.isTracking = false;
+                
+                const touch = e.changedTouches[0];
+                const deltaX = touch.clientX - this.startX;
+                const deltaY = touch.clientY - this.startY;
                 const deltaTime = Date.now() - this.startTime;
                 
-                // Ignore if too slow or mostly vertical
-                if (deltaTime > this.maxTime || Math.abs(deltaY) > Math.abs(deltaX)) return;
+                // Validate swipe
+                if (deltaTime > this.maxTime) return;
+                if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) return; // Mostly vertical
+                if (Math.abs(deltaX) < this.threshold) return;
                 
-                // Swipe left = next, swipe right = previous
-                if (Math.abs(deltaX) > this.threshold) {
-                    if (deltaX > 0) {
-                        showTab(NavState.getPrevTab());
-                    } else {
-                        showTab(NavState.getNextTab());
-                    }
+                // Execute navigation
+                if (deltaX > 0) {
+                    showTab(NavState.getPrevTab());
+                } else {
+                    showTab(NavState.getNextTab());
                 }
+            },
+            
+            onCancel() {
+                this.isTracking = false;
             }
         };
         
-        // Online/Offline Detection
+        // Online/Offline Detection with debouncing
         const ConnectionHandler = {
+            offlineTimer: null,
+            debounceMs: 1000,
+            
             init() {
-                window.addEventListener('online', () => this.updateStatus(true));
-                window.addEventListener('offline', () => this.updateStatus(false));
+                window.addEventListener('online', () => this.setOnline(true));
+                window.addEventListener('offline', () => this.setOnline(false));
                 this.updateStatus(navigator.onLine);
+            },
+            
+            setOnline(isOnline) {
+                clearTimeout(this.offlineTimer);
+                
+                if (isOnline) {
+                    this.updateStatus(true);
+                } else {
+                    // Debounce offline events
+                    this.offlineTimer = setTimeout(() => {
+                        this.updateStatus(false);
+                    }, this.debounceMs);
+                }
             },
             
             updateStatus(isOnline) {
                 const header = document.querySelector('.header h1');
-                if (!header) return;
+                const title = document.querySelector('title');
                 
                 if (isOnline) {
-                    header.style.color = 'var(--cyan)';
-                    header.textContent = '◈ J1MSKY Agency v5.4';
+                    document.body.classList.remove('offline');
+                    if (header) {
+                        header.style.color = '';
+                        header.textContent = '◈ J1MSKY Agency v5.5';
+                    }
+                    if (title) title.textContent = 'J1MSKY Agency v5.5';
                 } else {
-                    header.style.color = 'var(--red)';
-                    header.textContent = '◈ Agency (Offline)';
+                    document.body.classList.add('offline');
+                    if (header) {
+                        header.style.color = 'var(--red)';
+                        header.textContent = '◈ Agency (Offline)';
+                    }
+                    if (title) title.textContent = 'Agency (Offline)';
                 }
             }
         };
@@ -897,51 +971,112 @@ HTML = '''<!DOCTYPE html>
         }
         
         function showTab(tabId, pushState = true) {
-            if (!NavState.canTransition()) return;
-            if (tabId === NavState.currentTab) return;
-            if (!document.getElementById(tabId)) return;
+            // Validate inputs
+            if (!tabId || typeof tabId !== 'string') {
+                console.error('Invalid tabId:', tabId);
+                return;
+            }
             
+            // Check transition availability
+            if (!NavState.canTransition()) {
+                console.log('Navigation blocked: cooldown or in progress');
+                return;
+            }
+            
+            // Prevent navigating to same tab
+            if (tabId === NavState.currentTab) {
+                return;
+            }
+            
+            // Verify target exists
+            const targetPanel = document.getElementById(tabId);
+            if (!targetPanel) {
+                console.error('Panel not found:', tabId);
+                if (!NavState.recordFailure()) {
+                    console.error('Max retries exceeded, resetting state');
+                    NavState.reset();
+                }
+                return;
+            }
+            
+            // Begin transition
             NavState.isTransitioning = true;
             NavState.lastTransitionTime = Date.now();
             showLoading();
             
-            const panels = document.querySelectorAll('.panel');
-            const navItems = document.querySelectorAll('.nav-item');
-            
-            // Hide current panel
-            panels.forEach(p => {
-                p.classList.remove('active');
-            });
-            
-            // Show target panel
-            requestAnimationFrame(() => {
-                const targetPanel = document.getElementById(tabId);
-                targetPanel.style.display = 'block';
-                targetPanel.classList.add('active');
-                
-                // Update nav
+            try {
+                const panels = document.querySelectorAll('.panel');
+                const navItems = document.querySelectorAll('.nav-item');
                 const tabIndex = NavState.tabs.indexOf(tabId);
-                navItems.forEach((n, i) => n.classList.toggle('active', i === tabIndex));
                 
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                
-                NavState.currentTab = tabId;
-                if (pushState) {
-                    NavState.pushHistory(tabId);
-                    history.pushState({ tab: tabId }, '', '#' + tabId);
+                // Validate tab index
+                if (tabIndex === -1) {
+                    throw new Error('Invalid tab index for: ' + tabId);
                 }
                 
-                setTimeout(() => {
-                    NavState.isTransitioning = false;
-                    hideLoading();
-                    // Hide inactive panels after transition
-                    panels.forEach(p => {
-                        if (!p.classList.contains('active')) {
-                            p.style.display = 'none';
+                // Hide current panels
+                panels.forEach(p => p.classList.remove('active'));
+                
+                // Use requestAnimationFrame for smooth transition
+                requestAnimationFrame(() => {
+                    try {
+                        // Show target panel
+                        targetPanel.style.display = 'block';
+                        targetPanel.offsetHeight; // Force reflow
+                        targetPanel.classList.add('active');
+                        
+                        // Update navigation
+                        navItems.forEach((n, i) => {
+                            n.classList.toggle('active', i === tabIndex);
+                        });
+                        
+                        // Scroll to top smoothly
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        
+                        // Update state
+                        NavState.currentTab = tabId;
+                        NavState.recordSuccess();
+                        
+                        if (pushState) {
+                            NavState.pushHistory(tabId);
+                            history.pushState({ tab: tabId }, '', '#' + tabId);
                         }
-                    });
-                }, NavState.transitionCooldown);
-            });
+                        
+                        // Cleanup after transition
+                        setTimeout(() => {
+                            NavState.isTransitioning = false;
+                            hideLoading();
+                            // Hide inactive panels for performance
+                            panels.forEach(p => {
+                                if (!p.classList.contains('active')) {
+                                    p.style.display = 'none';
+                                }
+                            });
+                        }, NavState.transitionCooldown);
+                        
+                    } catch (innerError) {
+                        console.error('Error during transition:', innerError);
+                        handleTransitionError(tabId);
+                    }
+                });
+                
+            } catch (error) {
+                console.error('Error starting transition:', error);
+                handleTransitionError(tabId);
+            }
+        }
+        
+        function handleTransitionError(tabId) {
+            if (NavState.recordFailure()) {
+                // Retry once after a short delay
+                setTimeout(() => showTab(tabId), 100);
+            } else {
+                NavState.reset();
+                // Fallback to dashboard
+                if (tabId !== 'dashboard') {
+                    showTab('dashboard');
+                }
+            }
         }
         
         // Event Listeners
@@ -1024,8 +1159,8 @@ class AgencyServer(http.server.BaseHTTPRequestHandler):
 def run():
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
-        print("J1MSKY Agency v5.4 - Polished UI with Swipe Navigation")
-        print("Enhanced mobile/tablet/desktop responsiveness")
+        print("J1MSKY Agency v5.5 - Robust Navigation with Error Recovery")
+        print("Enhanced state handling, passive event listeners, viewport fixes")
         print("Gesture support: swipe left/right to navigate")
         print("http://localhost:8080")
         httpd.serve_forever()

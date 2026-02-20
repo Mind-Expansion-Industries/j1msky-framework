@@ -265,6 +265,7 @@ HTML = '''<!DOCTYPE html>
             display: flex;
             align-items: center;
             gap: 8px;
+            overflow-wrap: anywhere;
         }
         
         .stats-grid {
@@ -1005,7 +1006,7 @@ HTML = '''<!DOCTYPE html>
             goBack() {
                 if (this.history.length < 2) return false;
                 this.history.pop();
-                return this.history[this.history.length - 1];
+                return this.normalizeTab(this.history[this.history.length - 1]);
             },
             
             getNextTab() {

@@ -16,6 +16,12 @@ sudo systemctl stop ollama 2>/dev/null || true
 sudo systemctl stop rpi-connect 2>/dev/null || true
 sudo systemctl stop wayvnc 2>/dev/null || true
 
+# Performance tuning (best-effort)
+for g in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
+  [ -w "$g" ] && echo performance > "$g" || true
+done
+sudo sysctl -w vm.swappiness=10 >/dev/null 2>&1 || true
+
 # Kill lingering heavy apps
 pkill -f 'chromium|firefox|code-oss|electron|ollama serve|wayvnc' 2>/dev/null || true
 

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=jimsky Browser Lite
+Comment=Launch lightweight Chromium profile for Pi performance
+Exec=/bin/bash -lc '/home/m1ndb0t/Desktop/J1MSKY/scripts/startup/browser-lite.sh'
+Icon=web-browser
+Terminal=false
+Type=Application
+Categories=Network;

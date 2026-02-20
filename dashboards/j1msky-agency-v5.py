@@ -383,6 +383,9 @@ HTML = '''<!DOCTYPE html>
         .agent-status {
             font-size: 11px;
             color: var(--text-2);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
         .agent-action {
@@ -1460,8 +1463,9 @@ HTML = '''<!DOCTYPE html>
                 toggleHelp();
             }
 
-            // Ignore no-op popstate events that target the already-active tab.
-            if (targetTab === NavState.currentTab && !NavState.isTransitioning) {
+            // Ignore no-op popstate events that target the already-active tab
+            // when no queued navigation is pending.
+            if (targetTab === NavState.currentTab && !NavState.isTransitioning && !NavState.queuedTab) {
                 return;
             }
 

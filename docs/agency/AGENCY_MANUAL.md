@@ -184,8 +184,11 @@ Look for:
 - `pricing_policy` → active markup + minimum price floor
 - `example_task_quote` → sample recommended price and margin band
 - `pricing_guardrail_check` → whether quote profile is compliant or should escalate
+- `quote_portfolio_preview` → compliance ratio + executive review trigger for multi-option proposals
+- `exception_aging_preview` → aging risk snapshot for unresolved strategic exceptions
 
 If `pricing_guardrail_check.action` returns `escalate_deal_desk`, do not send final pricing until reviewed.
+If `quote_portfolio_preview.requires_executive_review` is `true`, pause proposal send and route to leadership.
 
 ---
 

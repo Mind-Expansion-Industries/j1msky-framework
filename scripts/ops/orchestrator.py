@@ -334,6 +334,25 @@ class UnifiedOrchestrator:
             "requires_executive_review": compliance_ratio < 0.67,
             "average_margin_pct": avg_margin
         }
+
+    def assess_exception_aging(self, open_exception_days: List[int]) -> Dict[str, Any]:
+        """Classify exception age risk for weekly revenue governance."""
+        if not open_exception_days:
+            return {
+                "open_exceptions": 0,
+                "oldest_days": 0,
+                "at_risk_count": 0,
+                "requires_exec_followup": False
+            }
+
+        oldest = max(open_exception_days)
+        at_risk = sum(1 for d in open_exception_days if d >= 14)
+        return {
+            "open_exceptions": len(open_exception_days),
+            "oldest_days": oldest,
+            "at_risk_count": at_risk,
+            "requires_exec_followup": oldest >= 30 or at_risk >= 2
+        }
     
     def get_daily_spend(self, day: Optional[str] = None) -> float:
         """Get spend for a specific day (YYYY-MM-DD) or today."""
@@ -549,6 +568,7 @@ class UnifiedOrchestrator:
             self.recommend_task_price("sonnet", estimated_tokens=3500, complexity="high"),
             self.recommend_task_price("opus", estimated_tokens=5000, complexity="high")
         ], delivery_type="task")
+        sample_exception_aging = self.assess_exception_aging([4, 11, 19, 33])
         return {
             "timestamp": datetime.now().isoformat(),
             "models_active": len(self.config["models"]),
@@ -568,6 +588,7 @@ class UnifiedOrchestrator:
             "pricing_guardrail_check": sample_guardrail,
             "quote_decision_preview": sample_decision,
             "quote_portfolio_preview": sample_portfolio,
+            "exception_aging_preview": sample_exception_aging,
             "usage_anomalies": self.detect_usage_anomalies(),
             "monthly_forecast": self.forecast_monthly_spend(),
             "orchestration_mode": "unified",

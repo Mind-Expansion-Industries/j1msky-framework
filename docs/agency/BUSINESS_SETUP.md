@@ -1711,3 +1711,17 @@ Escalate proposal portfolio to executive review when any of the following is tru
 - Every exception must show measurable recovery progress within 14 days
 - If no progress at day 14, deal is flagged for repricing action
 - If no progress at day 30, automatic escalation to executive review
+
+## 42) Exception Burn-Down Ritual
+
+### Weekly Ritual (20 minutes)
+
+1. Pull all open exceptions and sort by age descending.
+2. For each exception, verify next recovery milestone and owner.
+3. Close exceptions that recovered target margin.
+4. Escalate exceptions older than 30 days to executive staff.
+
+### Success Metric
+
+- Open exception count should trend down week-over-week.
+- Target: at least 25% reduction in at-risk exceptions each month.

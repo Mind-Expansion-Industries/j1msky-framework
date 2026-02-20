@@ -206,6 +206,7 @@ HTML = '''<!DOCTYPE html>
             transition: color 0.15s ease-out;
             min-width: 64px;
             min-height: 48px; /* WCAG minimum touch target */
+            white-space: nowrap;
             /* Better touch response */
             touch-action: manipulation;
             -webkit-touch-callout: none;
@@ -1312,6 +1313,10 @@ HTML = '''<!DOCTYPE html>
             NavState.isTransitioning = true;
             NavState.pendingTab = tabId;
             NavState.lastTransitionTime = Date.now();
+            if (NavState.popstateTimeoutId) {
+                clearTimeout(NavState.popstateTimeoutId);
+                NavState.popstateTimeoutId = null;
+            }
             showLoading();
 
             // Watchdog: prevent stuck transitioning state if a frame/update is dropped.

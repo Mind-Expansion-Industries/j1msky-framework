@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.12 - Resize Flicker Reduction
-Patch release: limits swipe nav to coarse pointers and avoids control-gesture conflicts
+J1MSKY Agency v6.0.13 - Resize Flicker Reduction
+Patch release: adds defensive touch list guards to prevent rare undefined touch access errors
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.12</title>
+    <title>J1MSKY Agency v6.0.13</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -677,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.12</h1>
+        <h1>◈ J1MSKY Agency v6.0.13</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1009,6 +1009,11 @@ HTML = '''<!DOCTYPE html>
                     return;
                 }
 
+                if (!e.touches || e.touches.length === 0) {
+                    this.isTracking = false;
+                    return;
+                }
+
                 const touch = e.touches[0];
                 const viewportWidth = window.innerWidth;
                 
@@ -1028,7 +1033,8 @@ HTML = '''<!DOCTYPE html>
             onEnd(e) {
                 if (!this.isTracking) return;
                 this.isTracking = false;
-                
+
+                if (!e.changedTouches || e.changedTouches.length === 0) return;
                 const touch = e.changedTouches[0];
                 const deltaX = touch.clientX - this.startX;
                 const deltaY = touch.clientY - this.startY;
@@ -1089,9 +1095,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.12';
+                        header.textContent = '◈ J1MSKY Agency v6.0.13';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.12';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.13';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1670,7 +1676,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.12 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.13 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

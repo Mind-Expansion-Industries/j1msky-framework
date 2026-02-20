@@ -1392,3 +1392,28 @@ Require legal/revops approval when any of these apply:
 - SEV-1 always triggers customer communication and incident timeline
 - Any issue breaching SLA auto-escalates one level
 - Repeated SEV-3 in same account within 7 days upgrades to SEV-2
+
+## 28) Post-Incident Commercial Recovery
+
+### Customer-Facing Recovery Steps
+
+1. Acknowledge impact and timeline clearly
+2. Share root cause summary in plain language
+3. Offer service credit where contractual or appropriate
+4. Confirm prevention actions with owner and due date
+
+### Credit Policy Framework
+
+| Incident Severity | Default Credit Guidance |
+|---|---|
+| SEV-1 | 10-25% monthly fee |
+| SEV-2 | 5-10% monthly fee |
+| SEV-3 | Case-by-case, usually no credit |
+| SEV-4 | No credit |
+
+### Recovery KPIs
+
+- Time to customer acknowledgment (target: <30 min for SEV-1)
+- Time to recovery plan publication (target: <48h)
+- Renewal impact from incident accounts (target: <5% negative variance)
+- Trust recovery score from follow-up survey (target: >4/5)

@@ -348,12 +348,25 @@ class UnifiedOrchestrator:
             if util >= 80:
                 hot_providers.append(provider)
 
+        budget_level = self.get_budget_alert_level()
         return {
-            "budget_alert_level": self.get_budget_alert_level(),
+            "budget_alert_level": budget_level,
             "max_provider_utilization_pct": round(max_provider_util, 2),
             "hot_providers": hot_providers,
-            "requires_ops_attention": self.get_budget_alert_level() in {"warning", "critical"} or len(hot_providers) > 0
+            "requires_ops_attention": budget_level in {"warning", "critical"} or len(hot_providers) > 0,
+            "recommended_action": self.get_recommended_action(budget_level, hot_providers)
         }
+
+    def get_recommended_action(self, budget_level: str, hot_providers: List[str]) -> str:
+        """Suggest immediate operator action based on current state."""
+        if budget_level == "critical":
+            return "Pause non-critical workloads and force cheapest model routing"
+        if budget_level == "warning":
+            return "Shift medium/low-priority tasks to k2p5/minimax and monitor hourly"
+        if hot_providers:
+            providers = ", ".join(hot_providers)
+            return f"Throttle traffic for: {providers}"
+        return "No action required"
 
     def get_status_report(self):
         """Get current orchestrator status"""

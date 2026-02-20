@@ -1757,3 +1757,19 @@ Ensure exception risk signals reach the right owner fast, with no ambiguity.
 ### Message Template
 
 `[Exception Risk: <level>] <summary> | Next action: <recommended_action>`
+
+## 45) Midday Exception Sweep
+
+### Purpose
+Add a second risk check during active selling hours so exception drift is caught before end-of-day.
+
+### Sweep Steps (12:00-14:00 local)
+
+1. Pull latest exception aging stats.
+2. Generate alert payload and post to ops channel.
+3. Confirm owners acknowledged all `warning` and `critical` items.
+4. Escalate any unacknowledged critical item within 30 minutes.
+
+### KPI
+
+- Acknowledgment time for critical exception alerts: <30 minutes.

@@ -2147,6 +2147,50 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
                 'results': evaluated
             })
 
+        elif self.path == '/api/pricing/exception-alert':
+            try:
+                open_exceptions = int(params.get('open_exceptions', ['0'])[0])
+                oldest_days = int(params.get('oldest_days', ['0'])[0])
+                at_risk_count = int(params.get('at_risk_count', ['0'])[0])
+            except ValueError:
+                self.send_json({'success': False, 'error': 'open_exceptions, oldest_days, at_risk_count must be integers'})
+                return
+
+            requires_exec = oldest_days >= 30 or at_risk_count >= 2
+            if open_exceptions <= 0:
+                level = 'none'
+                summary = 'No open quote exceptions'
+                next_action = 'no_action'
+            elif requires_exec:
+                level = 'critical'
+                summary = f'Critical exception risk: {open_exceptions} open, oldest {oldest_days}d'
+                next_action = 'schedule_executive_review'
+            elif at_risk_count >= 1:
+                level = 'warning'
+                summary = f'Warning exception risk: {open_exceptions} open, oldest {oldest_days}d'
+                next_action = 'manager_followup'
+            else:
+                level = 'ok'
+                summary = f'Exceptions under control: {open_exceptions} open'
+                next_action = 'continue_recovery_plan'
+
+            self.send_json({
+                'success': True,
+                'exception_aging': {
+                    'open_exceptions': open_exceptions,
+                    'oldest_days': oldest_days,
+                    'at_risk_count': at_risk_count,
+                    'requires_exec_followup': requires_exec,
+                    'risk_level': level,
+                    'next_action': next_action
+                },
+                'exception_alert': {
+                    'level': level,
+                    'summary': summary,
+                    'recommended_action': next_action
+                }
+            })
+
         elif self.path == '/api/pricing/quote':
             model = params.get('model', ['k2p5'])[0]
             complexity = params.get('complexity', ['medium'])[0]

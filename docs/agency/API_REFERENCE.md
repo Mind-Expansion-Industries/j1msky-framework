@@ -426,6 +426,36 @@ Creates an auditable approve/escalate decision packet for one quote candidate.
 }
 ```
 
+#### Generate Exception Alert Payload
+**Endpoint:** `POST /pricing/exception-alert`
+
+Builds exception-aging risk classification and an alert-ready message payload.
+
+**Request (form fields):**
+- `open_exceptions`: integer
+- `oldest_days`: integer
+- `at_risk_count`: integer (exceptions aged 14+ days)
+
+**Response:**
+```json
+{
+  "success": true,
+  "exception_aging": {
+    "open_exceptions": 4,
+    "oldest_days": 33,
+    "at_risk_count": 2,
+    "requires_exec_followup": true,
+    "risk_level": "critical",
+    "next_action": "schedule_executive_review"
+  },
+  "exception_alert": {
+    "level": "critical",
+    "summary": "Critical exception risk: 4 open, oldest 33d",
+    "recommended_action": "schedule_executive_review"
+  }
+}
+```
+
 #### Evaluate Pricing Scenarios
 **Endpoint:** `POST /pricing/scenario`
 

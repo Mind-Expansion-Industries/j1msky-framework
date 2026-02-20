@@ -403,6 +403,8 @@ HTML = '''<!DOCTYPE html>
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
             margin-bottom: 8px;
         }
         
@@ -418,6 +420,7 @@ HTML = '''<!DOCTYPE html>
             background: rgba(0,255,136,0.1);
             padding: 4px 8px;
             border-radius: 12px;
+            white-space: nowrap;
         }
         
         .model-desc {
@@ -1050,7 +1053,8 @@ HTML = '''<!DOCTYPE html>
                     return;
                 }
 
-                if (!e.touches || e.touches.length === 0) {
+                // Ignore multi-touch gestures (pinch/zoom) to avoid accidental tab switches.
+                if (!e.touches || e.touches.length !== 1) {
                     this.isTracking = false;
                     return;
                 }

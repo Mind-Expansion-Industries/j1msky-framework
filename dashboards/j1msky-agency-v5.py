@@ -364,6 +364,7 @@ HTML = '''<!DOCTYPE html>
         
         .agent-icon {
             font-size: 28px;
+            flex-shrink: 0;
         }
         
         .agent-info {
@@ -1475,7 +1476,8 @@ HTML = '''<!DOCTYPE html>
                 if (NavState.popstateTimeoutId) clearTimeout(NavState.popstateTimeoutId);
                 NavState.popstateTimeoutId = setTimeout(() => {
                     NavState.popstateTimeoutId = null;
-                    showTab(targetTab, false);
+                    const latestTarget = NavState.normalizeTab(window.location.hash.slice(1) || targetTab);
+                    showTab(latestTarget, false);
                 }, NavState.transitionCooldown + 20);
                 return;
             }

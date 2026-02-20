@@ -272,6 +272,7 @@ HTML = '''<!DOCTYPE html>
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
             margin-bottom: 16px;
+            min-width: 0;
         }
         
         .stat-card {
@@ -313,6 +314,7 @@ HTML = '''<!DOCTYPE html>
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
+            min-width: 0;
         }
         
         .quick-btn {
@@ -722,7 +724,7 @@ HTML = '''<!DOCTYPE html>
         </div>
     </header>
     
-    <main class="main">
+    <main class="main" aria-busy="false">
         <div id="dashboard" class="panel active">
             <div class="stats-grid">
                 <div class="stat-card">

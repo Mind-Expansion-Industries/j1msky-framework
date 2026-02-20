@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.25 - Resize Flicker Reduction
-Patch release: reacts to significant height-only viewport changes (e.g., mobile UI chrome/orientation) for more reliable responsive refresh
+J1MSKY Agency v6.0.26 - Resize Flicker Reduction
+Patch release: aborts in-flight live polling fetches on stop/unload to prevent stale async updates after teardown
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.25</title>
+    <title>J1MSKY Agency v6.0.26</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -677,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.25</h1>
+        <h1>◈ J1MSKY Agency v6.0.26</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1108,9 +1108,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.25';
+                        header.textContent = '◈ J1MSKY Agency v6.0.26';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.25';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.26';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1506,6 +1506,7 @@ HTML = '''<!DOCTYPE html>
         const StatsUpdater = {
             interval: null,
             inFlight: false,
+            controller: null,
             pausedByTransition: false,
             lastLogHtml: '',
             lastMetaText: '',
@@ -1534,6 +1535,10 @@ HTML = '''<!DOCTYPE html>
                     clearInterval(this.interval);
                     this.interval = null;
                 }
+                if (this.controller) {
+                    this.controller.abort();
+                    this.controller = null;
+                }
                 // Reset transient polling state to avoid stale locks after resume.
                 this.inFlight = false;
                 this.pausedByTransition = false;
@@ -1553,8 +1558,9 @@ HTML = '''<!DOCTYPE html>
             async update() {
                 if (this.inFlight || document.hidden) return;
                 this.inFlight = true;
+                this.controller = new AbortController();
                 try {
-                    const res = await fetch('/api/live', { cache: 'no-store' });
+                    const res = await fetch('/api/live', { cache: 'no-store', signal: this.controller.signal });
                     if (!res.ok) throw new Error('live endpoint error');
                     const data = await res.json();
 
@@ -1609,6 +1615,7 @@ HTML = '''<!DOCTYPE html>
                     // keep silent in UI; dashboard still usable
                 } finally {
                     this.inFlight = false;
+                    this.controller = null;
                 }
             }
         };
@@ -1764,7 +1771,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.25 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.26 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

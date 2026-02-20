@@ -1899,4 +1899,38 @@ pricing_policy_v2026-02-20a.json
 - Major changes: requires executive approval to rollback
 - Emergency changes: originator can rollback immediately
 
+## 50) Pricing Calibration Protocol
+
+### Purpose
+Systematically tune pricing to balance win rate and margin without guessing.
+
+### Calibration Cycle (Monthly)
+
+1. **Data Collection**
+   - Pull last 4 weeks of quote data
+   - Calculate actual win rate by segment
+   - Compare quoted vs accepted prices
+
+2. **Signal Detection**
+   - Win rate >70% → prices may be too low, consider markup increase
+   - Win rate <30% → prices may be too high, consider targeted discounts
+   - Margin consistently >target+15% → room to be more aggressive
+   - Margin consistently <target-10% → tighten guardrails
+
+3. **Experiment Design**
+   - Change only one variable per cycle
+   - A/B test on 20% of quotes minimum
+   - Define success metric and duration upfront
+
+4. **Measurement**
+   - Track win rate, margin, and sales cycle length
+   - Compare experimental group vs control
+   - Document lessons learned
+
+### Calibration Guardrails
+
+- Never adjust markup more than ±1.0x in a single cycle
+- Require executive approval for any test that could reduce average margin below 50%
+- Rollback any change that doesn't show positive signal within 2 weeks
+
 

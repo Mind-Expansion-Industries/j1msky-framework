@@ -443,6 +443,34 @@ class UnifiedOrchestrator:
             "exceptions_created": sum(1 for q in weekly_quotes if q.get("exception_created")),
             "exceptions_closed": sum(1 for q in weekly_quotes if q.get("exception_closed"))
         }
+
+    def compare_weekly_metrics(self, current: Dict[str, Any], previous: Dict[str, Any]) -> Dict[str, Any]:
+        """Compare two weeks of pricing metrics and flag significant changes."""
+        def pct_change(curr, prev):
+            if prev == 0:
+                return 0.0 if curr == 0 else float('inf')
+            return round(((curr - prev) / prev) * 100, 2)
+
+        changes = {
+            "total_quotes_change": pct_change(current.get("total_quotes", 0), previous.get("total_quotes", 0)),
+            "approval_rate_change": pct_change(current.get("approval_rate", 0), previous.get("approval_rate", 0)),
+            "avg_margin_change": pct_change(current.get("avg_margin_pct", 0), previous.get("avg_margin_pct", 0)),
+            "exceptions_created_change": pct_change(current.get("exceptions_created", 0), previous.get("exceptions_created", 0))
+        }
+
+        alerts = []
+        if abs(changes["approval_rate_change"]) > 15:
+            alerts.append(f"Approval rate shifted {changes['approval_rate_change']}%")
+        if abs(changes["avg_margin_change"]) > 10:
+            alerts.append(f"Average margin shifted {changes['avg_margin_change']}%")
+        if changes["exceptions_created_change"] > 50:
+            alerts.append(f"Exception creation up {changes['exceptions_created_change']}%")
+
+        return {
+            "week_over_week_changes": changes,
+            "significant_shifts": alerts,
+            "requires_review": len(alerts) > 0
+        }
     
     def get_daily_spend(self, day: Optional[str] = None) -> float:
         """Get spend for a specific day (YYYY-MM-DD) or today."""
@@ -684,6 +712,10 @@ class UnifiedOrchestrator:
                 sample_decision,
                 {"decision_status": "escalated", "gross_margin_pct": 42.0, "exception_created": True, "exception_closed": False}
             ]),
+            "weekly_comparison_preview": self.compare_weekly_metrics(
+                {"total_quotes": 50, "approval_rate": 0.84, "avg_margin_pct": 72.5, "exceptions_created": 3},
+                {"total_quotes": 45, "approval_rate": 0.88, "avg_margin_pct": 68.0, "exceptions_created": 2}
+            ),
             "exception_aging_preview": sample_exception_aging,
             "exception_alert_preview": sample_exception_alert,
             "usage_anomalies": self.detect_usage_anomalies(),

@@ -2237,6 +2237,36 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
                 }
             })
 
+        elif self.path == '/api/pricing/weekly-metrics':
+            raw_quotes = params.get('quotes', ['[]'])[0]
+            try:
+                quotes = json.loads(raw_quotes)
+                if not isinstance(quotes, list):
+                    raise ValueError('quotes must be a JSON array')
+            except Exception as e:
+                self.send_json({'success': False, 'error': f'Invalid quotes payload: {e}'})
+                return
+
+            total = len(quotes)
+            approved = sum(1 for q in quotes if q.get('decision_status') == 'approved')
+            escalated = total - approved
+            avg_margin = round(sum(q.get('gross_margin_pct', 0.0) for q in quotes) / max(total, 1), 2) if total else 0.0
+            exceptions_created = sum(1 for q in quotes if q.get('exception_created'))
+            exceptions_closed = sum(1 for q in quotes if q.get('exception_closed'))
+
+            self.send_json({
+                'success': True,
+                'weekly_metrics': {
+                    'total_quotes': total,
+                    'approved_count': approved,
+                    'escalated_count': escalated,
+                    'approval_rate': round(approved / max(total, 1), 2),
+                    'avg_margin_pct': avg_margin,
+                    'exceptions_created': exceptions_created,
+                    'exceptions_closed': exceptions_closed
+                }
+            })
+
         elif self.path == '/api/pricing/quote':
             model = params.get('model', ['k2p5'])[0]
             complexity = params.get('complexity', ['medium'])[0]

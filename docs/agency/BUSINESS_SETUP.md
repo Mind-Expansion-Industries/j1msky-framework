@@ -1867,3 +1867,36 @@ pricing_policy_v2026-02-20a.json
 └── rollback_date: <if applicable>
 ```
 
+## 49) Pricing Policy Rollback Procedure
+
+### When to Rollback
+
+- Margins move opposite to prediction by >10%
+- Escalation rate spikes >20% within 48h of change
+- Customer complaints about pricing increase significantly
+- Executive override
+
+### Rollback Steps
+
+1. **Immediate (within 1 hour)**
+   - Revert to previous policy version
+   - Notify sales team of temporary hold on new pricing
+   - Pause any in-flight quotes using new policy
+
+2. **Short-term (within 24 hours)**
+   - Review all quotes issued under rolled-back policy
+   - Honor committed prices for signed deals
+   - Re-issue quotes for pending approvals using previous policy
+
+3. **Analysis (within 1 week)**
+   - Document root cause of policy failure
+   - Update change control criteria to prevent recurrence
+   - Schedule re-attempt with modified approach if warranted
+
+### Rollback Authority
+
+- Minor changes: revenue manager can rollback
+- Major changes: requires executive approval to rollback
+- Emergency changes: originator can rollback immediately
+
+

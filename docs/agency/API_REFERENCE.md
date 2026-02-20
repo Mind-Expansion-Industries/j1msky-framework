@@ -471,6 +471,36 @@ Builds portfolio compliance rollup and an alert-ready message for proposal-level
 }
 ```
 
+#### Aggregate Weekly Pricing Metrics
+**Endpoint:** `POST /pricing/weekly-metrics`
+
+Aggregates weekly pricing decisions for retrospective analysis and policy tuning.
+
+**Request (form fields):**
+- `quotes`: JSON array of quote decision objects
+
+**Quote object fields:**
+- `decision_status`: `approved|escalated`
+- `gross_margin_pct`: float
+- `exception_created`: boolean (optional)
+- `exception_closed`: boolean (optional)
+
+**Response:**
+```json
+{
+  "success": true,
+  "weekly_metrics": {
+    "total_quotes": 45,
+    "approved_count": 38,
+    "escalated_count": 7,
+    "approval_rate": 0.84,
+    "avg_margin_pct": 72.5,
+    "exceptions_created": 3,
+    "exceptions_closed": 2
+  }
+}
+```
+
 #### Generate Exception Alert Payload
 **Endpoint:** `POST /pricing/exception-alert`
 

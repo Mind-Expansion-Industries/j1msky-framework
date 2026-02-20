@@ -347,6 +347,7 @@ HTML = '''<!DOCTYPE html>
             display: flex;
             flex-direction: column;
             gap: 10px;
+            min-width: 0;
         }
 
         .agent-item {
@@ -1299,10 +1300,10 @@ HTML = '''<!DOCTYPE html>
 
             // Check transition availability; queue latest request instead of dropping it.
             if (!NavState.canTransition()) {
-                NavState.queuedTab = tabId;
+                NavState.queuedTab = NavState.normalizeTab(tabId);
                 if (!NavState.queuedNavTimeoutId) {
                     NavState.queuedNavTimeoutId = setTimeout(() => {
-                        const nextTab = NavState.queuedTab;
+                        const nextTab = NavState.normalizeTab(NavState.queuedTab);
                         NavState.queuedTab = null;
                         NavState.queuedNavTimeoutId = null;
                         if (nextTab && nextTab !== NavState.currentTab) showTab(nextTab);

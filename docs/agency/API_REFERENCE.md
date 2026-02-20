@@ -512,6 +512,36 @@ Aggregates weekly pricing decisions for retrospective analysis and policy tuning
 }
 ```
 
+#### Compare Weekly Pricing Metrics
+**Endpoint:** `POST /pricing/weekly-comparison`
+
+Compares two weeks of pricing metrics and flags significant shifts for calibration reviews.
+
+**Request (form fields):**
+- `current_total_quotes`: integer
+- `current_approval_rate`: float (0.0-1.0)
+- `current_avg_margin_pct`: float
+- `current_exceptions_created`: integer
+- `prev_total_quotes`: integer
+- `prev_approval_rate`: float (0.0-1.0)
+- `prev_avg_margin_pct`: float
+- `prev_exceptions_created`: integer
+
+**Response:**
+```json
+{
+  "success": true,
+  "week_over_week_changes": {
+    "total_quotes_change": 11.11,
+    "approval_rate_change": -4.55,
+    "avg_margin_change": 6.62,
+    "exceptions_created_change": 50.0
+  },
+  "significant_shifts": ["Exception creation up 50.0%"],
+  "requires_review": true
+}
+```
+
 #### Generate Exception Alert Payload
 **Endpoint:** `POST /pricing/exception-alert`
 

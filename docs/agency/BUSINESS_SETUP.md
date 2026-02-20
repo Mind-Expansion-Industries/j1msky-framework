@@ -1933,4 +1933,30 @@ Systematically tune pricing to balance win rate and margin without guessing.
 - Require executive approval for any test that could reduce average margin below 50%
 - Rollback any change that doesn't show positive signal within 2 weeks
 
+## 51) Segment-Specific Pricing
+
+### Purpose
+Recognize that different customer segments have different price sensitivities and value perceptions.
+
+### Segment Definitions
+
+| Segment | Description | Base Markup Adjustment |
+|---------|-------------|------------------------|
+| **Enterprise** | 500+ employees, procurement process | +0.5x (premium for compliance/SLA) |
+| **Mid-Market** | 50-500 employees, growth focused | Baseline (standard markup) |
+| **SMB** | <50 employees, price sensitive | -0.5x (volume play, lower touch) |
+| **Startup** | Seed/Series A, cash constrained | -1.0x (strategic bet, expansion path) |
+
+### Segment Guardrails
+
+- Minimum margin floor applies regardless of segment (50% for subscriptions)
+- Segment discounts must be justified in CRM with expansion timeline
+- Annual true-up required for any segment pricing below baseline
+
+### Segment Migration
+
+- Track customers moving between segments
+- Price adjustments at renewal for segment changes
+- grandfather existing customers for 12 months minimum
+
 

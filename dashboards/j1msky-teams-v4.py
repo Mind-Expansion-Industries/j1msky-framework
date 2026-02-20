@@ -2267,6 +2267,48 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
                 }
             })
 
+        elif self.path == '/api/pricing/weekly-comparison':
+            try:
+                current_total = int(params.get('current_total_quotes', ['0'])[0])
+                current_approval_rate = float(params.get('current_approval_rate', ['0.0'])[0])
+                current_margin = float(params.get('current_avg_margin_pct', ['0.0'])[0])
+                current_exceptions = int(params.get('current_exceptions_created', ['0'])[0])
+
+                prev_total = int(params.get('prev_total_quotes', ['0'])[0])
+                prev_approval_rate = float(params.get('prev_approval_rate', ['0.0'])[0])
+                prev_margin = float(params.get('prev_avg_margin_pct', ['0.0'])[0])
+                prev_exceptions = int(params.get('prev_exceptions_created', ['0'])[0])
+            except ValueError:
+                self.send_json({'success': False, 'error': 'Invalid numeric values provided'})
+                return
+
+            def pct_change(curr, prev):
+                if prev == 0:
+                    return 0.0 if curr == 0 else float('inf')
+                return round(((curr - prev) / prev) * 100, 2)
+
+            changes = {
+                'total_quotes_change': pct_change(current_total, prev_total),
+                'approval_rate_change': pct_change(current_approval_rate, prev_approval_rate),
+                'avg_margin_change': pct_change(current_margin, prev_margin),
+                'exceptions_created_change': pct_change(current_exceptions, prev_exceptions)
+            }
+
+            alerts = []
+            if abs(changes['approval_rate_change']) > 15:
+                alerts.append(f"Approval rate shifted {changes['approval_rate_change']}%")
+            if abs(changes['avg_margin_change']) > 10:
+                alerts.append(f"Average margin shifted {changes['avg_margin_change']}%")
+            if changes['exceptions_created_change'] > 50:
+                alerts.append(f"Exception creation up {changes['exceptions_created_change']}%")
+
+            self.send_json({
+                'success': True,
+                'week_over_week_changes': changes,
+                'significant_shifts': alerts,
+                'requires_review': len(alerts) > 0
+            })
+
         elif self.path == '/api/pricing/quote':
             model = params.get('model', ['k2p5'])[0]
             complexity = params.get('complexity', ['medium'])[0]

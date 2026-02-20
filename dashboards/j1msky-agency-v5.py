@@ -355,6 +355,7 @@ HTML = '''<!DOCTYPE html>
             display: flex;
             align-items: center;
             gap: 12px;
+            min-width: 0;
             border-left: 3px solid var(--green);
         }
         
@@ -367,12 +368,16 @@ HTML = '''<!DOCTYPE html>
         
         .agent-info {
             flex: 1;
+            min-width: 0;
         }
         
         .agent-name {
             font-weight: 600;
             font-size: 14px;
             margin-bottom: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         
         .agent-status {

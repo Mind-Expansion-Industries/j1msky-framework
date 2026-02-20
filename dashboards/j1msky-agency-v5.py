@@ -478,6 +478,9 @@ HTML = '''<!DOCTYPE html>
             color: var(--text-2);
             margin-bottom: 6px;
             text-transform: uppercase;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .form-input, .form-select, .form-textarea {
@@ -513,6 +516,7 @@ HTML = '''<!DOCTYPE html>
             font-weight: 700;
             cursor: pointer;
             text-transform: uppercase;
+            min-width: 0;
         }
 
         .btn-primary:active {

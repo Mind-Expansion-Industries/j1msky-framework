@@ -292,9 +292,11 @@ HTML = '''<!DOCTYPE html>
         }
         
         .stat-value {
-            font-size: 28px;
+            font-size: clamp(20px, 6vw, 28px);
             font-weight: 700;
             color: var(--cyan);
+            line-height: 1.1;
+            word-break: break-word;
         }
         
         .stat-label {
@@ -1349,9 +1351,9 @@ HTML = '''<!DOCTYPE html>
                         NavState.currentTab = tabId;
                         SessionStore.save(tabId);
                         NavState.recordSuccess();
+                        NavState.pushHistory(tabId);
                         
                         if (pushState) {
-                            NavState.pushHistory(tabId);
                             safePushState({ tab: tabId }, '#' + tabId);
                         }
                         

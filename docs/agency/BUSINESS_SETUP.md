@@ -1347,3 +1347,24 @@ Require legal/revops approval when any of these apply:
 - % weekly action items closed (target: >85%)
 - Forecast accuracy (target: within ±10%)
 - % at-risk accounts with active mitigation plan (target: 100%)
+
+## 26) End-of-Day Ops Handoff
+
+### Nightly Handoff Pack
+
+- Budget status: spend, utilization %, alert level
+- Pipeline deltas: stage movement and blockers
+- Customer health changes: newly at-risk accounts
+- Collections state: failed payments and recovery actions
+- Implementation exceptions: delayed milestones + owner
+
+### Handoff Quality Rules
+
+- Every blocker must have an owner and next action
+- Every risk must include impact + mitigation
+- No unresolved priority items without ETA
+
+### Handoff KPI
+
+- % nights with complete handoff pack (target: >98%)
+- Mean time to acknowledge critical alert (target: <15 min)

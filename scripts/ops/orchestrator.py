@@ -325,6 +325,17 @@ class UnifiedOrchestrator:
             return 0.0
         return round((self.get_daily_spend() / daily_budget) * 100, 2)
 
+    def get_budget_alert_level(self) -> str:
+        """Return budget alert level for operational routing."""
+        pct = self.get_budget_utilization_pct()
+        if pct >= 90:
+            return "critical"
+        if pct >= 70:
+            return "warning"
+        if pct >= 50:
+            return "notice"
+        return "ok"
+
     def get_status_report(self):
         """Get current orchestrator status"""
         today = datetime.now().strftime("%Y-%m-%d")
@@ -341,6 +352,7 @@ class UnifiedOrchestrator:
             "today_spend": today_spend,
             "budget_remaining": round(max(daily_budget - today_spend, 0), 4),
             "budget_utilization_pct": self.get_budget_utilization_pct(),
+            "budget_alert_level": self.get_budget_alert_level(),
             "monthly_forecast": self.forecast_monthly_spend(),
             "orchestration_mode": "unified",
             "ceo_model": "opus",

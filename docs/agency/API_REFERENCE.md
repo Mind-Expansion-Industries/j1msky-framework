@@ -86,6 +86,7 @@ Idempotency-Key: 7f8f8c5a-4d6f-4f6c-ae4b-52a7c8aa2d9b
 
 Returns live budget/rate-limit state sourced from orchestrator config and usage tracking.
 Use `budget_utilization_pct` for alerting thresholds (for example: warn at 70%, critical at 90%).
+`budget_alert_level` is a normalized state machine: `ok` → `notice` → `warning` → `critical`.
 
 **Response:**
 ```json
@@ -104,6 +105,7 @@ Use `budget_utilization_pct` for alerting thresholds (for example: warn at 70%, 
   "today_spend": 12.43,
   "budget_remaining": 37.57,
   "budget_utilization_pct": 24.86,
+  "budget_alert_level": "ok",
   "monthly_forecast": {
     "projected_spend": 372.9,
     "budget_ceiling": 1500,

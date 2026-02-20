@@ -31,3 +31,4 @@ Or upload `index.html` to Netlify/Vercel/Cloudflare Pages.
 - Connect `captureLead()` to ConvertKit/Mailchimp/API endpoint
 - Add analytics (Plausible/GA)
 - Replace placeholder gallery with generated samples
+- Set launch coupon in Stripe (50% first month) to match page copy

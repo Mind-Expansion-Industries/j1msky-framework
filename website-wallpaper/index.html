@@ -346,6 +346,37 @@
 
         .btn-outline:hover { background: rgba(255,255,255,0.05); }
 
+        /* Conversion Boost */
+        .trust-strip {
+            margin: 2rem auto 0;
+            max-width: 900px;
+            background: #12121a;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 0.9rem 1rem;
+            color: #9ca3af;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .guarantee-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1rem;
+            margin-top: 1.2rem;
+        }
+
+        .guarantee-card {
+            background: var(--dark-card);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 1rem;
+            color: #9ca3af;
+            font-size: 0.95rem;
+        }
+
+        .guarantee-card strong { color: #f3f4f6; }
+
         /* FAQ */
         .faq-item {
             background: var(--dark-card);
@@ -516,6 +547,23 @@
                 </ul>
                 <a href="#" class="btn btn-outline" onclick="showSignup('pro')">Start Free Trial</a>
             </div>
+        </div>
+    </section>
+
+    <section id="guarantee">
+        <div class="section-header">
+            <h2>Risk-Free Launch Offer</h2>
+            <p>Start now and lock in discounted early pricing.</p>
+        </div>
+
+        <div class="trust-strip">
+            🔒 <strong>Launch Special:</strong> First month 50% off on Daily and Pro plans • 7-day free trial • Cancel anytime
+        </div>
+
+        <div class="guarantee-grid">
+            <div class="guarantee-card"><strong>7-Day Trial:</strong> Test quality before paying anything.</div>
+            <div class="guarantee-card"><strong>Instant Cancel:</strong> One click, no emails or support tickets required.</div>
+            <div class="guarantee-card"><strong>Commercial Rights:</strong> Included on Pro for creators and client work.</div>
         </div>
     </section>
 

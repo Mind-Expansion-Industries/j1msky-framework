@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book an AI Strategy Call | J1MSKY</title>
+    <meta name="description" content="Quick pre-qualification form for your AI strategy call. Share goals, budget, and timeline so we can prepare a focused action plan.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent: #22d3ee;
+            --dark: #0f172a;
+            --gray: #94a3b8;
+            --light: #f8fafc;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: radial-gradient(ellipse at 20% 20%, rgba(99,102,241,.15), transparent 50%), var(--dark);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .wrap { max-width: 740px; margin: 0 auto; }
+        .card {
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 18px;
+            padding: 2rem;
+        }
+        h1 { font-size: clamp(1.8rem, 5vw, 2.5rem); margin-bottom: .75rem; }
+        p.lead { color: var(--gray); margin-bottom: 1.6rem; }
+        .grid { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; }
+        .full { grid-column: 1/-1; }
+        label { display: block; margin-bottom: .45rem; color: var(--gray); font-weight: 500; }
+        input, select, textarea {
+            width: 100%;
+            padding: .85rem 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,.12);
+            background: rgba(255,255,255,.03);
+            color: var(--light);
+            font: inherit;
+        }
+        textarea { min-height: 120px; resize: vertical; }
+        .btn {
+            border: 0;
+            cursor: pointer;
+            padding: .95rem 1.2rem;
+            border-radius: 10px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            width: 100%;
+            margin-top: .2rem;
+        }
+        .note { margin-top: .9rem; color: var(--gray); font-size: .9rem; text-align: center; }
+        .link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="card">
+            <h1>Book Your AI Strategy Call</h1>
+            <p class="lead">Answer a few quick questions so we can bring a focused 7-day execution plan to your call.</p>
+
+            <form name="agency-booking-intake" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="https://calendly.com/your-handle/ai-strategy-call">
+                <input type="hidden" name="form-name" value="agency-booking-intake">
+                <input type="hidden" name="source_page" value="book-page">
+                <input type="hidden" id="utm-source" name="utm_source" value="direct">
+                <input type="hidden" id="utm-medium" name="utm_medium" value="none">
+                <input type="hidden" id="utm-campaign" name="utm_campaign" value="agency-booking">
+                <p style="display:none;"><label>Do not fill: <input name="bot-field"></label></p>
+
+                <div class="grid">
+                    <div>
+                        <label for="name">Name</label>
+                        <input id="name" name="name" required placeholder="Jane Founder">
+                    </div>
+                    <div>
+                        <label for="email">Work Email</label>
+                        <input id="email" name="email" type="email" required placeholder="jane@company.com">
+                    </div>
+
+                    <div>
+                        <label for="company">Company</label>
+                        <input id="company" name="company" placeholder="Acme Labs">
+                    </div>
+                    <div>
+                        <label for="role">Role</label>
+                        <input id="role" name="role" placeholder="Founder / Head of Growth">
+                    </div>
+
+                    <div>
+                        <label for="budget">Monthly Budget</label>
+                        <select id="budget" name="budget" required>
+                            <option value="">Select budget…</option>
+                            <option value="750-onetime">$750 one-time sprint</option>
+                            <option value="2500-5000">$2,500–$5,000/month</option>
+                            <option value="5000-10000">$5,000–$10,000/month</option>
+                            <option value="10000-plus">$10,000+/month</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="timeline">Timeline</label>
+                        <select id="timeline" name="timeline" required>
+                            <option value="">Select timeline…</option>
+                            <option value="asap">ASAP (within 7 days)</option>
+                            <option value="2-4-weeks">2–4 weeks</option>
+                            <option value="1-2-months">1–2 months</option>
+                            <option value="exploring">Just exploring</option>
+                        </select>
+                    </div>
+
+                    <div class="full">
+                        <label for="goal">What outcome do you want in the next 30 days?</label>
+                        <textarea id="goal" name="goal" required placeholder="Example: Increase qualified leads by 30% with an automated outbound + follow-up system."></textarea>
+                    </div>
+
+                    <div class="full">
+                        <button class="btn" type="submit">Continue to Calendar →</button>
+                        <p class="note">We’ll use this to prep your call with concrete recommendations.</p>
+                    </div>
+                </div>
+            </form>
+
+            <a class="link" href="/index.html">← Back to main page</a>
+        </div>
+    </div>
+
+    <script>
+        const p = new URLSearchParams(window.location.search);
+        const source = document.getElementById('utm-source');
+        const medium = document.getElementById('utm-medium');
+        const campaign = document.getElementById('utm-campaign');
+        if (source) source.value = p.get('utm_source') || 'direct';
+        if (medium) medium.value = p.get('utm_medium') || 'none';
+        if (campaign) campaign.value = p.get('utm_campaign') || 'agency-booking';
+    </script>
+</body>
+</html>

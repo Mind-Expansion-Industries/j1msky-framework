@@ -30,6 +30,7 @@ COPY . /usr/share/nginx/html
 
 - `index.html` — Complete landing page + pricing offer + Netlify-ready lead form
 - `thank-you.html` — Post-submit conversion page
+- `book.html` — Pre-qualifier intake page before scheduling
 - Embedded CSS & JavaScript
 - Zero external dependencies except Google Fonts
 
@@ -54,8 +55,10 @@ The form is pre-configured for **Netlify Forms**:
 If hosting elsewhere, point the form `action` to your CRM endpoint (HubSpot, Formspree, custom API).
 
 ### Direct Booking CTA
-A Calendly shortcut is included in the CTA section:
-- Replace `https://calendly.com/your-handle/ai-strategy-call` with your live booking URL.
+A pre-qualifier booking path is included:
+- CTA on `index.html` points to `/book.html`
+- `book.html` collects budget/timeline/goal and then forwards to Calendly
+- Replace `https://calendly.com/your-handle/ai-strategy-call` in `book.html` with your live booking URL.
 
 ### Update Pricing
 Edit the pricing cards in the HTML directly:

@@ -98,6 +98,7 @@ Use `quote_portfolio_preview.requires_executive_review=true` to trigger leadersh
 `exception_aging_preview` classifies open exception risk and returns a concrete next action for revops.
 `exception_alert_preview` provides a ready-to-send alert payload (level, summary, recommended action).
 `portfolio_alert_preview` provides a ready-to-send alert for portfolio-level compliance signals.
+`weekly_metrics_preview` aggregates weekly pricing decisions for retrospective analysis (approval rate, avg margin, exception counts).
 `usage_anomalies` is intended for alerting pipelines and overnight ops watchlists.
 Use `usage_anomalies.severity` to route alerts (`warning` to ops queue, `critical` to on-call).
 
@@ -170,6 +171,15 @@ Use `usage_anomalies.severity` to route alerts (`warning` to ops queue, `critica
     "level": "ok",
     "summary": "Portfolio healthy: 3/3 compliant, margin 88.13%",
     "recommended_action": "send_proposal"
+  },
+  "weekly_metrics_preview": {
+    "total_quotes": 2,
+    "approved_count": 1,
+    "escalated_count": 1,
+    "approval_rate": 0.5,
+    "avg_margin_pct": 70.8,
+    "exceptions_created": 1,
+    "exceptions_closed": 0
   },
   "exception_aging_preview": {
     "open_exceptions": 4,

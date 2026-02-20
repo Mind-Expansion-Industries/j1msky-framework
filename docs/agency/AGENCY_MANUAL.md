@@ -190,6 +190,19 @@ Look for:
 If `pricing_guardrail_check.action` returns `escalate_deal_desk`, do not send final pricing until reviewed.
 If `quote_portfolio_preview.requires_executive_review` is `true`, pause proposal send and route to leadership.
 
+### Weekly Retrospective Data Check
+
+For the weekly pricing retrospective, pull from `/api/orchestrator/status`:
+
+- `weekly_metrics_preview` → approval rate, average margin, exception counts
+- Compare week-over-week trends to identify systematic issues
+- Use metrics to justify policy adjustments in change control process
+
+Key thresholds to watch:
+- Approval rate dropping below 70% → review escalation criteria
+- Average margin exceeding target by >15% → consider markup increases
+- Exception creation rate >20% of quotes → tighten initial guardrails
+
 ---
 
 ## 🎯 USE CASES

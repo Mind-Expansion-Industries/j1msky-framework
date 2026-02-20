@@ -415,6 +415,34 @@ class UnifiedOrchestrator:
             "summary": summary,
             "recommended_action": "route_to_executive_review" if needs_exec else "proceed_with_caution" if ratio < 1.0 else "send_proposal"
         }
+
+    def aggregate_weekly_pricing_metrics(self, weekly_quotes: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Aggregate weekly pricing decisions for retrospective analysis."""
+        if not weekly_quotes:
+            return {
+                "total_quotes": 0,
+                "approved_count": 0,
+                "escalated_count": 0,
+                "approval_rate": 0.0,
+                "avg_margin_pct": 0.0,
+                "exceptions_created": 0,
+                "exceptions_closed": 0
+            }
+
+        total = len(weekly_quotes)
+        approved = sum(1 for q in weekly_quotes if q.get("decision_status") == "approved")
+        escalated = total - approved
+        avg_margin = round(sum(q.get("gross_margin_pct", 0.0) for q in weekly_quotes) / total, 2)
+
+        return {
+            "total_quotes": total,
+            "approved_count": approved,
+            "escalated_count": escalated,
+            "approval_rate": round(approved / total, 2),
+            "avg_margin_pct": avg_margin,
+            "exceptions_created": sum(1 for q in weekly_quotes if q.get("exception_created")),
+            "exceptions_closed": sum(1 for q in weekly_quotes if q.get("exception_closed"))
+        }
     
     def get_daily_spend(self, day: Optional[str] = None) -> float:
         """Get spend for a specific day (YYYY-MM-DD) or today."""
@@ -652,6 +680,10 @@ class UnifiedOrchestrator:
             "quote_decision_preview": sample_decision,
             "quote_portfolio_preview": sample_portfolio,
             "portfolio_alert_preview": self.build_portfolio_alert(sample_portfolio),
+            "weekly_metrics_preview": self.aggregate_weekly_pricing_metrics([
+                sample_decision,
+                {"decision_status": "escalated", "gross_margin_pct": 42.0, "exception_created": True, "exception_closed": False}
+            ]),
             "exception_aging_preview": sample_exception_aging,
             "exception_alert_preview": sample_exception_alert,
             "usage_anomalies": self.detect_usage_anomalies(),

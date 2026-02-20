@@ -1822,3 +1822,48 @@ Review the week's pricing decisions to refine markup defaults and catch systemat
 - Updated pricing policy defaults (if any)
 - List of systematic issues to address
 - Commitments for next week's pricing operations
+
+## 48) Pricing Policy Change Control
+
+### Objective
+Ensure pricing policy changes are deliberate, documented, and reversible.
+
+### Change Types
+
+- **Minor:** markup adjustments within existing bands (±0.5x)
+- **Major:** new complexity tiers, minimum price changes, threshold adjustments
+- **Emergency:** immediate changes to stop margin leakage
+
+### Change Process
+
+1. **Proposal**
+   - Document current metric drift
+   - Specify proposed change and expected outcome
+   - Identify rollback criteria
+
+2. **Review**
+   - Minor: revenue manager approval
+   - Major: executive review with 48h notice
+   - Emergency: notify immediately, review within 24h
+
+3. **Implementation**
+   - Update policy in config
+   - Version the change with timestamp and approver
+   - Announce to sales team
+
+4. **Validation**
+   - Monitor quotes for 1 week post-change
+   - Confirm margin trends move as expected
+   - Rollback if outcomes diverge from predictions
+
+### Versioning Format
+
+```
+pricing_policy_v2026-02-20a.json
+├── previous: v2026-02-13b
+├── changed_by: <name>
+├── change_type: minor|major|emergency
+├── rationale: <brief>
+└── rollback_date: <if applicable>
+```
+

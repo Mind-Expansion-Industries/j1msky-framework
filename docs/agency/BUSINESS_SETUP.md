@@ -1604,3 +1604,26 @@ Reduce pricing mistakes by making quote approval explicit and auditable.
 - Guardrail result (pass/fail)
 - Approver name + timestamp
 - If escalated: final decision owner
+
+## 36) Morning Quote Triage (Revenue Standup)
+
+### Goal
+Turn overnight quote risk flags into concrete owner actions before new outbound starts.
+
+### Daily 10-Minute Triage
+
+1. Review prior-night quote decisions (`approved` vs `escalated`).
+2. Assign owner for every escalated quote.
+3. Select one remediation path per quote:
+   - reduce scope
+   - repackage to subscription
+   - keep scope, raise price
+4. Confirm customer-facing follow-up ETA for each adjusted quote.
+
+### Standup Output Format
+
+- **Quote ID**
+- **Current status** (`approved` / `escalated`)
+- **Owner**
+- **Action by EOD**
+- **Expected margin after changes**

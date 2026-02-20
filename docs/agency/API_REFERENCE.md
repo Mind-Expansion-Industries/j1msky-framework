@@ -92,6 +92,7 @@ Use `budget_utilization_pct` for alerting thresholds (for example: warn at 70%, 
 `model_mix_recommendation` can be used by schedulers to bias routing toward cost-optimized or balanced modes.
 `pricing_policy` surfaces current markup guardrails used by quoting workflows.
 `example_task_quote` gives a ready-to-display sample quote (internal cost, markup, recommended customer price, margin).
+`quote_decision_preview` provides an auditable decision packet (approved/escalated + next step) for CRM syncing.
 `usage_anomalies` is intended for alerting pipelines and overnight ops watchlists.
 Use `usage_anomalies.severity` to route alerts (`warning` to ops queue, `critical` to on-call).
 
@@ -141,7 +142,15 @@ Use `usage_anomalies.severity` to route alerts (`warning` to ops queue, `critica
     "internal_cost": 0.002,
     "markup": 4.0,
     "recommended_price": 0.5,
-    "gross_margin_pct": 99.6
+    "gross_margin_pct": 99.6,
+    "margin_band": "strong"
+  },
+  "quote_decision_preview": {
+    "decision_status": "approved",
+    "approver": "ops-auto",
+    "delivery_type": "task",
+    "next_step": "send_quote",
+    "generated_at": "2026-02-20T06:20:00-05:00"
   },
   "usage_anomalies": {
     "has_anomalies": false,

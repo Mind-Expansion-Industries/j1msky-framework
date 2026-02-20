@@ -292,6 +292,22 @@ class UnifiedOrchestrator:
             "is_compliant": is_compliant,
             "action": "approve_quote" if is_compliant else "escalate_deal_desk"
         }
+
+    def build_quote_decision_record(self, quote: Dict[str, Any], delivery_type: str = "task", approver: str = "ops-auto") -> Dict[str, Any]:
+        """Build an auditable quote decision payload for CRM or handoff logs."""
+        guardrail = self.evaluate_pricing_guardrails(quote, delivery_type=delivery_type)
+        approved = guardrail.get("is_compliant", False)
+        decision_status = "approved" if approved else "escalated"
+
+        return {
+            "decision_status": decision_status,
+            "approver": approver,
+            "delivery_type": delivery_type,
+            "quote": quote,
+            "guardrail": guardrail,
+            "next_step": "send_quote" if approved else "route_to_deal_desk",
+            "generated_at": datetime.now().isoformat()
+        }
     
     def get_daily_spend(self, day: Optional[str] = None) -> float:
         """Get spend for a specific day (YYYY-MM-DD) or today."""
@@ -501,6 +517,7 @@ class UnifiedOrchestrator:
         default_quote_model = self.get_model_for_task("coding", "medium", "normal")
         sample_quote = self.recommend_task_price(default_quote_model, estimated_tokens=2000, complexity="medium")
         sample_guardrail = self.evaluate_pricing_guardrails(sample_quote, delivery_type="task")
+        sample_decision = self.build_quote_decision_record(sample_quote, delivery_type="task", approver="ops-auto")
         return {
             "timestamp": datetime.now().isoformat(),
             "models_active": len(self.config["models"]),
@@ -518,6 +535,7 @@ class UnifiedOrchestrator:
             "pricing_policy": self.get_pricing_policy(),
             "example_task_quote": sample_quote,
             "pricing_guardrail_check": sample_guardrail,
+            "quote_decision_preview": sample_decision,
             "usage_anomalies": self.detect_usage_anomalies(),
             "monthly_forecast": self.forecast_monthly_spend(),
             "orchestration_mode": "unified",

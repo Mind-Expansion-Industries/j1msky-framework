@@ -42,8 +42,9 @@ COPY . /usr/share/nginx/html
 2. **Live Ticker** — Simulates activity/social proof
 3. **Services Grid** — Clear offer presentation
 4. **Pricing Cards** — 3-tier structure with "Popular" highlight
-5. **Testimonials** — Social proof section
-6. **Contact Form** — Netlify-ready lead capture with anti-spam honeypot
+5. **ROI Calculator** — Interactive revenue upside estimator that pushes to booking CTA
+6. **Testimonials** — Social proof section
+7. **Contact Form** — Netlify-ready lead capture with anti-spam honeypot
 
 ## 🔧 Customization
 

@@ -649,6 +649,7 @@
             <a href="#services">Services</a>
             <a href="#pricing">Pricing</a>
             <a href="#how-it-works">How It Works</a>
+            <a href="#roi">ROI Calculator</a>
             <a href="#contact" class="btn btn-primary">Get Started</a>
         </div>
         <button class="mobile-menu-btn">☰</button>
@@ -823,6 +824,51 @@
         </div>
     </section>
 
+    <!-- ROI Calculator -->
+    <section id="roi">
+        <div class="section-header">
+            <h2>Quick ROI Calculator</h2>
+            <p>Estimate what one AI workflow could add to your business each month.</p>
+        </div>
+        <div style="max-width:760px;margin:0 auto;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:1.5rem;">
+            <div class="form-group">
+                <label for="leads">Monthly qualified leads</label>
+                <input type="number" id="leads" value="120" min="1">
+            </div>
+            <div class="form-group">
+                <label for="close-rate">Current close rate (%)</label>
+                <input type="number" id="close-rate" value="15" min="1" max="100">
+            </div>
+            <div class="form-group">
+                <label for="deal-value">Average deal value ($)</label>
+                <input type="number" id="deal-value" value="1800" min="100">
+            </div>
+            <div class="form-group">
+                <label for="lift">Expected conversion lift from AI ops (%)</label>
+                <input type="number" id="lift" value="20" min="1" max="300">
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:1rem;">
+                <div style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.35);border-radius:12px;padding:1rem;">
+                    <div style="font-size:.85rem;color:var(--gray-light);">Current Monthly Revenue</div>
+                    <div id="rev-current" style="font-size:1.5rem;font-weight:800;">$32,400</div>
+                </div>
+                <div style="background:rgba(34,211,238,0.12);border:1px solid rgba(34,211,238,0.35);border-radius:12px;padding:1rem;">
+                    <div style="font-size:.85rem;color:var(--gray-light);">Projected Revenue</div>
+                    <div id="rev-projected" style="font-size:1.5rem;font-weight:800;">$38,880</div>
+                </div>
+                <div style="background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.35);border-radius:12px;padding:1rem;">
+                    <div style="font-size:.85rem;color:var(--gray-light);">Potential Revenue Gain</div>
+                    <div id="rev-gain" style="font-size:1.5rem;font-weight:800;">+$6,480</div>
+                </div>
+            </div>
+
+            <p style="margin-top:1rem;color:var(--gray-light);font-size:.9rem;">Estimate only. We'll validate your real numbers during your strategy call.</p>
+            <a href="/book.html" class="btn btn-primary" style="margin-top:1rem;justify-content:center;">Get My Custom ROI Plan →</a>
+        </div>
+    </section>
+
+
     <!-- Testimonials -->
     <section id="testimonials">
         <div class="section-header">
@@ -957,6 +1003,33 @@
             el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
             observer.observe(el);
         });
+
+        function updateRoi() {
+            const leads = Math.max(1, Number(document.getElementById('leads')?.value || 0));
+            const closeRate = Math.max(0, Number(document.getElementById('close-rate')?.value || 0)) / 100;
+            const dealValue = Math.max(0, Number(document.getElementById('deal-value')?.value || 0));
+            const lift = Math.max(0, Number(document.getElementById('lift')?.value || 0)) / 100;
+
+            const currentRevenue = leads * closeRate * dealValue;
+            const projectedRevenue = leads * (closeRate * (1 + lift)) * dealValue;
+            const gain = projectedRevenue - currentRevenue;
+
+            const usd = (n) => `$${Math.round(n).toLocaleString()}`;
+            const currentEl = document.getElementById('rev-current');
+            const projectedEl = document.getElementById('rev-projected');
+            const gainEl = document.getElementById('rev-gain');
+            if (currentEl) currentEl.textContent = usd(currentRevenue);
+            if (projectedEl) projectedEl.textContent = usd(projectedRevenue);
+            if (gainEl) gainEl.textContent = `+${usd(gain).replace('$','$')}`;
+        }
+
+        ['leads','close-rate','deal-value','lift'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', updateRoi);
+        });
+
+        updateRoi();
+
         function hydrateUtmFields() {
             const params = new URLSearchParams(window.location.search);
             const source = document.getElementById('utm-source');

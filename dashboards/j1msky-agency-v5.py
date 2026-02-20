@@ -150,6 +150,7 @@ HTML = '''<!DOCTYPE html>
             font-size: 14px;
             color: var(--text-2);
             transition: all 0.2s;
+            flex-shrink: 0;
         }
 
         .help-btn:hover {
@@ -531,6 +532,7 @@ HTML = '''<!DOCTYPE html>
         .panel.active {
             display: block;
             animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-x: hidden;
         }
 
         @keyframes fadeIn {

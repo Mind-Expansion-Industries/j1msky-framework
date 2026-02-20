@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.17 - Resize Flicker Reduction
-Patch release: escapes &, <, > in live log rendering to reduce UI injection/glitch risk
+J1MSKY Agency v6.0.18 - Resize Flicker Reduction
+Patch release: avoids redundant live panel DOM writes by only updating meta/log when content changes
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.17</title>
+    <title>J1MSKY Agency v6.0.18</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -677,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.17</h1>
+        <h1>◈ J1MSKY Agency v6.0.18</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1095,9 +1095,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.17';
+                        header.textContent = '◈ J1MSKY Agency v6.0.18';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.17';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.18';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1467,6 +1467,8 @@ HTML = '''<!DOCTYPE html>
         const StatsUpdater = {
             interval: null,
             inFlight: false,
+            lastLogHtml: '',
+            lastMetaText: '',
             updateInterval: 5000, // 5 seconds
             
             init() {
@@ -1524,7 +1526,11 @@ HTML = '''<!DOCTYPE html>
                     }
 
                     const meta = document.getElementById('live-watch-meta');
-                    if (meta) meta.textContent = `req:${data.requests} • py:${data.python_procs} • updated:${data.now}`;
+                    const nextMeta = `req:${data.requests} • py:${data.python_procs} • updated:${data.now}`;
+                    if (meta && this.lastMetaText !== nextMeta) {
+                        meta.textContent = nextMeta;
+                        this.lastMetaText = nextMeta;
+                    }
 
                     const log = document.getElementById('live-watch-log');
                     if (log) {
@@ -1532,7 +1538,11 @@ HTML = '''<!DOCTYPE html>
                             .replace(/&/g, '&amp;')
                             .replace(/</g, '&lt;')
                             .replace(/>/g, '&gt;');
-                        log.innerHTML = (data.logs || []).map(l => `<div>${esc(l)}</div>`).join('');
+                        const nextLogHtml = (data.logs || []).map(l => `<div>${esc(l)}</div>`).join('');
+                        if (this.lastLogHtml !== nextLogHtml) {
+                            log.innerHTML = nextLogHtml;
+                            this.lastLogHtml = nextLogHtml;
+                        }
                     }
 
                     // pulse effect
@@ -1699,7 +1709,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.17 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.18 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

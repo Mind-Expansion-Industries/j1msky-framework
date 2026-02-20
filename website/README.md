@@ -48,9 +48,14 @@ COPY . /usr/share/nginx/html
 The form is pre-configured for **Netlify Forms**:
 - `data-netlify="true"`
 - `name="agency-leads"`
+- Captures `utm_source`, `utm_medium`, `utm_campaign`
 - Redirects to `/thank-you.html`
 
 If hosting elsewhere, point the form `action` to your CRM endpoint (HubSpot, Formspree, custom API).
+
+### Direct Booking CTA
+A Calendly shortcut is included in the CTA section:
+- Replace `https://calendly.com/your-handle/ai-strategy-call` with your live booking URL.
 
 ### Update Pricing
 Edit the pricing cards in the HTML directly:

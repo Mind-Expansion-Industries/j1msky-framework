@@ -397,6 +397,7 @@ HTML = '''<!DOCTYPE html>
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
+            flex-shrink: 0;
         }
         
         .model-card {
@@ -1793,6 +1794,7 @@ HTML = '''<!DOCTYPE html>
             const sessionTab = SessionStore.load();
             const initialTab = NavState.normalizeTab(hash || sessionTab || 'dashboard');
             
+            NavState.currentTab = initialTab;
             NavState.pushHistory(initialTab);
             if (!hash) safeReplaceState({ tab: initialTab }, '#' + initialTab);
             

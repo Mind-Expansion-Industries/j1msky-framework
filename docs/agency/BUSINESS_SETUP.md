@@ -1741,3 +1741,19 @@ Escalate proposal portfolio to executive review when any of the following is tru
 - `continue_recovery_plan` → owner executes current plan
 - `manager_followup` → line manager reviews blockers within 24h
 - `schedule_executive_review` → leadership review added to next operating meeting
+
+## 44) Exception Alert Routing
+
+### Objective
+Ensure exception risk signals reach the right owner fast, with no ambiguity.
+
+### Routing Matrix
+
+- `none` → no notification
+- `ok` → include in daily ops digest only
+- `warning` → notify revenue manager + quote owner
+- `critical` → page executive sponsor and add to same-day review agenda
+
+### Message Template
+
+`[Exception Risk: <level>] <summary> | Next action: <recommended_action>`

@@ -96,6 +96,7 @@ Use `budget_utilization_pct` for alerting thresholds (for example: warn at 70%, 
 `quote_portfolio_preview` gives a multi-scenario compliance rollup for proposal-level pricing checks.
 Use `quote_portfolio_preview.requires_executive_review=true` to trigger leadership review workflow before proposals are sent.
 `exception_aging_preview` classifies open exception risk and returns a concrete next action for revops.
+`exception_alert_preview` provides a ready-to-send alert payload (level, summary, recommended action).
 `usage_anomalies` is intended for alerting pipelines and overnight ops watchlists.
 Use `usage_anomalies.severity` to route alerts (`warning` to ops queue, `critical` to on-call).
 
@@ -171,6 +172,11 @@ Use `usage_anomalies.severity` to route alerts (`warning` to ops queue, `critica
     "requires_exec_followup": true,
     "risk_level": "critical",
     "next_action": "schedule_executive_review"
+  },
+  "exception_alert_preview": {
+    "level": "critical",
+    "summary": "Critical exception risk: 4 open, oldest 33d",
+    "recommended_action": "schedule_executive_review"
   },
   "usage_anomalies": {
     "has_anomalies": false,

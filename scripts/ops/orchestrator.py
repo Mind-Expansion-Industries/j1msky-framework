@@ -369,6 +369,28 @@ class UnifiedOrchestrator:
             "risk_level": risk_level,
             "next_action": next_action
         }
+
+    def build_exception_alert(self, exception_aging: Dict[str, Any]) -> Dict[str, str]:
+        """Build human-readable ops alert message from exception aging risk."""
+        level = exception_aging.get("risk_level", "none")
+        oldest = exception_aging.get("oldest_days", 0)
+        open_count = exception_aging.get("open_exceptions", 0)
+        action = exception_aging.get("next_action", "no_action")
+
+        if level == "critical":
+            summary = f"Critical exception risk: {open_count} open, oldest {oldest}d"
+        elif level == "warning":
+            summary = f"Warning exception risk: {open_count} open, oldest {oldest}d"
+        elif level == "ok":
+            summary = f"Exceptions under control: {open_count} open"
+        else:
+            summary = "No open quote exceptions"
+
+        return {
+            "level": level,
+            "summary": summary,
+            "recommended_action": action
+        }
     
     def get_daily_spend(self, day: Optional[str] = None) -> float:
         """Get spend for a specific day (YYYY-MM-DD) or today."""
@@ -585,6 +607,7 @@ class UnifiedOrchestrator:
             self.recommend_task_price("opus", estimated_tokens=5000, complexity="high")
         ], delivery_type="task")
         sample_exception_aging = self.assess_exception_aging([4, 11, 19, 33])
+        sample_exception_alert = self.build_exception_alert(sample_exception_aging)
         return {
             "timestamp": datetime.now().isoformat(),
             "models_active": len(self.config["models"]),
@@ -605,6 +628,7 @@ class UnifiedOrchestrator:
             "quote_decision_preview": sample_decision,
             "quote_portfolio_preview": sample_portfolio,
             "exception_aging_preview": sample_exception_aging,
+            "exception_alert_preview": sample_exception_alert,
             "usage_anomalies": self.detect_usage_anomalies(),
             "monthly_forecast": self.forecast_monthly_spend(),
             "orchestration_mode": "unified",

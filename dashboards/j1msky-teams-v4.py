@@ -2050,7 +2050,49 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
         body = self.rfile.read(content_length).decode()
         params = parse_qs(body)
         
-        if self.path == '/api/pricing/scenario':
+        if self.path == '/api/pricing/decision':
+            model = params.get('model', ['k2p5'])[0]
+            complexity = params.get('complexity', ['medium'])[0]
+            delivery_type = params.get('delivery_type', ['task'])[0]
+            approver = params.get('approver', ['ops-auto'])[0]
+
+            try:
+                estimated_input = int(params.get('estimated_input', ['1000'])[0])
+                estimated_output = int(params.get('estimated_output', ['500'])[0])
+            except ValueError:
+                self.send_json({'success': False, 'error': 'estimated_input and estimated_output must be integers'})
+                return
+
+            if model not in cost_tracker.MODEL_PRICING:
+                self.send_json({'success': False, 'error': f'Unsupported model: {model}'})
+                return
+            if complexity not in {'low', 'medium', 'high'}:
+                self.send_json({'success': False, 'error': 'complexity must be low|medium|high'})
+                return
+
+            quote = cost_tracker.recommend_task_quote(
+                model,
+                estimated_input=estimated_input,
+                estimated_output=estimated_output,
+                complexity=complexity
+            )
+            guardrail = cost_tracker.evaluate_margin_guardrail(quote, delivery_type=delivery_type)
+            decision_status = 'approved' if guardrail.get('is_compliant') else 'escalated'
+
+            self.send_json({
+                'success': True,
+                'decision': {
+                    'decision_status': decision_status,
+                    'approver': approver,
+                    'delivery_type': delivery_type,
+                    'next_step': 'send_quote' if decision_status == 'approved' else 'route_to_deal_desk',
+                    'generated_at': datetime.now().isoformat()
+                },
+                'quote': quote,
+                'guardrail_check': guardrail
+            })
+
+        elif self.path == '/api/pricing/scenario':
             delivery_type = params.get('delivery_type', ['task'])[0]
             raw_scenarios = params.get('scenarios', ['[]'])[0]
 

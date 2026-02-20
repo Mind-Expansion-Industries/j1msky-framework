@@ -1662,3 +1662,22 @@ Manage bundles of quote options as a portfolio so teams optimize total win proba
 
 - Weekly: inspect portfolio compliance trend by segment.
 - Monthly: adjust markup defaults if portfolio margins drift below target.
+
+## 39) Quote Exception Registry
+
+### Purpose
+Track every non-compliant quote approved as a strategic exception so margin leakage is visible and reversible.
+
+### Required Fields
+
+- Quote ID
+- Account name + segment
+- Exception reason (strategic logo, expansion path, etc.)
+- Approved by (name + role)
+- Expected recovery plan (upsell date, scope reduction, or renewal repricing)
+- Target recovery date
+
+### Governance Rule
+
+- Any exception without a recovery plan is auto-rejected.
+- Exceptions older than 30 days must be reviewed in weekly revenue meeting.

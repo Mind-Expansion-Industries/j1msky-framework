@@ -370,6 +370,44 @@ Returns active pricing policy, a sample quote, and margin guardrail result.
 }
 ```
 
+#### Generate Quote Decision Record
+**Endpoint:** `POST /pricing/decision`
+
+Creates an auditable approve/escalate decision packet for one quote candidate.
+
+**Request (form fields):**
+- `model`: `k2p5|sonnet|opus|minimax-m2.5`
+- `estimated_input`: integer token estimate
+- `estimated_output`: integer token estimate
+- `complexity`: `low|medium|high`
+- `delivery_type`: `task|subscription|enterprise`
+- `approver`: decision owner label (default: `ops-auto`)
+
+**Response:**
+```json
+{
+  "success": true,
+  "decision": {
+    "decision_status": "approved",
+    "approver": "ops-auto",
+    "delivery_type": "task",
+    "next_step": "send_quote",
+    "generated_at": "2026-02-20T08:35:00-05:00"
+  },
+  "quote": {
+    "model": "k2p5",
+    "complexity": "medium",
+    "recommended_price": 0.5,
+    "gross_margin_pct": 99.6,
+    "margin_band": "strong"
+  },
+  "guardrail_check": {
+    "is_compliant": true,
+    "action": "approve_quote"
+  }
+}
+```
+
 #### Evaluate Pricing Scenarios
 **Endpoint:** `POST /pricing/scenario`
 

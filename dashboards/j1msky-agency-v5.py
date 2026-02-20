@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.19 - Resize Flicker Reduction
-Patch release: pauses live polling during UI transitions and resumes cleanly after to reduce transition jitter
+J1MSKY Agency v6.0.20 - Resize Flicker Reduction
+Patch release: clears resize debounce timers and nulls observer refs during teardown to avoid stale callbacks
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.19</title>
+    <title>J1MSKY Agency v6.0.20</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -677,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.19</h1>
+        <h1>◈ J1MSKY Agency v6.0.20</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1095,9 +1095,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.19';
+                        header.textContent = '◈ J1MSKY Agency v6.0.20';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.19';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.20';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1158,8 +1158,13 @@ HTML = '''<!DOCTYPE html>
             },
             
             destroy() {
+                if (this.debounceTimer) {
+                    clearTimeout(this.debounceTimer);
+                    this.debounceTimer = null;
+                }
                 if (this.observer) {
                     this.observer.disconnect();
+                    this.observer = null;
                 }
             }
         };
@@ -1731,7 +1736,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.19 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.20 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

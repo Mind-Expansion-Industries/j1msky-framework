@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.23 - Resize Flicker Reduction
-Patch release: clears pending offline debounce timers on teardown to avoid stale callbacks after unload/reload
+J1MSKY Agency v6.0.24 - Resize Flicker Reduction
+Patch release: coalesces deferred popstate transitions to avoid stacked back/forward callbacks during in-flight navigation
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.23</title>
+    <title>J1MSKY Agency v6.0.24</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -677,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.23</h1>
+        <h1>◈ J1MSKY Agency v6.0.24</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -918,6 +918,7 @@ HTML = '''<!DOCTYPE html>
             isTransitioning: false,
             pendingTab: null,
             transitionTimeoutId: null,
+            popstateTimeoutId: null,
             transitionCooldown: 150,
             lastTransitionTime: 0,
             history: [],
@@ -973,6 +974,10 @@ HTML = '''<!DOCTYPE html>
                 if (this.transitionTimeoutId) {
                     clearTimeout(this.transitionTimeoutId);
                     this.transitionTimeoutId = null;
+                }
+                if (this.popstateTimeoutId) {
+                    clearTimeout(this.popstateTimeoutId);
+                    this.popstateTimeoutId = null;
                 }
                 this.failedTransitions = 0;
                 hideLoading();
@@ -1103,9 +1108,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.23';
+                        header.textContent = '◈ J1MSKY Agency v6.0.24';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.23';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.24';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1386,7 +1391,11 @@ HTML = '''<!DOCTYPE html>
 
             // If a transition is already active, defer popstate nav slightly.
             if (NavState.isTransitioning) {
-                setTimeout(() => showTab(targetTab, false), NavState.transitionCooldown + 20);
+                if (NavState.popstateTimeoutId) clearTimeout(NavState.popstateTimeoutId);
+                NavState.popstateTimeoutId = setTimeout(() => {
+                    NavState.popstateTimeoutId = null;
+                    showTab(targetTab, false);
+                }, NavState.transitionCooldown + 20);
                 return;
             }
 
@@ -1752,7 +1761,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.23 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.24 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

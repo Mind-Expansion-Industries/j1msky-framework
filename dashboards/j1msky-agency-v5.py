@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.15 - Resize Flicker Reduction
-Patch release: keeps aria-current synced with active tab to improve accessibility + nav state clarity
+J1MSKY Agency v6.0.16 - Resize Flicker Reduction
+Patch release: initializes aria-current from active nav state on load and keeps semantic state explicit
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.15</title>
+    <title>J1MSKY Agency v6.0.16</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -677,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.15</h1>
+        <h1>◈ J1MSKY Agency v6.0.16</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -893,7 +893,7 @@ HTML = '''<!DOCTYPE html>
     </div>
     
     <nav class="bottom-nav">
-        <button class="nav-item active" onclick="showTab('dashboard')" aria-label="Dashboard">
+        <button class="nav-item active" onclick="showTab('dashboard')" aria-label="Dashboard" aria-current="page">
             <span>🏠</span>
             Home
         </button>
@@ -1095,9 +1095,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.15';
+                        header.textContent = '◈ J1MSKY Agency v6.0.16';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.15';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.16';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1372,6 +1372,14 @@ HTML = '''<!DOCTYPE html>
             return el.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select';
         }
 
+        function syncNavAriaFromActive() {
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach((n) => {
+                if (n.classList.contains('active')) n.setAttribute('aria-current', 'page');
+                else n.removeAttribute('aria-current');
+            });
+        }
+
         document.addEventListener('keydown', (e) => {
             if (isTypingTarget(e.target)) return;
             if (e.altKey && e.key === 'ArrowLeft') {
@@ -1595,6 +1603,7 @@ HTML = '''<!DOCTYPE html>
             ResizeHandler.init();
             FocusManager.init();
             StatsUpdater.init();
+            syncNavAriaFromActive();
             
             // Determine initial tab: hash > session > default
             const hash = window.location.hash.slice(1);
@@ -1686,7 +1695,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.15 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.16 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

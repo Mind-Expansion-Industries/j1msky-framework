@@ -281,6 +281,80 @@ GET /events?limit=50&cursor=eyJpZCI6MTIzNDV9
 
 ---
 
+### Pricing Operations Endpoints
+
+#### Get Pricing Status Snapshot
+**Endpoint:** `GET /pricing/status`
+
+Returns active pricing policy, a sample quote, and margin guardrail result.
+
+**Response:**
+```json
+{
+  "success": true,
+  "pricing_policy": {
+    "complexity_markup": {"low": 3.0, "medium": 4.0, "high": 5.0},
+    "minimum_price": 0.5,
+    "margin_thresholds": {"task": 55.0, "subscription": 50.0, "enterprise": 45.0}
+  },
+  "example_quote": {
+    "model": "k2p5",
+    "complexity": "medium",
+    "estimated_input_tokens": 1200,
+    "estimated_output_tokens": 600,
+    "internal_cost": 0.0015,
+    "markup": 4.0,
+    "recommended_price": 0.5,
+    "gross_margin_pct": 99.7,
+    "margin_band": "strong"
+  },
+  "guardrail_check": {
+    "delivery_type": "task",
+    "minimum_margin_pct": 55.0,
+    "actual_margin_pct": 99.7,
+    "is_compliant": true,
+    "action": "approve_quote"
+  }
+}
+```
+
+#### Generate Pricing Quote
+**Endpoint:** `POST /pricing/quote`
+
+**Request (form fields):**
+- `model`: `k2p5|sonnet|opus|minimax-m2.5`
+- `estimated_input`: integer token estimate
+- `estimated_output`: integer token estimate
+- `complexity`: `low|medium|high`
+- `delivery_type`: `task|subscription|enterprise`
+
+**Response:**
+```json
+{
+  "success": true,
+  "quote": {
+    "model": "sonnet",
+    "complexity": "high",
+    "estimated_input_tokens": 3000,
+    "estimated_output_tokens": 1200,
+    "internal_cost": 0.027,
+    "markup": 5.0,
+    "recommended_price": 0.5,
+    "gross_margin_pct": 94.6,
+    "margin_band": "strong"
+  },
+  "guardrail_check": {
+    "delivery_type": "task",
+    "minimum_margin_pct": 55.0,
+    "actual_margin_pct": 94.6,
+    "is_compliant": true,
+    "action": "approve_quote"
+  }
+}
+```
+
+---
+
 ### 1. Spawn Agent
 Create a new agent to complete a task.
 

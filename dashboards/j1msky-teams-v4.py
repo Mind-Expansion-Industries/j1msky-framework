@@ -447,6 +447,50 @@ class CostTracker:
             return 'notice', f'Budget at {percentage:.0f}%: ${current_cost:.2f} / ${daily_budget:.2f}'
         return 'ok', f'Budget healthy: ${current_cost:.2f} / ${daily_budget:.2f}'
 
+    def recommend_task_quote(self, model, estimated_input=1000, estimated_output=500, complexity='medium'):
+        """Generate a customer-facing quote recommendation from model cost estimates."""
+        complexity_markup = {'low': 3.0, 'medium': 4.0, 'high': 5.0}
+        markup = complexity_markup.get(complexity, 4.0)
+
+        internal_cost = self.estimate_task_cost(model, estimated_input, estimated_output)
+        minimum_price = 0.50
+        recommended_price = round(max(internal_cost * markup, minimum_price), 2)
+        margin_pct = round(((recommended_price - internal_cost) / recommended_price) * 100, 2) if recommended_price else 0.0
+
+        if margin_pct >= 70:
+            margin_band = 'strong'
+        elif margin_pct >= 55:
+            margin_band = 'healthy'
+        else:
+            margin_band = 'at_risk'
+
+        return {
+            'model': model,
+            'complexity': complexity,
+            'estimated_input_tokens': int(estimated_input),
+            'estimated_output_tokens': int(estimated_output),
+            'internal_cost': round(internal_cost, 4),
+            'markup': markup,
+            'recommended_price': recommended_price,
+            'gross_margin_pct': margin_pct,
+            'margin_band': margin_band
+        }
+
+    def evaluate_margin_guardrail(self, quote, delivery_type='task'):
+        """Evaluate quote against minimum margin thresholds."""
+        thresholds = {'task': 55.0, 'subscription': 50.0, 'enterprise': 45.0}
+        threshold = thresholds.get(delivery_type, 55.0)
+        margin = quote.get('gross_margin_pct', 0.0)
+        compliant = margin >= threshold
+
+        return {
+            'delivery_type': delivery_type,
+            'minimum_margin_pct': threshold,
+            'actual_margin_pct': margin,
+            'is_compliant': compliant,
+            'action': 'approve_quote' if compliant else 'escalate_deal_desk'
+        }
+
 # Initialize global cost tracker
 cost_tracker = CostTracker()
 
@@ -1865,7 +1909,20 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
         pass
     
     def do_GET(self):
-        if self.path == '/':
+        if self.path == '/api/pricing/status':
+            sample_quote = cost_tracker.recommend_task_quote('k2p5', estimated_input=1200, estimated_output=600, complexity='medium')
+            guardrail = cost_tracker.evaluate_margin_guardrail(sample_quote, delivery_type='task')
+            self.send_json({
+                'success': True,
+                'pricing_policy': {
+                    'complexity_markup': {'low': 3.0, 'medium': 4.0, 'high': 5.0},
+                    'minimum_price': 0.50,
+                    'margin_thresholds': {'task': 55.0, 'subscription': 50.0, 'enterprise': 45.0}
+                },
+                'example_quote': sample_quote,
+                'guardrail_check': guardrail
+            })
+        elif self.path == '/':
             stats = get_system_stats()
             
             # Build rate limits HTML
@@ -1993,7 +2050,36 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
         body = self.rfile.read(content_length).decode()
         params = parse_qs(body)
         
-        if self.path == '/api/spawn':
+        if self.path == '/api/pricing/quote':
+            model = params.get('model', ['k2p5'])[0]
+            complexity = params.get('complexity', ['medium'])[0]
+            delivery_type = params.get('delivery_type', ['task'])[0]
+
+            try:
+                estimated_input = int(params.get('estimated_input', ['1000'])[0])
+                estimated_output = int(params.get('estimated_output', ['500'])[0])
+            except ValueError:
+                self.send_json({'success': False, 'error': 'estimated_input and estimated_output must be integers'})
+                return
+
+            if model not in cost_tracker.MODEL_PRICING:
+                self.send_json({'success': False, 'error': f'Unsupported model: {model}'})
+                return
+            if complexity not in {'low', 'medium', 'high'}:
+                self.send_json({'success': False, 'error': 'complexity must be low|medium|high'})
+                return
+
+            quote = cost_tracker.recommend_task_quote(
+                model,
+                estimated_input=estimated_input,
+                estimated_output=estimated_output,
+                complexity=complexity
+            )
+            guardrail = cost_tracker.evaluate_margin_guardrail(quote, delivery_type=delivery_type)
+
+            self.send_json({'success': True, 'quote': quote, 'guardrail_check': guardrail})
+
+        elif self.path == '/api/spawn':
             model = params.get('model', ['k2p5'])[0]
             task = sanitize_task(params.get('task', ['No task'])[0])
 

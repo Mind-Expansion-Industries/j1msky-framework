@@ -1580,3 +1580,27 @@ Catch weak-margin quotes before they become avoidable churn or bad-fit contracts
 - **Critical (<45% margin):** same-night escalation to revenue lead
 - **Warning (45-54.99% margin):** next-business-day review
 - **Healthy (>=55% margin):** no escalation required
+
+## 35) Quote Approval Handshake (Sales ↔ Ops)
+
+### Purpose
+Reduce pricing mistakes by making quote approval explicit and auditable.
+
+### Handshake Steps
+
+1. Sales drafts quote with model, token estimate, complexity, and delivery type.
+2. Ops runs quote validation (automated endpoint or worksheet).
+3. Ops returns one of three outcomes:
+   - **Approved** (meets margin policy)
+   - **Approved with conditions** (scope edits required)
+   - **Escalate** (Deal Desk/leadership approval required)
+4. Sales sends final quote only after approval state is logged.
+
+### Required CRM Fields
+
+- Estimated internal cost
+- Proposed price
+- Gross margin %
+- Guardrail result (pass/fail)
+- Approver name + timestamp
+- If escalated: final decision owner

@@ -30,6 +30,7 @@ COPY . /usr/share/nginx/html
 
 - `index.html` — Complete landing page + pricing offer + Netlify-ready lead form
 - `thank-you.html` — Post-submit conversion page
+- `refer.html` — Referral program page for viral growth (earn free months)
 - `case-study.html` — Social proof page showing real client results
 - `audit.html` — Focused lead-gen page: Free AI Operations Audit offer (use for ads/outreach)
 - `book.html` — Pre-qualifier intake page before scheduling

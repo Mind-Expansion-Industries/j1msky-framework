@@ -344,6 +344,7 @@ HTML = '''<!DOCTYPE html>
             font-size: 28px;
             margin-bottom: 8px;
             display: block;
+            line-height: 1;
         }
 
         .agent-list {
@@ -503,6 +504,7 @@ HTML = '''<!DOCTYPE html>
         .form-textarea {
             min-height: 100px;
             resize: vertical;
+            min-width: 0;
         }
 
         .btn-primary {

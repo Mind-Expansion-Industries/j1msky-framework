@@ -583,6 +583,7 @@ HTML = '''<!DOCTYPE html>
             border-radius: 50%;
             transform: translate(-50%, -50%);
             transition: width 0.3s, height 0.3s;
+            pointer-events: none;
         }
         
         .nav-item:active::after, .quick-btn:active::after, .btn-primary:active::after {
@@ -1765,6 +1766,15 @@ HTML = '''<!DOCTYPE html>
         });
         
         // Cleanup on page unload
+        window.addEventListener('pageshow', () => {
+            // Recover from back-forward cache restores where transitional flags may be stale.
+            if (NavState.isTransitioning || document.body.classList.contains('navigating')) {
+                NavState.reset();
+                const tab = NavState.normalizeTab(window.location.hash.slice(1) || SessionStore.load() || NavState.currentTab);
+                showTab(tab, false);
+            }
+        });
+
         window.addEventListener('beforeunload', () => {
             ResizeHandler.destroy();
             StatsUpdater.stop();

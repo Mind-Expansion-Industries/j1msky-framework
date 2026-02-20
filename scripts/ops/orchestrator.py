@@ -346,6 +346,28 @@ class UnifiedOrchestrator:
             return "notice"
         return "ok"
 
+    def detect_usage_anomalies(self) -> Dict[str, Any]:
+        """Detect simple anomalies in recent usage patterns."""
+        summary = self.get_usage_summary(limit=10)
+        top_models = summary.get("top_models", [])
+        anomalies = []
+
+        for item in top_models:
+            calls = item.get("calls", 0)
+            avg_tokens = item.get("avg_tokens_per_call", 0)
+            model = item.get("model", "unknown")
+
+            if calls >= 100:
+                anomalies.append({"model": model, "type": "high_call_volume", "value": calls})
+            if avg_tokens >= 5000:
+                anomalies.append({"model": model, "type": "high_tokens_per_call", "value": avg_tokens})
+
+        return {
+            "has_anomalies": len(anomalies) > 0,
+            "anomalies": anomalies,
+            "count": len(anomalies)
+        }
+
     def get_operational_flags(self) -> Dict[str, Any]:
         """Return normalized operational state for routing and dashboards."""
         provider_usage = self.get_provider_usage_snapshot()
@@ -420,6 +442,7 @@ class UnifiedOrchestrator:
             "budget_alert_level": self.get_budget_alert_level(),
             "operational_flags": self.get_operational_flags(),
             "model_mix_recommendation": self.get_model_mix_recommendation(),
+            "usage_anomalies": self.detect_usage_anomalies(),
             "monthly_forecast": self.forecast_monthly_spend(),
             "orchestration_mode": "unified",
             "ceo_model": "opus",

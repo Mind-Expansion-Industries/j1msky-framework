@@ -1472,3 +1472,23 @@ Create a recurring forum to approve pricing changes with cross-functional alignm
 - Approved experiments and rollback criteria
 - Effective date + communication plan
 - Owner and success metric for each change
+
+## 31) Night Operations Policy
+
+### Overnight Guardrails (23:00–08:00)
+
+- Pause non-urgent experiments and high-risk pricing changes
+- Restrict model routing to approved low-cost baseline unless incident response requires otherwise
+- Auto-escalate only SEV-1 and SEV-2 events to on-call owner
+
+### Overnight KPI Targets
+
+- Critical alert acknowledgement: <15 minutes
+- False-positive page rate: <10%
+- Unattended high-risk change count: 0
+
+### Morning Handoff Requirements
+
+- Summary of incidents and mitigations
+- Budget movement vs overnight threshold
+- Any customer-facing impact statement drafted and reviewed

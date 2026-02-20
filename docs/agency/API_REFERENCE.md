@@ -90,6 +90,7 @@ Use `budget_utilization_pct` for alerting thresholds (for example: warn at 70%, 
 `operational_flags.requires_ops_attention=true` should page the operations owner or trigger escalation workflow.
 `operational_flags.recommended_action` provides an immediate operator play for runbook automation.
 `model_mix_recommendation` can be used by schedulers to bias routing toward cost-optimized or balanced modes.
+`usage_anomalies` is intended for alerting pipelines and overnight ops watchlists.
 
 **Response:**
 ```json
@@ -122,6 +123,11 @@ Use `budget_utilization_pct` for alerting thresholds (for example: warn at 70%, 
     "secondary": ["codex"],
     "restricted": [],
     "reason": "Normal operating range"
+  },
+  "usage_anomalies": {
+    "has_anomalies": false,
+    "anomalies": [],
+    "count": 0
   },
   "monthly_forecast": {
     "projected_spend": 372.9,

@@ -134,6 +134,7 @@ HTML = '''<!DOCTYPE html>
             display: flex;
             gap: 8px;
             align-items: center;
+            flex-shrink: 0;
         }
         
         .help-btn {
@@ -412,6 +413,7 @@ HTML = '''<!DOCTYPE html>
             font-weight: 600;
             font-size: 16px;
             color: var(--cyan);
+            overflow-wrap: anywhere;
         }
         
         .model-cost {
@@ -637,6 +639,10 @@ HTML = '''<!DOCTYPE html>
             }
             .header h1 {
                 font-size: 16px;
+                max-width: 58vw;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
         }
 
@@ -1526,6 +1532,7 @@ HTML = '''<!DOCTYPE html>
                 helpPanel.style.display = 'block';
                 helpPanel.classList.add('active');
                 helpPanel.setAttribute('aria-hidden', 'false');
+                helpPanel.focus();
             } else {
                 helpPanel.style.display = 'none';
                 helpPanel.classList.remove('active');
@@ -1537,6 +1544,7 @@ HTML = '''<!DOCTYPE html>
                     current.style.display = 'block';
                     current.classList.add('active');
                 }
+                if (helpBtn) helpBtn.focus();
             }
         }
         

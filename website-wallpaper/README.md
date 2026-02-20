@@ -19,8 +19,12 @@ python3 -m http.server 8090
 Or upload `index.html` to Netlify/Vercel/Cloudflare Pages.
 
 ## Stripe Checkout Wiring (5 min)
-1. Create Stripe payment links for Daily and Pro plans.
-2. In `index.html`, update `CHECKOUT_LINKS.daily` and `CHECKOUT_LINKS.pro`.
+1. Create Stripe payment links for Daily and Pro plans (monthly + annual).
+2. In `index.html`, update:
+   - `CHECKOUT_LINKS.daily_monthly`
+   - `CHECKOUT_LINKS.daily_annual`
+   - `CHECKOUT_LINKS.pro_monthly`
+   - `CHECKOUT_LINKS.pro_annual`
 3. Configure Stripe redirect URLs:
    - Success URL: `https://YOUR-DOMAIN/success.html`
    - Cancel URL: `https://YOUR-DOMAIN/cancel.html`

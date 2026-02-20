@@ -502,6 +502,10 @@
         <div class="section-header">
             <h2>Simple Pricing</h2>
             <p>Less than a coffee per month for daily fresh art</p>
+            <div style="margin-top:1rem;display:inline-flex;background:#12121a;border:1px solid rgba(255,255,255,0.12);border-radius:999px;padding:4px;gap:4px;">
+                <button id="bill-monthly" class="btn" type="button" onclick="setBilling('monthly')" style="width:auto;padding:0.45rem 0.9rem;border-radius:999px;background:#8b5cf6;">Monthly</button>
+                <button id="bill-annual" class="btn btn-outline" type="button" onclick="setBilling('annual')" style="width:auto;padding:0.45rem 0.9rem;border-radius:999px;">Annual (2 months free)</button>
+            </div>
         </div>
         
         <div class="pricing-grid">
@@ -521,8 +525,8 @@
             <div class="pricing-card popular">
                 <div class="popular-badge">Most Popular</div>
                 <h3>Daily</h3>
-                <div class="price">$3<span>/month</span></div>
-                <p>Perfect for wallpaper enthusiasts</p>
+                <div class="price" id="price-daily">$3<span>/month</span></div>
+                <p id="desc-daily">Perfect for wallpaper enthusiasts</p>
                 <ul class="features">
                     <li>1 wallpaper every day</li>
                     <li>4K Ultra HD resolution</li>
@@ -535,8 +539,8 @@
             
             <div class="pricing-card">
                 <h3>Pro</h3>
-                <div class="price">$8<span>/month</span></div>
-                <p>For designers and creators</p>
+                <div class="price" id="price-pro">$8<span>/month</span></div>
+                <p id="desc-pro">For designers and creators</p>
                 <ul class="features">
                     <li>3 wallpapers every day</li>
                     <li>4K + 8K resolution</li>
@@ -653,20 +657,26 @@
         // Replace with your real Stripe payment links
         const CHECKOUT_LINKS = {
             free: 'mailto:hello@wallpaperdaily.ai?subject=WallpaperDaily%20Free%20Signup',
-            daily: 'https://buy.stripe.com/test_daily_placeholder',
-            pro: 'https://buy.stripe.com/test_pro_placeholder'
+            daily_monthly: 'https://buy.stripe.com/test_daily_monthly_placeholder',
+            daily_annual: 'https://buy.stripe.com/test_daily_annual_placeholder',
+            pro_monthly: 'https://buy.stripe.com/test_pro_monthly_placeholder',
+            pro_annual: 'https://buy.stripe.com/test_pro_annual_placeholder'
         };
 
+        let selectedBilling = 'monthly';
+
         function showSignup(plan) {
-            const baseUrl = CHECKOUT_LINKS[plan] || CHECKOUT_LINKS.free;
+            const checkoutKey = plan === 'free' ? 'free' : `${plan}_${selectedBilling}`;
+            const baseUrl = CHECKOUT_LINKS[checkoutKey] || CHECKOUT_LINKS.free;
             if (baseUrl.includes('placeholder')) {
-                alert(`Checkout link for ${plan} is not configured yet.\n\nUpdate CHECKOUT_LINKS in index.html with your Stripe payment links.`);
+                alert(`Checkout link for ${checkoutKey} is not configured yet.\n\nUpdate CHECKOUT_LINKS in index.html with your Stripe payment links.`);
                 return;
             }
 
             localStorage.setItem('wd_selected_plan', plan);
+            localStorage.setItem('wd_selected_billing', selectedBilling);
             const url = new URL(baseUrl, window.location.origin);
-            url.searchParams.set('client_reference_id', `wd_${plan}_${Date.now()}`);
+            url.searchParams.set('client_reference_id', `wd_${plan}_${selectedBilling}_${Date.now()}`);
             url.searchParams.set('prefilled_email', document.getElementById('lead-email')?.value || '');
             url.searchParams.set('utm_source', document.getElementById('utm-source')?.value || 'direct');
             url.searchParams.set('utm_medium', document.getElementById('utm-medium')?.value || 'none');
@@ -688,6 +698,36 @@
             e.target.reset();
         }
 
+        function setBilling(mode) {
+            selectedBilling = mode;
+            const monthlyBtn = document.getElementById('bill-monthly');
+            const annualBtn = document.getElementById('bill-annual');
+            const priceDaily = document.getElementById('price-daily');
+            const pricePro = document.getElementById('price-pro');
+            const descDaily = document.getElementById('desc-daily');
+            const descPro = document.getElementById('desc-pro');
+
+            if (mode === 'annual') {
+                monthlyBtn.className = 'btn btn-outline';
+                annualBtn.className = 'btn';
+                monthlyBtn.style.background = 'transparent';
+                annualBtn.style.background = '#8b5cf6';
+                priceDaily.innerHTML = '$30<span>/year</span>';
+                pricePro.innerHTML = '$80<span>/year</span>';
+                descDaily.textContent = 'Annual billing — save 2 months';
+                descPro.textContent = 'Annual billing — save 2 months';
+            } else {
+                monthlyBtn.className = 'btn';
+                annualBtn.className = 'btn btn-outline';
+                monthlyBtn.style.background = '#8b5cf6';
+                annualBtn.style.background = 'transparent';
+                priceDaily.innerHTML = '$3<span>/month</span>';
+                pricePro.innerHTML = '$8<span>/month</span>';
+                descDaily.textContent = 'Perfect for wallpaper enthusiasts';
+                descPro.textContent = 'For designers and creators';
+            }
+        }
+
         function hydrateAttributionFields() {
             const p = new URLSearchParams(window.location.search);
             document.getElementById('utm-source').value = p.get('utm_source') || 'direct';
@@ -696,6 +736,7 @@
         }
 
         hydrateAttributionFields();
+        setBilling('monthly');
     </script>
 </body>
 </html>

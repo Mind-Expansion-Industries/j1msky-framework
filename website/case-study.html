@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case Study: How SaaS Startup Cut 40 Hours/Week with AI | J1MSKY</title>
+    <meta name="description" content="See how a 12-person SaaS team automated lead qualification, content production, and reporting—saving $8,000/month and 40 hours of manual work.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent: #22d3ee;
+            --dark: #0f172a;
+            --gray: #94a3b8;
+            --light: #f8fafc;
+            --success: #10b981;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            line-height: 1.65;
+        }
+        .wrap { max-width: 780px; margin: 0 auto; padding: 2.5rem 1.25rem; }
+        .nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .logo { font-weight: 800; font-size: 1.3rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav a { color: var(--gray); text-decoration: none; font-size: .9rem; }
+        .tag { display: inline-block; padding: .25rem .7rem; background: rgba(99,102,241,.12); border: 1px solid rgba(99,102,241,.35); border-radius: 50px; font-size: .75rem; color: var(--primary); margin-bottom: .8rem; }
+        h1 { font-size: clamp(1.7rem, 5vw, 2.4rem); line-height: 1.15; margin-bottom: .6rem; }
+        .lead { color: var(--gray); font-size: 1.1rem; margin-bottom: 2rem; }
+        .metric-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin: 2rem 0; }
+        .metric { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 1rem; text-align: center; }
+        .metric strong { display: block; font-size: 1.6rem; color: var(--success); }
+        .metric span { font-size: .85rem; color: var(--gray); }
+        h2 { font-size: 1.25rem; margin: 2rem 0 .6rem; }
+        p { margin-bottom: 1rem; }
+        ul { margin: 0 0 1rem 1.2rem; color: #cbd5e1; }
+        li { margin: .4rem 0; }
+        blockquote { border-left: 3px solid var(--primary); padding-left: 1rem; margin: 1.5rem 0; color: #e2e8f0; font-style: italic; }
+        .cta-box { background: linear-gradient(135deg, rgba(99,102,241,.12), rgba(34,211,238,.06)); border: 1px solid rgba(99,102,241,.35); border-radius: 16px; padding: 1.5rem; margin: 2.5rem 0; }
+        .cta-box h3 { margin-bottom: .5rem; }
+        .cta-box p { color: var(--gray); margin-bottom: 1rem; }
+        .btn { display: inline-block; padding: .9rem 1.4rem; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; text-decoration: none; border-radius: 10px; font-weight: 700; }
+        .footer { text-align: center; padding: 2rem; color: var(--gray); font-size: .9rem; border-top: 1px solid rgba(255,255,255,.06); margin-top: 2rem; }
+        @media (max-width: 560px) { .wrap { padding: 1.5rem 1rem; } }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="nav">
+            <div class="logo">◈ J1MSKY</div>
+            <a href="/index.html">← Back to site</a>
+        </div>
+
+        <div class="tag">Case Study</div>
+        <h1>How a SaaS Startup Cut 40 Hours/Week with AI Operations</h1>
+        <p class="lead">A 12-person B2B SaaS team was drowning in manual tasks. Here's how we built 3 AI workflows that saved them $8,000/month and freed up 40 hours of weekly work.</p>
+
+        <div class="metric-row">
+            <div class="metric"><strong>40 hrs</strong><span>Saved weekly</span></div>
+            <div class="metric"><strong>$8K</strong><span>Monthly savings</span></div>
+            <div class="metric"><strong>3x</strong><span>Content output</span></div>
+            <div class="metric"><strong>7 days</strong><span>To deploy</span></div>
+        </div>
+
+        <h2>The Challenge</h2>
+        <p>FlowMetrics (name changed) had a classic growth problem: they were acquiring customers faster than they could scale operations. Their 12-person team was spending:</p>
+        <ul>
+            <li><strong>12 hours/week</strong> manually qualifying inbound leads</li>
+            <li><strong>15 hours/week</strong> writing blog posts and social content</li>
+            <li><strong>8 hours/week</strong> building weekly performance reports</li>
+            <li><strong>5 hours/week</strong> on follow-up emails and scheduling</li>
+        </ul>
+        <p>That's 40 hours of skilled work doing repetitive tasks. Their top performers were burning out, and they were considering hiring 2 more ops people at $60K+ each.</p>
+
+        <h2>The Solution</h2>
+        <p>We deployed 3 integrated AI workflows over 7 days:</p>
+
+        <p><strong>1. Smart Lead Qualification Bot</strong></p>
+        <ul>
+            <li>Connected to their HubSpot forms and Slack</li>
+            <li>AI reads form responses, website, and LinkedIn to score leads</li>
+            <li>Only qualified leads get routed to sales; others get nurturing sequence</li>
+        </ul>
+
+        <p><strong>2. Content Production Engine</strong></p>
+        <ul>
+            <li>Takes brief inputs from their product team</li>
+            <li>Generates blog drafts, LinkedIn posts, and email snippets</li>
+            <li>Human editor reviews, refines, and schedules—no writing from scratch</li>
+        </ul>
+
+        <p><strong>3. Automated Reporting Pipeline</strong></p>
+        <ul>
+            <li>Pulls data from Stripe, Google Analytics, and their product DB</li>
+            <li>AI generates narrative weekly report with insights, not just numbers</li>
+            <li>Auto-delivered to leadership every Monday at 9am</li>
+        </ul>
+
+        <h2>The Results</h2>
+        <p>Within 30 days of deployment:</p>
+        <ul>
+            <li>Lead response time dropped from <strong>6 hours to 12 minutes</strong></li>
+            <li>Content output <strong>tripled</strong> without adding writers</li>
+            <li>Weekly reports now take <strong>zero manual work</strong></li>
+            <li>Team morale improved—people doing creative work instead of copy-paste</li>
+            <li><strong>Deferred 2 hires</strong>, saving ~$120K in annual salary</li>
+        </ul>
+
+        <blockquote>
+            "We were skeptical about AI hype. J1MSKY built workflows that actually work—the AI doesn't replace our judgment, it removes the tedious parts so we can focus on strategy. Best ROI we've seen on any tool."
+            <br><br>
+            — <strong>Sarah Chen</strong>, VP Operations
+        </blockquote>
+
+        <h2>What's Next for Them</h2>
+        <p>Phase 2 is already scoped: customer support ticket routing, automated onboarding sequences, and competitive intelligence monitoring. They're reinvesting the saved time into product improvements and customer success.</p>
+
+        <div class="cta-box">
+            <h3>Want similar results?</h3>
+            <p>Get a free AI Operations Audit. We'll identify your top 3 automation opportunities and build you a prioritized roadmap.</p>
+            <a class="btn" href="/audit.html">Get My Free Audit →</a>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2026 J1MSKY AI Agency. Results may vary based on team and tech stack.</p>
+    </div>
+</body>
+</html>

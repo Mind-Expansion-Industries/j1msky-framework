@@ -1270,3 +1270,35 @@ Require legal/revops approval when any of these apply:
 - On-time implementation rate (target: >90%)
 - First-30-day activation rate (target: >80%)
 - Post-implementation CSAT (target: >4.5/5)
+
+## 23) Competitive Battlecards (Field Use)
+
+### Against Generic LLM Subscriptions
+
+**Their pitch:** "Cheaper monthly seat"
+
+**Our response:**
+- We provide multi-model orchestration + teams, not single-seat chat
+- We include operational controls (budget, rate limits, status)
+- We support production workflows and integration paths
+
+### Against DIY Agent Frameworks
+
+**Their pitch:** "More flexible if you build it yourself"
+
+**Our response:**
+- Faster time-to-value with prebuilt operations patterns
+- Lower implementation risk for non-specialist teams
+- Better business controls (dunning, renewal, partner ops guidance)
+
+### Proof Points to Use in Calls
+
+- Reduced time-to-first-value through guided implementation standards
+- Budget-aware model routing to protect margin
+- Operational visibility through status and forecast reporting
+
+### Objection Handling Snippets
+
+- **"We can build this internally"** → "Totally valid; we usually coexist by accelerating first outcomes while your internal team scales."
+- **"Price is high"** → "Let’s compare against manual delivery cost and missed SLA risk, not just tool subscription line items."
+- **"Security concern"** → "We can start with scoped keys, least privilege, and auditable status/usage reporting."

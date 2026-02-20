@@ -144,6 +144,17 @@ Returns live budget/rate-limit state sourced from orchestrator config and usage 
 Use this endpoint when you need a model choice that respects daily spend limits.
 Forecast fields in `/orchestrator/status` help finance and ops estimate month-end burn.
 
+### Response Headers (Observability)
+
+Important headers returned on operational endpoints:
+
+- `X-Request-Id` – unique request trace identifier
+- `X-RateLimit-Limit` – provider/request limit ceiling
+- `X-RateLimit-Remaining` – requests left in current window
+- `X-RateLimit-Reset` – unix timestamp for next reset
+
+Use `X-Request-Id` when escalating incidents to support.
+
 ### Pagination & Filtering
 
 Most list endpoints support pagination and filtering using query parameters:

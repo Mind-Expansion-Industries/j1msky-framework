@@ -34,6 +34,11 @@ class UnifiedOrchestrator:
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.config_path, 'w') as f:
             json.dump(self.config, f, indent=2)
+
+    def prune_usage_log(self, max_entries: int = 5000):
+        """Keep usage log bounded to avoid unbounded memory growth."""
+        if len(self.usage_log) > max_entries:
+            self.usage_log = self.usage_log[-max_entries:]
     
     def get_default_config(self):
         """Default configuration if file missing"""
@@ -147,6 +152,7 @@ class UnifiedOrchestrator:
             "tokens": tokens
         }
         self.usage_log.append(usage)
+        self.prune_usage_log()
 
         # Track spend by day
         estimated_cost = self.estimate_cost(model_alias, tokens or 1000)

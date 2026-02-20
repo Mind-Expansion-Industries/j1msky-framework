@@ -157,3 +157,9 @@ OSError: [Errno 98] Address already in use
 [2026-02-20T14:40:12-05:00] command-audit snapshot
 [source missing] /tmp/alexa-bridge.log not found
 ---
+[2026-02-20T15:10:21-05:00] command-audit snapshot
+[source missing] /tmp/alexa-bridge.log not found
+---
+[2026-02-20T15:40:11-05:00] command-audit snapshot
+[source missing] /tmp/alexa-bridge.log not found
+---

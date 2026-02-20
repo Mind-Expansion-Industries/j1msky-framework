@@ -1368,3 +1368,27 @@ Require legal/revops approval when any of these apply:
 
 - % nights with complete handoff pack (target: >98%)
 - Mean time to acknowledge critical alert (target: <15 min)
+
+## 27) Incident Escalation Matrix
+
+### Severity Levels
+
+- **SEV-1:** Revenue-impacting outage, billing/system failure, security event
+- **SEV-2:** Major degradation affecting active customers
+- **SEV-3:** Localized issue with workaround
+- **SEV-4:** Minor defect or documentation gap
+
+### Escalation Path
+
+| Severity | First Owner | Escalate To | Target Acknowledgment |
+|---|---|---|---|
+| SEV-1 | On-call ops | Executive lead + security | <15 min |
+| SEV-2 | Ops manager | Product/engineering lead | <30 min |
+| SEV-3 | Support lead | Team lead if unresolved | <4 hours |
+| SEV-4 | Functional owner | Weekly review queue | <1 business day |
+
+### Escalation Rules
+
+- SEV-1 always triggers customer communication and incident timeline
+- Any issue breaching SLA auto-escalates one level
+- Repeated SEV-3 in same account within 7 days upgrades to SEV-2

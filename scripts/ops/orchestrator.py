@@ -336,6 +336,25 @@ class UnifiedOrchestrator:
             return "notice"
         return "ok"
 
+    def get_operational_flags(self) -> Dict[str, Any]:
+        """Return normalized operational state for routing and dashboards."""
+        provider_usage = self.get_provider_usage_snapshot()
+        max_provider_util = 0.0
+        hot_providers = []
+
+        for provider, usage in provider_usage.items():
+            util = usage.get("utilization_pct", 0.0)
+            max_provider_util = max(max_provider_util, util)
+            if util >= 80:
+                hot_providers.append(provider)
+
+        return {
+            "budget_alert_level": self.get_budget_alert_level(),
+            "max_provider_utilization_pct": round(max_provider_util, 2),
+            "hot_providers": hot_providers,
+            "requires_ops_attention": self.get_budget_alert_level() in {"warning", "critical"} or len(hot_providers) > 0
+        }
+
     def get_status_report(self):
         """Get current orchestrator status"""
         today = datetime.now().strftime("%Y-%m-%d")
@@ -353,6 +372,7 @@ class UnifiedOrchestrator:
             "budget_remaining": round(max(daily_budget - today_spend, 0), 4),
             "budget_utilization_pct": self.get_budget_utilization_pct(),
             "budget_alert_level": self.get_budget_alert_level(),
+            "operational_flags": self.get_operational_flags(),
             "monthly_forecast": self.forecast_monthly_spend(),
             "orchestration_mode": "unified",
             "ceo_model": "opus",

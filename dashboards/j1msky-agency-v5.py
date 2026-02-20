@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.10 - Resize Flicker Reduction
-Patch release: saves last-tab only after successful transition commit
+J1MSKY Agency v6.0.11 - Resize Flicker Reduction
+Patch release: respects reduced-motion preference during tab-transition scroll restoration
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.10</title>
+    <title>J1MSKY Agency v6.0.11</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -677,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.10</h1>
+        <h1>◈ J1MSKY Agency v6.0.11</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1079,9 +1079,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.10';
+                        header.textContent = '◈ J1MSKY Agency v6.0.11';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.10';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.11';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1242,8 +1242,11 @@ HTML = '''<!DOCTYPE html>
                             n.classList.toggle('active', i === tabIndex);
                         });
                         
-                        // Scroll to top smoothly
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        // Scroll to top (respect reduced-motion preferences)
+                        const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                        if (!document.hidden) {
+                            window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+                        }
                         
                         // Update state
                         NavState.currentTab = tabId;
@@ -1657,7 +1660,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.10 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.11 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

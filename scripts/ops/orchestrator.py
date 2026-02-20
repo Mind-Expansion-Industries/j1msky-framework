@@ -391,6 +391,30 @@ class UnifiedOrchestrator:
             "summary": summary,
             "recommended_action": action
         }
+
+    def build_portfolio_alert(self, portfolio: Dict[str, Any]) -> Dict[str, str]:
+        """Build human-readable ops alert message from portfolio rollup."""
+        scenarios = portfolio.get("scenario_count", 0)
+        compliant = portfolio.get("compliant_count", 0)
+        ratio = portfolio.get("compliance_ratio", 0.0)
+        margin = portfolio.get("average_margin_pct", 0.0)
+        needs_exec = portfolio.get("requires_executive_review", False)
+
+        if needs_exec:
+            level = "critical"
+            summary = f"Portfolio executive review required: {compliant}/{scenarios} compliant, ratio {ratio}"
+        elif ratio < 1.0:
+            level = "warning"
+            summary = f"Portfolio needs attention: {compliant}/{scenarios} compliant"
+        else:
+            level = "ok"
+            summary = f"Portfolio healthy: {compliant}/{scenarios} compliant, margin {margin}%"
+
+        return {
+            "level": level,
+            "summary": summary,
+            "recommended_action": "route_to_executive_review" if needs_exec else "proceed_with_caution" if ratio < 1.0 else "send_proposal"
+        }
     
     def get_daily_spend(self, day: Optional[str] = None) -> float:
         """Get spend for a specific day (YYYY-MM-DD) or today."""
@@ -627,6 +651,7 @@ class UnifiedOrchestrator:
             "pricing_guardrail_check": sample_guardrail,
             "quote_decision_preview": sample_decision,
             "quote_portfolio_preview": sample_portfolio,
+            "portfolio_alert_preview": self.build_portfolio_alert(sample_portfolio),
             "exception_aging_preview": sample_exception_aging,
             "exception_alert_preview": sample_exception_alert,
             "usage_anomalies": self.detect_usage_anomalies(),

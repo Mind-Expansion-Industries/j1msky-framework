@@ -1773,3 +1773,21 @@ Add a second risk check during active selling hours so exception drift is caught
 ### KPI
 
 - Acknowledgment time for critical exception alerts: <30 minutes.
+
+## 46) End-of-Day Pricing Closure
+
+### Objective
+Ensure every pricing decision from the day is logged, approved, or escalated before EOD handoff.
+
+### Closure Checklist
+
+1. All quotes sent today must have a decision record (approved/escalated).
+2. All escalated quotes must have an owner assigned.
+3. Portfolio summaries must be posted to ops channel.
+4. Exceptions requiring executive review must be flagged in handoff.
+
+### Closure Gate
+
+Pricing closure is not complete until:
+- Zero quotes with missing decision records
+- Zero exceptions with `risk_level=critical` and no owner acknowledgment

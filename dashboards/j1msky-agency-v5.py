@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.21 - Resize Flicker Reduction
-Patch release: resets transient polling flags on stop to prevent stale in-flight/paused state after visibility or transition changes
+J1MSKY Agency v6.0.22 - Resize Flicker Reduction
+Patch release: adds aria-busy loading semantics and blocks swipe navigation while transitions are active
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.21</title>
+    <title>J1MSKY Agency v6.0.22</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -677,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.21</h1>
+        <h1>◈ J1MSKY Agency v6.0.22</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1045,7 +1045,8 @@ HTML = '''<!DOCTYPE html>
                 if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) return; // Mostly vertical
                 if (Math.abs(deltaX) < this.threshold) return;
                 
-                // Guard against swipe burst spam
+                // Guard against swipe burst spam / in-flight transitions
+                if (NavState.isTransitioning) return;
                 const now = Date.now();
                 if (now - this.lastSwipeAt < this.minIntervalMs) return;
                 this.lastSwipeAt = now;
@@ -1095,9 +1096,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.21';
+                        header.textContent = '◈ J1MSKY Agency v6.0.22';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.21';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.22';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1187,6 +1188,8 @@ HTML = '''<!DOCTYPE html>
         
         function showLoading() {
             document.body.classList.add('navigating');
+            const main = document.querySelector('.main');
+            if (main) main.setAttribute('aria-busy', 'true');
             if (typeof StatsUpdater !== 'undefined') {
                 StatsUpdater.pauseForTransition();
             }
@@ -1194,6 +1197,8 @@ HTML = '''<!DOCTYPE html>
 
         function hideLoading() {
             document.body.classList.remove('navigating');
+            const main = document.querySelector('.main');
+            if (main) main.setAttribute('aria-busy', 'false');
             if (typeof StatsUpdater !== 'undefined') {
                 StatsUpdater.resumeAfterTransition();
             }
@@ -1739,7 +1744,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.21 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.22 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

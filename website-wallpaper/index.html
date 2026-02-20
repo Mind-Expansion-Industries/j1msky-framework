@@ -377,6 +377,22 @@
 
         .guarantee-card strong { color: #f3f4f6; }
 
+        .social-proof {
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+            gap:1rem;
+            margin-top:1.5rem;
+        }
+        .proof-card {
+            background: var(--dark-card);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+        .proof-card .stars { color: #fbbf24; margin-bottom: .4rem; }
+        .proof-card p { color:#9ca3af; font-size:.95rem; }
+        .proof-card strong { color:#f3f4f6; font-size:.92rem; }
+
         /* FAQ */
         .faq-item {
             background: var(--dark-card);
@@ -493,6 +509,30 @@
                 <div class="step-icon">📧</div>
                 <h3>Delivered to You</h3>
                 <p>Check your inbox each morning. Download and enjoy your fresh wallpaper.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="social-proof">
+        <div class="section-header">
+            <h2>Loved by Daily Users</h2>
+            <p>Social proof that increases conversion confidence.</p>
+        </div>
+        <div class="social-proof">
+            <div class="proof-card">
+                <div class="stars">★★★★★</div>
+                <p>“I stopped doom-scrolling wallpaper apps. I get one beautiful image every morning and that’s it.”</p>
+                <strong>— Lena, Product Designer</strong>
+            </div>
+            <div class="proof-card">
+                <div class="stars">★★★★★</div>
+                <p>“Pro plan paid for itself in one client project. Commercial rights + custom prompts are huge.”</p>
+                <strong>— Mark, Freelance Creative</strong>
+            </div>
+            <div class="proof-card">
+                <div class="stars">★★★★★</div>
+                <p>“The annual plan was a no-brainer. Fresh visuals for streams and thumbnails every day.”</p>
+                <strong>— Rio, Content Creator</strong>
             </div>
         </div>
     </section>

@@ -452,6 +452,7 @@ HTML = '''<!DOCTYPE html>
             padding: 4px 10px;
             border-radius: 12px;
             display: inline-block;
+            white-space: nowrap;
         }
         
         .status-active {
@@ -1394,6 +1395,9 @@ HTML = '''<!DOCTYPE html>
                         setTimeout(() => {
                             NavState.isTransitioning = false;
                             NavState.pendingTab = null;
+                            if (NavState.queuedTab === NavState.currentTab) {
+                                NavState.queuedTab = null;
+                            }
                             if (NavState.transitionTimeoutId) {
                                 clearTimeout(NavState.transitionTimeoutId);
                                 NavState.transitionTimeoutId = null;

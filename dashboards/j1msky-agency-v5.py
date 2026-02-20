@@ -284,6 +284,8 @@ HTML = '''<!DOCTYPE html>
             border: 1px solid var(--border);
             transition: all 0.3s ease;
             cursor: pointer;
+            min-width: 0;
+            overflow: hidden;
         }
 
         .stat-card:hover {
@@ -645,6 +647,8 @@ HTML = '''<!DOCTYPE html>
         .cost-value {
             color: var(--green);
             font-weight: 600;
+            flex-shrink: 0;
+            white-space: nowrap;
         }
 
         /* Small phones */

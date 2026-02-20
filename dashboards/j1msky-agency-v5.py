@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.18 - Resize Flicker Reduction
-Patch release: avoids redundant live panel DOM writes by only updating meta/log when content changes
+J1MSKY Agency v6.0.19 - Resize Flicker Reduction
+Patch release: pauses live polling during UI transitions and resumes cleanly after to reduce transition jitter
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.18</title>
+    <title>J1MSKY Agency v6.0.19</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -677,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.18</h1>
+        <h1>◈ J1MSKY Agency v6.0.19</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1095,9 +1095,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.18';
+                        header.textContent = '◈ J1MSKY Agency v6.0.19';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.18';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.19';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1180,8 +1180,18 @@ HTML = '''<!DOCTYPE html>
             }
         };
         
+        function showLoading() {
+            document.body.classList.add('navigating');
+            if (typeof StatsUpdater !== 'undefined') {
+                StatsUpdater.pauseForTransition();
+            }
+        }
+
         function hideLoading() {
             document.body.classList.remove('navigating');
+            if (typeof StatsUpdater !== 'undefined') {
+                StatsUpdater.resumeAfterTransition();
+            }
         }
         
         function showTab(tabId, pushState = true) {
@@ -1467,6 +1477,7 @@ HTML = '''<!DOCTYPE html>
         const StatsUpdater = {
             interval: null,
             inFlight: false,
+            pausedByTransition: false,
             lastLogHtml: '',
             lastMetaText: '',
             updateInterval: 5000, // 5 seconds
@@ -1494,6 +1505,17 @@ HTML = '''<!DOCTYPE html>
                     clearInterval(this.interval);
                     this.interval = null;
                 }
+            },
+
+            pauseForTransition() {
+                this.pausedByTransition = true;
+                this.stop();
+            },
+
+            resumeAfterTransition() {
+                if (!this.pausedByTransition || document.hidden) return;
+                this.pausedByTransition = false;
+                this.start();
             },
             
             async update() {
@@ -1709,7 +1731,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.18 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.19 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

@@ -444,6 +444,7 @@ HTML = '''<!DOCTYPE html>
             font-size: 12px;
             color: var(--text-2);
             margin-bottom: 8px;
+            overflow-wrap: anywhere;
         }
         
         .model-status {
@@ -991,11 +992,12 @@ HTML = '''<!DOCTYPE html>
             },
             
             pushHistory(tabId) {
+                const normalized = this.normalizeTab(tabId);
                 if (this.history.length >= this.maxHistory) {
                     this.history.shift();
                 }
-                if (this.history[this.history.length - 1] !== tabId) {
-                    this.history.push(tabId);
+                if (this.history[this.history.length - 1] !== normalized) {
+                    this.history.push(normalized);
                 }
             },
             

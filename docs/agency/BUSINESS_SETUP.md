@@ -1492,3 +1492,19 @@ Create a recurring forum to approve pricing changes with cross-functional alignm
 - Summary of incidents and mitigations
 - Budget movement vs overnight threshold
 - Any customer-facing impact statement drafted and reviewed
+
+## 32) Executive Weekly Brief Format
+
+### Required Sections
+
+1. Revenue movement (new, expansion, churn)
+2. Margin movement (model mix + support load)
+3. Top risks and mitigation owners
+4. Customer sentiment highlights (wins + detractors)
+5. Next-week priorities and dependencies
+
+### Brief KPIs
+
+- On-time brief delivery rate (target: 100%)
+- Decision latency after brief (target: <48h)
+- % actions from prior brief completed (target: >85%)

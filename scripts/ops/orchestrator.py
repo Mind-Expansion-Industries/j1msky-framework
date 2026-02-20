@@ -362,10 +362,17 @@ class UnifiedOrchestrator:
             if avg_tokens >= 5000:
                 anomalies.append({"model": model, "type": "high_tokens_per_call", "value": avg_tokens})
 
+        severity = "none"
+        if any(a["type"] == "high_call_volume" for a in anomalies):
+            severity = "warning"
+        if len(anomalies) >= 2:
+            severity = "critical"
+
         return {
             "has_anomalies": len(anomalies) > 0,
             "anomalies": anomalies,
-            "count": len(anomalies)
+            "count": len(anomalies),
+            "severity": severity
         }
 
     def get_operational_flags(self) -> Dict[str, Any]:

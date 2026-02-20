@@ -1696,3 +1696,18 @@ Escalate proposal portfolio to executive review when any of the following is tru
 - Approve with strategic exception memo
 - Rework proposal structure and rerun pricing scenarios
 - Decline opportunity due to sustained margin risk
+
+## 41) Exception Aging & Recovery SLA
+
+### Aging Bands
+
+- **0-7 days:** owner actively executing recovery plan
+- **8-14 days:** manager review required
+- **15-30 days:** leadership visibility in weekly review
+- **31+ days:** mandatory re-approval or retirement of exception
+
+### Recovery SLA
+
+- Every exception must show measurable recovery progress within 14 days
+- If no progress at day 14, deal is flagged for repricing action
+- If no progress at day 30, automatic escalation to executive review

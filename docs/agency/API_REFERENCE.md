@@ -415,6 +415,7 @@ Creates an auditable approve/escalate decision packet for one quote candidate.
 **Endpoint:** `POST /pricing/scenario`
 
 Batch-evaluates multiple pricing options and returns compliance rollup.
+Use `requires_executive_review=true` as a hard stop before proposal send.
 
 **Request (form fields):**
 - `delivery_type`: `task|subscription|enterprise`
@@ -433,7 +434,9 @@ Batch-evaluates multiple pricing options and returns compliance rollup.
   "delivery_type": "task",
   "scenario_count": 3,
   "compliant_count": 2,
+  "compliance_ratio": 0.67,
   "needs_escalation": true,
+  "requires_executive_review": false,
   "average_margin_pct": 63.42,
   "results": [
     {

@@ -2133,13 +2133,16 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
 
             compliant_count = sum(1 for e in evaluated if e['guardrail_check'].get('is_compliant'))
             avg_margin = round(sum(e['quote'].get('gross_margin_pct', 0.0) for e in evaluated) / len(evaluated), 2)
+            compliance_ratio = round(compliant_count / len(evaluated), 2)
 
             self.send_json({
                 'success': True,
                 'delivery_type': delivery_type,
                 'scenario_count': len(evaluated),
                 'compliant_count': compliant_count,
+                'compliance_ratio': compliance_ratio,
                 'needs_escalation': compliant_count < len(evaluated),
+                'requires_executive_review': compliance_ratio < 0.67,
                 'average_margin_pct': avg_margin,
                 'results': evaluated
             })

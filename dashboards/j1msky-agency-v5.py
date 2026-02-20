@@ -325,6 +325,7 @@ HTML = '''<!DOCTYPE html>
             font-size: 12px;
             cursor: pointer;
             transition: all 0.2s;
+            min-width: 0;
         }
         
         .quick-btn:active {
@@ -1275,7 +1276,7 @@ HTML = '''<!DOCTYPE html>
             tabId = NavState.normalizeTab(tabId);
             
             // Prevent duplicate or conflicting transitions
-            if (tabId === NavState.currentTab || tabId === NavState.pendingTab) {
+            if (tabId === NavState.currentTab || tabId === NavState.pendingTab || tabId === NavState.queuedTab) {
                 return;
             }
 

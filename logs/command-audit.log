@@ -36,3 +36,10 @@ OSError: [Errno 98] Address already in use
 [traceback detected]
 OSError: [Errno 98] Address already in use
 ---
+[2026-02-19T19:10:16-05:00] command-audit snapshot
+[traceback detected]
+OSError: [Errno 98] Address already in use
+---
+[2026-02-19T19:40:27-05:00] command-audit snapshot
+[source missing] /tmp/alexa-bridge.log not found
+---

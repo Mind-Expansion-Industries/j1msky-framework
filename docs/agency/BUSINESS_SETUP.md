@@ -1791,3 +1791,34 @@ Ensure every pricing decision from the day is logged, approved, or escalated bef
 Pricing closure is not complete until:
 - Zero quotes with missing decision records
 - Zero exceptions with `risk_level=critical` and no owner acknowledgment
+
+## 47) Weekly Pricing Retrospective
+
+### Objective
+Review the week's pricing decisions to refine markup defaults and catch systematic errors.
+
+### Retrospective Agenda (30 minutes)
+
+1. **Metrics Review**
+   - Total quotes sent
+   - Approval rate vs escalation rate
+   - Average margin by segment
+   - Exceptions created and closed
+
+2. **Decision Quality**
+   - Review escalated quotes that were later approved
+   - Identify patterns in non-compliant scenarios
+
+3. **Policy Adjustments**
+   - Adjust markup defaults if margins consistently exceed target by >15%
+   - Tighten exception criteria if burn-down rate is too slow
+
+4. **Action Items**
+   - Assign owners to any policy changes
+   - Schedule follow-up review for adjustments
+
+### Output
+
+- Updated pricing policy defaults (if any)
+- List of systematic issues to address
+- Commitments for next week's pricing operations

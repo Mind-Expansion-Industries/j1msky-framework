@@ -432,6 +432,35 @@ Creates an auditable approve/escalate decision packet for one quote candidate.
 }
 ```
 
+#### Generate Portfolio Alert Payload
+**Endpoint:** `POST /pricing/portfolio-alert`
+
+Builds portfolio compliance rollup and an alert-ready message for proposal-level signals.
+
+**Request (form fields):**
+- `scenario_count`: integer
+- `compliant_count`: integer
+- `average_margin_pct`: float
+
+**Response:**
+```json
+{
+  "success": true,
+  "portfolio_summary": {
+    "scenario_count": 3,
+    "compliant_count": 3,
+    "compliance_ratio": 1.0,
+    "requires_executive_review": false,
+    "average_margin_pct": 88.13
+  },
+  "portfolio_alert": {
+    "level": "ok",
+    "summary": "Portfolio healthy: 3/3 compliant, margin 88.13%",
+    "recommended_action": "send_proposal"
+  }
+}
+```
+
 #### Generate Exception Alert Payload
 **Endpoint:** `POST /pricing/exception-alert`
 

@@ -2191,6 +2191,52 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
                 }
             })
 
+        elif self.path == '/api/pricing/portfolio-alert':
+            try:
+                scenario_count = int(params.get('scenario_count', ['0'])[0])
+                compliant_count = int(params.get('compliant_count', ['0'])[0])
+                avg_margin = float(params.get('average_margin_pct', ['0.0'])[0])
+            except ValueError:
+                self.send_json({'success': False, 'error': 'scenario_count and compliant_count must be integers, average_margin_pct must be float'})
+                return
+
+            if scenario_count <= 0:
+                level = 'ok'
+                summary = 'No portfolio scenarios to evaluate'
+                action = 'no_action'
+            else:
+                ratio = round(compliant_count / scenario_count, 2)
+                requires_exec = ratio < 0.67
+
+                if requires_exec:
+                    level = 'critical'
+                    summary = f'Portfolio executive review required: {compliant_count}/{scenario_count} compliant, ratio {ratio}'
+                    action = 'route_to_executive_review'
+                elif ratio < 1.0:
+                    level = 'warning'
+                    summary = f'Portfolio needs attention: {compliant_count}/{scenario_count} compliant'
+                    action = 'proceed_with_caution'
+                else:
+                    level = 'ok'
+                    summary = f'Portfolio healthy: {compliant_count}/{scenario_count} compliant, margin {avg_margin}%'
+                    action = 'send_proposal'
+
+            self.send_json({
+                'success': True,
+                'portfolio_summary': {
+                    'scenario_count': scenario_count,
+                    'compliant_count': compliant_count,
+                    'compliance_ratio': round(compliant_count / max(scenario_count, 1), 2),
+                    'requires_executive_review': scenario_count > 0 and compliant_count < scenario_count * 0.67,
+                    'average_margin_pct': avg_margin
+                },
+                'portfolio_alert': {
+                    'level': level,
+                    'summary': summary,
+                    'recommended_action': action
+                }
+            })
+
         elif self.path == '/api/pricing/quote':
             model = params.get('model', ['k2p5'])[0]
             complexity = params.get('complexity', ['medium'])[0]

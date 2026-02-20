@@ -489,6 +489,7 @@ HTML = '''<!DOCTYPE html>
             display: none;
             /* Containment for better render performance */
             contain: layout style paint;
+            min-width: 0;
         }
         
         .panel.active {
@@ -848,7 +849,7 @@ HTML = '''<!DOCTYPE html>
                 <div class="model-card">
                     <div class="model-header">
                         <div class="model-name">💻 Code Team</div>
-                        <div class="model-cost">$99/mo</span>
+                        <div class="model-cost">$99/mo</div>
                     </div>
                     <div class="model-desc">Kimi + MiniMax • Programming • Development</div>
                     <button class="btn-primary" style="margin-top: 12px;">Deploy Team</button>
@@ -857,7 +858,7 @@ HTML = '''<!DOCTYPE html>
                 <div class="model-card">
                     <div class="model-header">
                         <div class="model-name">🎨 Creative Team</div>
-                        <div class="model-cost">$99/mo</span>
+                        <div class="model-cost">$99/mo</div>
                     </div>
                     <div class="model-desc">Sonnet + Opus • Content • Design</div>
                     <button class="btn-primary" style="margin-top: 12px;">Deploy Team</button>
@@ -917,7 +918,9 @@ HTML = '''<!DOCTYPE html>
             currentTab: 'dashboard',
             isTransitioning: false,
             pendingTab: null,
+            queuedTab: null,
             transitionTimeoutId: null,
+            queuedNavTimeoutId: null,
             popstateTimeoutId: null,
             transitionCooldown: 150,
             lastTransitionTime: 0,
@@ -932,6 +935,11 @@ HTML = '''<!DOCTYPE html>
                 if (this.isTransitioning) return false;
                 if (now - this.lastTransitionTime < this.transitionCooldown) return false;
                 return true;
+            },
+
+            normalizeTab(tabId) {
+                if (!tabId || typeof tabId !== 'string') return 'dashboard';
+                return this.tabs.includes(tabId) ? tabId : 'dashboard';
             },
             
             pushHistory(tabId) {
@@ -971,6 +979,7 @@ HTML = '''<!DOCTYPE html>
             reset() {
                 this.isTransitioning = false;
                 this.pendingTab = null;
+                this.queuedTab = null;
                 if (this.transitionTimeoutId) {
                     clearTimeout(this.transitionTimeoutId);
                     this.transitionTimeoutId = null;
@@ -978,6 +987,10 @@ HTML = '''<!DOCTYPE html>
                 if (this.popstateTimeoutId) {
                     clearTimeout(this.popstateTimeoutId);
                     this.popstateTimeoutId = null;
+                }
+                if (this.queuedNavTimeoutId) {
+                    clearTimeout(this.queuedNavTimeoutId);
+                    this.queuedNavTimeoutId = null;
                 }
                 this.failedTransitions = 0;
                 hideLoading();
@@ -1188,6 +1201,9 @@ HTML = '''<!DOCTYPE html>
         // Focus management for accessibility
         const FocusManager = {
             init() {
+                document.querySelectorAll('.panel').forEach((panel) => {
+                    if (!panel.hasAttribute('tabindex')) panel.setAttribute('tabindex', '-1');
+                });
                 // Restore focus after navigation
                 document.addEventListener('click', (e) => {
                     if (e.target.closest('.nav-item')) {
@@ -1220,20 +1236,24 @@ HTML = '''<!DOCTYPE html>
         }
         
         function showTab(tabId, pushState = true) {
-            // Validate inputs
-            if (!tabId || typeof tabId !== 'string') {
-                console.error('Invalid tabId:', tabId);
-                return;
-            }
+            tabId = NavState.normalizeTab(tabId);
             
             // Prevent duplicate or conflicting transitions
             if (tabId === NavState.currentTab || tabId === NavState.pendingTab) {
                 return;
             }
 
-            // Check transition availability
+            // Check transition availability; queue latest request instead of dropping it.
             if (!NavState.canTransition()) {
-                console.log('Navigation blocked: cooldown or in progress');
+                NavState.queuedTab = tabId;
+                if (!NavState.queuedNavTimeoutId) {
+                    NavState.queuedNavTimeoutId = setTimeout(() => {
+                        const nextTab = NavState.queuedTab;
+                        NavState.queuedTab = null;
+                        NavState.queuedNavTimeoutId = null;
+                        if (nextTab && nextTab !== NavState.currentTab) showTab(nextTab);
+                    }, NavState.transitionCooldown + 10);
+                }
                 return;
             }
             
@@ -1334,25 +1354,25 @@ HTML = '''<!DOCTYPE html>
                         
                     } catch (innerError) {
                         console.error('Error during transition:', innerError);
-                        handleTransitionError(tabId);
+                        handleTransitionError(tabId, pushState);
                     }
                 });
                 
             } catch (error) {
                 console.error('Error starting transition:', error);
-                handleTransitionError(tabId);
+                handleTransitionError(tabId, pushState);
             }
         }
         
-        function handleTransitionError(tabId) {
+        function handleTransitionError(tabId, pushState = true) {
             if (NavState.recordFailure()) {
                 // Retry once after a short delay
-                setTimeout(() => showTab(tabId), 100);
+                setTimeout(() => showTab(tabId, pushState), 100);
             } else {
                 NavState.reset();
                 // Fallback to dashboard
                 if (tabId !== 'dashboard') {
-                    showTab('dashboard');
+                    showTab('dashboard', pushState);
                 }
             }
         }
@@ -1385,7 +1405,7 @@ HTML = '''<!DOCTYPE html>
         };
         
         window.addEventListener('popstate', (e) => {
-            const targetTab = e.state?.tab || 'dashboard';
+            const targetTab = NavState.normalizeTab(e.state?.tab || window.location.hash.slice(1) || 'dashboard');
 
             // Ensure overlay state doesn't conflict with browser history navigation.
             if (typeof helpVisible !== 'undefined' && helpVisible) {
@@ -1685,11 +1705,7 @@ HTML = '''<!DOCTYPE html>
             // Determine initial tab: hash > session > default
             const hash = window.location.hash.slice(1);
             const sessionTab = SessionStore.load();
-            const initialTab = (hash && document.getElementById(hash)) 
-                ? hash 
-                : (sessionTab && document.getElementById(sessionTab)) 
-                    ? sessionTab 
-                    : 'dashboard';
+            const initialTab = NavState.normalizeTab(hash || sessionTab || 'dashboard');
             
             NavState.pushHistory(initialTab);
             if (!hash) history.replaceState({ tab: initialTab }, '', '#' + initialTab);

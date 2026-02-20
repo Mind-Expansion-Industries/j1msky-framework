@@ -30,6 +30,7 @@ COPY . /usr/share/nginx/html
 
 - `index.html` — Complete landing page + pricing offer + Netlify-ready lead form
 - `thank-you.html` — Post-submit conversion page
+- `audit.html` — Focused lead-gen page: Free AI Operations Audit offer (use for ads/outreach)
 - `book.html` — Pre-qualifier intake page before scheduling
 - `netlify.toml` — Deploy config (redirects + security/cache headers)
 - `robots.txt` and `sitemap.xml` — Basic SEO crawl/index support

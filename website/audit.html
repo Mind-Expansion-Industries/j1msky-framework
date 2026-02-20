@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free AI Operations Audit | J1MSKY</title>
+    <meta name="description" content="Get a free 5-point AI operations audit. We'll identify your highest-ROI automation opportunities and send you a prioritized action plan in 48 hours.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent: #22d3ee;
+            --dark: #0f172a;
+            --gray: #94a3b8;
+            --light: #f8fafc;
+            --success: #10b981;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: radial-gradient(ellipse at 20% 20%, rgba(99,102,241,.15), transparent 50%), var(--dark);
+            color: var(--light);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        .wrap { max-width: 520px; margin: 0 auto; padding: 3rem 1.25rem; }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            padding: .35rem .8rem;
+            background: rgba(99,102,241,.12);
+            border: 1px solid rgba(99,102,241,.35);
+            border-radius: 50px;
+            font-size: .8rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        h1 { font-size: clamp(1.9rem, 5vw, 2.6rem); line-height: 1.15; margin-bottom: .8rem; }
+        .lead { color: var(--gray); font-size: 1.05rem; margin-bottom: 2rem; }
+        .checks { list-style: none; margin-bottom: 2rem; }
+        .checks li {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            padding: .4rem 0;
+            color: #cbd5e1;
+        }
+        .checks li::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: 800;
+        }
+        .card {
+            background: rgba(255,255,255,.04);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+        label { display: block; margin: 1rem 0 .4rem; color: var(--gray); font-weight: 500; font-size: .9rem; }
+        label:first-child { margin-top: 0; }
+        input, select, textarea {
+            width: 100%;
+            padding: .85rem 1rem;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,.12);
+            background: rgba(255,255,255,.03);
+            color: var(--light);
+            font: inherit;
+        }
+        textarea { min-height: 100px; resize: vertical; }
+        .btn {
+            border: 0;
+            cursor: pointer;
+            padding: 1rem 1.2rem;
+            border-radius: 10px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            width: 100%;
+            margin-top: 1.2rem;
+            font-size: 1rem;
+        }
+        .trust { margin-top: 1rem; text-align: center; color: var(--gray); font-size: .85rem; }
+        .link { display: inline-block; margin-top: 1.2rem; color: var(--accent); text-decoration: none; }
+        @media (max-width: 560px) { .wrap { padding: 2rem 1rem; } }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="badge">🎯 Limited: 12 audits this week</div>
+        <h1>Free AI Operations Audit</h1>
+        <p class="lead">Get a 5-point assessment of your highest-ROI automation opportunities. Delivered in 48 hours. No sales pitch.</p>
+
+        <ul class="checks">
+            <li>Identify 3 workflows to automate first</li>
+            <li>Estimate time savings & cost impact</li>
+            <li>Prioritized implementation roadmap</li>
+            <li>Tool recommendations with budgets</li>
+            <li>Quick-win fixes you can deploy today</li>
+        </ul>
+
+        <div class="card">
+            <form name="audit-request" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you.html">
+                <input type="hidden" name="form-name" value="audit-request">
+                <input type="hidden" name="source_page" value="audit-landing">
+                <input type="hidden" id="utm-source" name="utm_source" value="direct">
+                <input type="hidden" id="utm-medium" name="utm_medium" value="none">
+                <input type="hidden" id="utm-campaign" name="utm_campaign" value="audit-offer">
+                <p style="display:none;"><label>Do not fill: <input name="bot-field"></label></p>
+
+                <label for="name">Your Name</label>
+                <input id="name" name="name" required placeholder="Alex Rivera">
+
+                <label for="email">Work Email</label>
+                <input id="email" name="email" type="email" required placeholder="alex@company.com">
+
+                <label for="company">Company / Website</label>
+                <input id="company" name="company" placeholder="acme.com">
+
+                <label for="team-size">Team Size</label>
+                <select id="team-size" name="team_size" required>
+                    <option value="">Select...</option>
+                    <option value="solo">Just me</option>
+                    <option value="2-10">2–10 people</option>
+                    <option value="11-50">11–50 people</option>
+                    <option value="50+">50+ people</option>
+                </select>
+
+                <label for="pain">What's your biggest time drain right now?</label>
+                <textarea id="pain" name="pain" required placeholder="Example: Manually copying data between CRM and email tools takes 2+ hours daily..."></textarea>
+
+                <button class="btn" type="submit">Get My Free Audit →</button>
+                <p class="trust">✓ 48-hour delivery • ✓ No spam • ✓ Unsubscribe anytime</p>
+            </form>
+        </div>
+
+        <a class="link" href="/index.html">← View full agency services</a>
+    </div>
+
+    <script>
+        const p = new URLSearchParams(window.location.search);
+        document.getElementById('utm-source').value = p.get('utm_source') || 'direct';
+        document.getElementById('utm-medium').value = p.get('utm_medium') || 'none';
+        document.getElementById('utm-campaign').value = p.get('utm_campaign') || 'audit-offer';
+    </script>
+</body>
+</html>

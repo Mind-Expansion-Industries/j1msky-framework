@@ -91,7 +91,7 @@ Use `budget_utilization_pct` for alerting thresholds (for example: warn at 70%, 
 `operational_flags.recommended_action` provides an immediate operator play for runbook automation.
 `model_mix_recommendation` can be used by schedulers to bias routing toward cost-optimized or balanced modes.
 `pricing_policy` surfaces current markup guardrails used by quoting workflows.
-`example_task_quote` gives a ready-to-display sample quote (internal cost, markup, recommended customer price, margin).
+`example_task_quote` gives a ready-to-display sample quote with segment-adjusted pricing (internal cost, base markup, segment adjustment, final markup, recommended price, margin).
 `quote_decision_preview` provides an auditable decision packet (approved/escalated + next step) for CRM syncing.
 `quote_portfolio_preview` gives a multi-scenario compliance rollup for proposal-level pricing checks.
 Use `quote_portfolio_preview.requires_executive_review=true` to trigger leadership review workflow before proposals are sent.
@@ -145,9 +145,12 @@ Use `usage_anomalies.severity` to route alerts (`warning` to ops queue, `critica
   "example_task_quote": {
     "model": "k2p5",
     "complexity": "medium",
+    "segment": "mid_market",
     "estimated_tokens": 2000,
     "internal_cost": 0.002,
-    "markup": 4.0,
+    "base_markup": 4.0,
+    "segment_adjustment": 0.0,
+    "final_markup": 4.0,
     "recommended_price": 0.5,
     "gross_margin_pct": 99.6,
     "margin_band": "strong"

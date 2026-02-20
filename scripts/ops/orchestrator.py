@@ -244,13 +244,23 @@ class UnifiedOrchestrator:
             "minimum_price": pricing.get("minimum_price", 0.50)
         }
 
-    def recommend_task_price(self, model_alias: str, estimated_tokens: int = 1000, complexity: str = "medium") -> Dict[str, Any]:
+    def recommend_task_price(self, model_alias: str, estimated_tokens: int = 1000, complexity: str = "medium", segment: str = "mid_market") -> Dict[str, Any]:
         """Return an internal-cost + customer-price quote for pay-per-task workflows."""
         policy = self.get_pricing_policy()
         internal_cost = round(self.estimate_cost(model_alias, estimated_tokens), 4)
 
+        # Segment markup adjustments
+        segment_adjustments = {
+            "enterprise": 0.5,
+            "mid_market": 0.0,
+            "smb": -0.5,
+            "startup": -1.0
+        }
+        segment_adj = segment_adjustments.get(segment, 0.0)
+
         complexity_map = policy.get("complexity_markup", {})
-        markup = complexity_map.get(complexity, policy.get("target_markup", 4.0))
+        base_markup = complexity_map.get(complexity, policy.get("target_markup", 4.0))
+        markup = base_markup + segment_adj
         markup = min(max(markup, policy.get("min_markup", 3.0)), policy.get("max_markup", 5.0))
 
         recommended_price = max(internal_cost * markup, policy.get("minimum_price", 0.50))
@@ -266,9 +276,12 @@ class UnifiedOrchestrator:
         return {
             "model": model_alias,
             "complexity": complexity,
+            "segment": segment,
             "estimated_tokens": estimated_tokens,
             "internal_cost": internal_cost,
-            "markup": round(markup, 2),
+            "base_markup": base_markup,
+            "segment_adjustment": segment_adj,
+            "final_markup": round(markup, 2),
             "recommended_price": round(recommended_price, 2),
             "gross_margin_pct": gross_margin_pct,
             "margin_band": margin_band

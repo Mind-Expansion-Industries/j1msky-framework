@@ -1959,4 +1959,30 @@ Recognize that different customer segments have different price sensitivities an
 - Price adjustments at renewal for segment changes
 - grandfather existing customers for 12 months minimum
 
+## 52) Seasonal Pricing Adjustments
+
+### Purpose
+Optimize pricing for predictable demand cycles throughout the year.
+
+### Seasonal Calendar
+
+| Period | Market Condition | Recommended Action |
+|--------|------------------|-------------------|
+| **Q1 (Jan-Mar)** | Budget flush, new initiatives | Maintain baseline, emphasize value |
+| **Q2 (Apr-Jun)** | Steady demand | Test 10% markup increase on new logos |
+| **Q3 (Jul-Sep)** | Summer slowdown | Offer 15% quarterly prepay discount |
+| **Q4 (Oct-Dec)** | Budget exhaustion, urgency | Premium pricing (+0.5x) for rush delivery |
+
+### Black Friday / End-of-Year
+
+- Run limited-time promotions (max 20% off, max 7 days)
+- Require annual commitment for promotional pricing
+- Track promotion cohort separately for LTV analysis
+
+### Seasonal Guardrails
+
+- Never reduce markup below 2.5x even during promotions
+- Promotional pricing requires 30-day advance planning
+- All seasonal changes must have defined end dates
+
 

@@ -4,6 +4,9 @@ Deployable client-facing landing page for art-generation subscription.
 
 ## Files
 - `index.html` — Landing + offer + CTA page for AI wallpaper subscription
+- `privacy.html` — Privacy policy page
+- `terms.html` — Terms of service page
+- `success.html` / `cancel.html` — Stripe redirect completion pages
 
 ## Offer Structure
 - Free: $0/mo (weekly wallpaper)

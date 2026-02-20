@@ -256,6 +256,13 @@ class UnifiedOrchestrator:
         recommended_price = max(internal_cost * markup, policy.get("minimum_price", 0.50))
         gross_margin_pct = round(((recommended_price - internal_cost) / recommended_price) * 100, 2) if recommended_price else 0.0
 
+        if gross_margin_pct >= 70:
+            margin_band = "strong"
+        elif gross_margin_pct >= 55:
+            margin_band = "healthy"
+        else:
+            margin_band = "at_risk"
+
         return {
             "model": model_alias,
             "complexity": complexity,
@@ -263,7 +270,27 @@ class UnifiedOrchestrator:
             "internal_cost": internal_cost,
             "markup": round(markup, 2),
             "recommended_price": round(recommended_price, 2),
-            "gross_margin_pct": gross_margin_pct
+            "gross_margin_pct": gross_margin_pct,
+            "margin_band": margin_band
+        }
+
+    def evaluate_pricing_guardrails(self, quote: Dict[str, Any], delivery_type: str = "task") -> Dict[str, Any]:
+        """Evaluate quote against margin guardrails for ops approvals."""
+        margin = quote.get("gross_margin_pct", 0.0)
+        threshold_map = {
+            "task": 55.0,
+            "subscription": 50.0,
+            "enterprise": 45.0
+        }
+        threshold = threshold_map.get(delivery_type, 55.0)
+        is_compliant = margin >= threshold
+
+        return {
+            "delivery_type": delivery_type,
+            "minimum_margin_pct": threshold,
+            "actual_margin_pct": margin,
+            "is_compliant": is_compliant,
+            "action": "approve_quote" if is_compliant else "escalate_deal_desk"
         }
     
     def get_daily_spend(self, day: Optional[str] = None) -> float:
@@ -472,6 +499,8 @@ class UnifiedOrchestrator:
         daily_budget = self.config.get("cost_tracking", {}).get("daily_budget", 50)
         today_spend = self.get_daily_spend(today)
         default_quote_model = self.get_model_for_task("coding", "medium", "normal")
+        sample_quote = self.recommend_task_price(default_quote_model, estimated_tokens=2000, complexity="medium")
+        sample_guardrail = self.evaluate_pricing_guardrails(sample_quote, delivery_type="task")
         return {
             "timestamp": datetime.now().isoformat(),
             "models_active": len(self.config["models"]),
@@ -487,7 +516,8 @@ class UnifiedOrchestrator:
             "operational_flags": self.get_operational_flags(),
             "model_mix_recommendation": self.get_model_mix_recommendation(),
             "pricing_policy": self.get_pricing_policy(),
-            "example_task_quote": self.recommend_task_price(default_quote_model, estimated_tokens=2000, complexity="medium"),
+            "example_task_quote": sample_quote,
+            "pricing_guardrail_check": sample_guardrail,
             "usage_anomalies": self.detect_usage_anomalies(),
             "monthly_forecast": self.forecast_monthly_spend(),
             "orchestration_mode": "unified",

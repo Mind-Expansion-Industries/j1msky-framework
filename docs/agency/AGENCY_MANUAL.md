@@ -172,6 +172,21 @@ Example:
 - You charge: $0.80 - $1.00
 - Profit: $0.60 - $0.80
 
+### Quick Quote Check (Ops-Safe)
+
+Before sending a pay-per-task quote, run:
+
+```bash
+curl http://localhost:8080/api/orchestrator/status
+```
+
+Look for:
+- `pricing_policy` → active markup + minimum price floor
+- `example_task_quote` → sample recommended price and margin band
+- `pricing_guardrail_check` → whether quote profile is compliant or should escalate
+
+If `pricing_guardrail_check.action` returns `escalate_deal_desk`, do not send final pricing until reviewed.
+
 ---
 
 ## 🎯 USE CASES

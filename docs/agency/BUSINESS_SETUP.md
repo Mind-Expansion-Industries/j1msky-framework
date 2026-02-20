@@ -1558,3 +1558,25 @@ Escalate before sending quote when:
 - Margin drops below target threshold
 - Client requests non-standard SLA/liability terms
 - Scope is unclear or likely to expand >30%
+
+## 34) Nightly Pricing QA Loop
+
+### Objective
+Catch weak-margin quotes before they become avoidable churn or bad-fit contracts.
+
+### Nightly Checklist
+
+1. Export all quotes sent in the last 24h
+2. Flag any quote with estimated gross margin below policy threshold
+3. Verify discount approvals match the Deal Desk matrix
+4. Annotate each at-risk quote with a recovery action:
+   - tighten scope
+   - move to subscription packaging
+   - require phased delivery
+5. Summarize outcomes in end-of-day ops handoff
+
+### SLA for At-Risk Quotes
+
+- **Critical (<45% margin):** same-night escalation to revenue lead
+- **Warning (45-54.99% margin):** next-business-day review
+- **Healthy (>=55% margin):** no escalation required

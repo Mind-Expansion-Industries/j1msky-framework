@@ -457,6 +457,7 @@ HTML = '''<!DOCTYPE html>
         
         .form-input, .form-select, .form-textarea {
             width: 100%;
+            min-width: 0;
             padding: 14px;
             background: var(--bg-3);
             border: 1px solid var(--border);
@@ -1544,6 +1545,7 @@ HTML = '''<!DOCTYPE html>
                     current.style.display = 'block';
                     current.classList.add('active');
                 }
+                syncNavAriaFromActive();
                 if (helpBtn) helpBtn.focus();
             }
         }

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.11 - Resize Flicker Reduction
-Patch release: respects reduced-motion preference during tab-transition scroll restoration
+J1MSKY Agency v6.0.12 - Resize Flicker Reduction
+Patch release: limits swipe nav to coarse pointers and avoids control-gesture conflicts
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.11</title>
+    <title>J1MSKY Agency v6.0.12</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -677,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.11</h1>
+        <h1>◈ J1MSKY Agency v6.0.12</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -992,6 +992,10 @@ HTML = '''<!DOCTYPE html>
             isTracking: false,
             
             init() {
+                // Only enable swipe navigation on touch-centric devices.
+                if (!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches)) {
+                    return;
+                }
                 const opts = { passive: true };
                 document.addEventListener('touchstart', this.onStart.bind(this), opts);
                 document.addEventListener('touchend', this.onEnd.bind(this), opts);
@@ -999,6 +1003,12 @@ HTML = '''<!DOCTYPE html>
             },
             
             onStart(e) {
+                // Ignore gestures starting on interactive controls.
+                if (e.target && e.target.closest('button, a, input, textarea, select, label, [role="button"]')) {
+                    this.isTracking = false;
+                    return;
+                }
+
                 const touch = e.touches[0];
                 const viewportWidth = window.innerWidth;
                 
@@ -1079,9 +1089,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.11';
+                        header.textContent = '◈ J1MSKY Agency v6.0.12';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.11';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.12';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1660,7 +1670,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.11 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.12 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

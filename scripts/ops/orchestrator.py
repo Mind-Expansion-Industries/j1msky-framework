@@ -368,6 +368,29 @@ class UnifiedOrchestrator:
             return f"Throttle traffic for: {providers}"
         return "No action required"
 
+    def get_model_mix_recommendation(self) -> Dict[str, Any]:
+        """Recommend model mix adjustments from recent usage and budget state."""
+        summary = self.get_usage_summary(limit=10)
+        budget_level = self.get_budget_alert_level()
+
+        if budget_level in {"warning", "critical"}:
+            return {
+                "strategy": "cost-optimized",
+                "primary": ["k2p5", "minimax-m2.5"],
+                "secondary": ["sonnet"],
+                "restricted": ["opus"],
+                "reason": "Budget pressure detected"
+            }
+
+        top_models = [m["model"] for m in summary.get("top_models", [])[:3]]
+        return {
+            "strategy": "balanced",
+            "primary": top_models or ["k2p5", "sonnet"],
+            "secondary": ["codex"],
+            "restricted": [],
+            "reason": "Normal operating range"
+        }
+
     def get_status_report(self):
         """Get current orchestrator status"""
         today = datetime.now().strftime("%Y-%m-%d")
@@ -386,6 +409,7 @@ class UnifiedOrchestrator:
             "budget_utilization_pct": self.get_budget_utilization_pct(),
             "budget_alert_level": self.get_budget_alert_level(),
             "operational_flags": self.get_operational_flags(),
+            "model_mix_recommendation": self.get_model_mix_recommendation(),
             "monthly_forecast": self.forecast_monthly_spend(),
             "orchestration_mode": "unified",
             "ceo_model": "opus",

@@ -89,6 +89,7 @@ Use `budget_utilization_pct` for alerting thresholds (for example: warn at 70%, 
 `budget_alert_level` is a normalized state machine: `ok` → `notice` → `warning` → `critical`.
 `operational_flags.requires_ops_attention=true` should page the operations owner or trigger escalation workflow.
 `operational_flags.recommended_action` provides an immediate operator play for runbook automation.
+`model_mix_recommendation` can be used by schedulers to bias routing toward cost-optimized or balanced modes.
 
 **Response:**
 ```json
@@ -114,6 +115,13 @@ Use `budget_utilization_pct` for alerting thresholds (for example: warn at 70%, 
     "hot_providers": [],
     "requires_ops_attention": false,
     "recommended_action": "No action required"
+  },
+  "model_mix_recommendation": {
+    "strategy": "balanced",
+    "primary": ["k2p5", "sonnet"],
+    "secondary": ["codex"],
+    "restricted": [],
+    "reason": "Normal operating range"
   },
   "monthly_forecast": {
     "projected_spend": 372.9,

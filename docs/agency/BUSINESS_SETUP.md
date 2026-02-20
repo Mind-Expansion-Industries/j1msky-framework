@@ -1417,3 +1417,26 @@ Require legal/revops approval when any of these apply:
 - Time to recovery plan publication (target: <48h)
 - Renewal impact from incident accounts (target: <5% negative variance)
 - Trust recovery score from follow-up survey (target: >4/5)
+
+## 29) Quarterly Planning Framework
+
+### Planning Inputs
+
+- Last-quarter KPI outcomes (MRR, churn, activation, gross margin)
+- Top 10 customer requests and incident themes
+- Capacity baseline (implementation, support, sales)
+- Product and model-cost trend assumptions
+
+### Quarterly Prioritization Buckets
+
+- **Growth (40%)**: pipeline conversion and expansion motions
+- **Retention (30%)**: renewals, win-back, health-risk mitigation
+- **Efficiency (20%)**: margin, model mix, support load reduction
+- **Innovation (10%)**: strategic experiments and new offers
+
+### Quarter Plan Deliverables
+
+- Revenue plan by month + confidence range
+- Risk register with mitigation owner
+- 90-day operating scorecard
+- Executive narrative: bets, tradeoffs, and expected outcomes

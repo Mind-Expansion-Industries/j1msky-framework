@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.24 - Resize Flicker Reduction
-Patch release: coalesces deferred popstate transitions to avoid stacked back/forward callbacks during in-flight navigation
+J1MSKY Agency v6.0.25 - Resize Flicker Reduction
+Patch release: reacts to significant height-only viewport changes (e.g., mobile UI chrome/orientation) for more reliable responsive refresh
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.24</title>
+    <title>J1MSKY Agency v6.0.25</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -677,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.24</h1>
+        <h1>◈ J1MSKY Agency v6.0.25</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1108,9 +1108,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.24';
+                        header.textContent = '◈ J1MSKY Agency v6.0.25';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.24';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.25';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1126,6 +1126,7 @@ HTML = '''<!DOCTYPE html>
         const ResizeHandler = {
             observer: null,
             lastWidth: 0,
+            lastHeight: 0,
             debounceTimer: null,
             
             init() {
@@ -1151,8 +1152,10 @@ HTML = '''<!DOCTYPE html>
             
             handleResize(entry) {
                 const width = entry?.contentRect?.width || window.innerWidth;
-                if (Math.abs(width - this.lastWidth) < 50) return;
+                const height = entry?.contentRect?.height || window.innerHeight;
+                if (Math.abs(width - this.lastWidth) < 50 && Math.abs(height - this.lastHeight) < 50) return;
                 this.lastWidth = width;
+                this.lastHeight = height;
 
                 // Smooth layout refresh without body hide/show flicker.
                 requestAnimationFrame(() => {
@@ -1761,7 +1764,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.24 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.25 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

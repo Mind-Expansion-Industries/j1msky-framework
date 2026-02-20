@@ -229,6 +229,42 @@ class UnifiedOrchestrator:
         }
         cost_per_1k = cost_map.get(model_alias, 0.003)
         return (estimated_tokens / 1000) * cost_per_1k
+
+    def get_pricing_policy(self) -> Dict[str, Any]:
+        """Return pricing policy with safe defaults for customer quoting."""
+        pricing = self.config.get("pricing", {})
+        return {
+            "min_markup": pricing.get("min_markup", 3.0),
+            "target_markup": pricing.get("target_markup", 4.0),
+            "max_markup": pricing.get("max_markup", 5.0),
+            "complexity_markup": pricing.get(
+                "complexity_markup",
+                {"low": 3.0, "medium": 4.0, "high": 5.0}
+            ),
+            "minimum_price": pricing.get("minimum_price", 0.50)
+        }
+
+    def recommend_task_price(self, model_alias: str, estimated_tokens: int = 1000, complexity: str = "medium") -> Dict[str, Any]:
+        """Return an internal-cost + customer-price quote for pay-per-task workflows."""
+        policy = self.get_pricing_policy()
+        internal_cost = round(self.estimate_cost(model_alias, estimated_tokens), 4)
+
+        complexity_map = policy.get("complexity_markup", {})
+        markup = complexity_map.get(complexity, policy.get("target_markup", 4.0))
+        markup = min(max(markup, policy.get("min_markup", 3.0)), policy.get("max_markup", 5.0))
+
+        recommended_price = max(internal_cost * markup, policy.get("minimum_price", 0.50))
+        gross_margin_pct = round(((recommended_price - internal_cost) / recommended_price) * 100, 2) if recommended_price else 0.0
+
+        return {
+            "model": model_alias,
+            "complexity": complexity,
+            "estimated_tokens": estimated_tokens,
+            "internal_cost": internal_cost,
+            "markup": round(markup, 2),
+            "recommended_price": round(recommended_price, 2),
+            "gross_margin_pct": gross_margin_pct
+        }
     
     def get_daily_spend(self, day: Optional[str] = None) -> float:
         """Get spend for a specific day (YYYY-MM-DD) or today."""
@@ -435,6 +471,7 @@ class UnifiedOrchestrator:
         today = datetime.now().strftime("%Y-%m-%d")
         daily_budget = self.config.get("cost_tracking", {}).get("daily_budget", 50)
         today_spend = self.get_daily_spend(today)
+        default_quote_model = self.get_model_for_task("coding", "medium", "normal")
         return {
             "timestamp": datetime.now().isoformat(),
             "models_active": len(self.config["models"]),
@@ -449,6 +486,8 @@ class UnifiedOrchestrator:
             "budget_alert_level": self.get_budget_alert_level(),
             "operational_flags": self.get_operational_flags(),
             "model_mix_recommendation": self.get_model_mix_recommendation(),
+            "pricing_policy": self.get_pricing_policy(),
+            "example_task_quote": self.recommend_task_price(default_quote_model, estimated_tokens=2000, complexity="medium"),
             "usage_anomalies": self.detect_usage_anomalies(),
             "monthly_forecast": self.forecast_monthly_spend(),
             "orchestration_mode": "unified",

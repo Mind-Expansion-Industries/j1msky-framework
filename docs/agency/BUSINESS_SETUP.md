@@ -1508,3 +1508,53 @@ Create a recurring forum to approve pricing changes with cross-functional alignm
 - On-time brief delivery rate (target: 100%)
 - Decision latency after brief (target: <48h)
 - % actions from prior brief completed (target: >85%)
+
+## 33) Pricing Flow Notes (Quote-to-Close)
+
+### Goal
+Create consistent pricing decisions that protect margin while keeping quotes fast and easy for sales.
+
+### 5-Step Pricing Flow
+
+1. **Classify the work**
+   - Complexity: low / medium / high
+   - Delivery type: one-off task, monthly managed plan, enterprise scope
+
+2. **Estimate internal cost**
+   - Use model + token estimate from orchestrator
+   - Include support and implementation overhead (time-based add-on)
+
+3. **Apply markup band**
+   - Low complexity: 3x
+   - Medium complexity: 4x
+   - High complexity: 5x
+   - Enforce task minimum price floor ($0.50)
+
+4. **Apply commercial guardrails**
+   - Validate gross margin target (>=55% for one-off tasks, >=50% for subscriptions)
+   - If discount requested, route through Deal Desk approval matrix
+
+5. **Send quote and log rationale**
+   - Record: customer segment, complexity, estimated cost, offered price, margin
+   - Store in CRM/deal notes for later win/loss analysis
+
+### Fast Quote Worksheet
+
+| Field | Example |
+|---|---|
+| Task | Build webhook retry handler |
+| Model | k2p5 |
+| Estimated tokens | 2,000 |
+| Estimated internal cost | $0.00-0.01 |
+| Complexity | Medium |
+| Markup | 4x |
+| Quoted customer price | $0.50 minimum floor |
+| Gross margin | ~98% |
+
+### Pricing Escalation Triggers
+
+Escalate before sending quote when:
+- Proposed discount >20%
+- Margin drops below target threshold
+- Client requests non-standard SLA/liability terms
+- Scope is unclear or likely to expand >30%

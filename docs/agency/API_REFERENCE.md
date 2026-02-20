@@ -90,6 +90,8 @@ Use `budget_utilization_pct` for alerting thresholds (for example: warn at 70%, 
 `operational_flags.requires_ops_attention=true` should page the operations owner or trigger escalation workflow.
 `operational_flags.recommended_action` provides an immediate operator play for runbook automation.
 `model_mix_recommendation` can be used by schedulers to bias routing toward cost-optimized or balanced modes.
+`pricing_policy` surfaces current markup guardrails used by quoting workflows.
+`example_task_quote` gives a ready-to-display sample quote (internal cost, markup, recommended customer price, margin).
 `usage_anomalies` is intended for alerting pipelines and overnight ops watchlists.
 Use `usage_anomalies.severity` to route alerts (`warning` to ops queue, `critical` to on-call).
 
@@ -124,6 +126,22 @@ Use `usage_anomalies.severity` to route alerts (`warning` to ops queue, `critica
     "secondary": ["codex"],
     "restricted": [],
     "reason": "Normal operating range"
+  },
+  "pricing_policy": {
+    "min_markup": 3.0,
+    "target_markup": 4.0,
+    "max_markup": 5.0,
+    "complexity_markup": {"low": 3.0, "medium": 4.0, "high": 5.0},
+    "minimum_price": 0.5
+  },
+  "example_task_quote": {
+    "model": "k2p5",
+    "complexity": "medium",
+    "estimated_tokens": 2000,
+    "internal_cost": 0.002,
+    "markup": 4.0,
+    "recommended_price": 0.5,
+    "gross_margin_pct": 99.6
   },
   "usage_anomalies": {
     "has_anomalies": false,

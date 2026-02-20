@@ -21,22 +21,18 @@ python3 -m http.server 8090
 
 Or upload `index.html` to Netlify/Vercel/Cloudflare Pages.
 
-## Stripe Checkout Wiring (5 min)
-1. Create Stripe payment links for Daily and Pro plans (monthly + annual).
-2. In `index.html`, update:
-   - `CHECKOUT_LINKS.daily_monthly`
-   - `CHECKOUT_LINKS.daily_annual`
-   - `CHECKOUT_LINKS.pro_monthly`
-   - `CHECKOUT_LINKS.pro_annual`
-3. Configure Stripe redirect URLs:
-   - Success URL: `https://YOUR-DOMAIN/success.html`
-   - Cancel URL: `https://YOUR-DOMAIN/cancel.html`
-4. Deploy and test each plan button end-to-end.
+## Lead Capture Wiring (deployable now)
+The landing page is configured with a production-safe **Netlify Form**:
+- form name: `wallpaper-leads`
+- anti-spam honeypot included
+- captures: email, selected plan, selected billing, UTM params
+- success redirect: `/success.html`
+
+If using a different host, point the form `action` to your backend/CRM endpoint.
 
 ## Production TODO
-- Connect CTA buttons to live Stripe Checkout links
-- Connect `captureLead()` to ConvertKit/Mailchimp/API endpoint
+- Connect lead webhook/CRM automation (ConvertKit, Mailchimp, HubSpot, etc.)
 - Add analytics (Plausible/GA)
 - Replace placeholder gallery with generated samples
-- Set launch coupon in Stripe (50% first month) to match page copy
-- Validate UTM + checkout attribution in Stripe dashboard (`client_reference_id` / UTM params)
+- Optional: add Stripe checkout links after validating pricing/offer
+- Validate UTM and plan-intent attribution in your CRM

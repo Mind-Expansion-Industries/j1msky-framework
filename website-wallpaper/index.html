@@ -458,7 +458,7 @@
 
     <nav>
         <div class="logo">◈ WallpaperDaily</div>
-        <a href="#pricing" class="nav-cta">Get Started →</a>
+        <a href="#waitlist" class="nav-cta">Get Early Access →</a>
     </nav>
 
     <div style="max-width:1100px;margin:0 auto;padding:0 2rem;">
@@ -471,7 +471,7 @@
         <div class="hero-badge">🎨 AI-Generated Daily</div>
         <h1>Stunning 4K Wallpapers <span>Delivered Daily</span></h1>
         <p>Stop searching. Start enjoying. Get unique, AI-generated wallpapers tailored to your taste, delivered to your inbox every morning.</p>
-        <a href="#pricing" class="hero-cta">Start Free Trial — 7 Days</a>
+        <a href="#waitlist" class="hero-cta">Get Launch Access →</a>
         <p style="margin-top: 1.5rem; font-size: 0.875rem; color: var(--gray);">✓ Cancel anytime ✓ No credit card required ✓ 4K quality</p>
     </section>
 
@@ -565,7 +565,7 @@
                     <li>Standard themes</li>
                     <li>Email delivery</li>
                 </ul>
-                <a href="#" class="btn btn-outline" onclick="showSignup('free')">Get Started</a>
+                <a href="#waitlist" class="btn btn-outline" onclick="selectPlan('free')">Join Free List</a>
             </div>
             
             <div class="pricing-card popular">
@@ -580,7 +580,7 @@
                     <li>Early access to new styles</li>
                     <li>Archive access (30 days)</li>
                 </ul>
-                <a href="#" class="btn" onclick="showSignup('daily')">Start Free Trial</a>
+                <a href="#waitlist" class="btn" onclick="selectPlan('daily')">Get Daily Access</a>
             </div>
             
             <div class="pricing-card">
@@ -595,7 +595,7 @@
                     <li>Unlimited archive access</li>
                     <li>Priority support</li>
                 </ul>
-                <a href="#" class="btn btn-outline" onclick="showSignup('pro')">Start Free Trial</a>
+                <a href="#waitlist" class="btn btn-outline" onclick="selectPlan('pro')">Get Pro Access</a>
             </div>
         </div>
     </section>
@@ -668,17 +668,22 @@
     <section class="cta-section">
         <h2>Ready for Daily Fresh Art?</h2>
         <p>Join 2,000+ subscribers getting beautiful wallpapers every morning.</p>
-        <a href="#pricing" class="hero-cta">Start Your Free Trial →</a>
+        <a href="#waitlist" class="hero-cta" onclick="selectPlan('daily')">Claim Launch Access →</a>
 
-        <div style="max-width:520px;margin:2rem auto 0;background:#12121a;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1rem;">
-            <p style="margin-bottom:0.8rem;color:#9ca3af;font-size:0.95rem;">Want launch updates + promo codes?</p>
-            <form onsubmit="captureLead(event)" style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center;">
-                <input id="lead-email" type="email" required placeholder="you@email.com" style="flex:1;min-width:220px;padding:0.8rem;border-radius:10px;border:1px solid rgba(255,255,255,0.18);background:#0f0f16;color:#f3f4f6;">
-                <input type="hidden" id="utm-source" />
-                <input type="hidden" id="utm-medium" />
-                <input type="hidden" id="utm-campaign" />
-                <button class="btn" type="submit" style="max-width:180px;">Notify Me</button>
+        <div id="waitlist" style="max-width:620px;margin:2rem auto 0;background:#12121a;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1rem;">
+            <p style="margin-bottom:0.8rem;color:#9ca3af;font-size:0.95rem;">Claim launch access + promo pricing.</p>
+            <form name="wallpaper-leads" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/success.html" style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center;">
+                <input type="hidden" name="form-name" value="wallpaper-leads">
+                <p style="display:none;"><label>Don't fill this out if you're human: <input name="bot-field"></label></p>
+                <input id="lead-email" name="email" type="email" required placeholder="you@email.com" style="flex:1;min-width:220px;padding:0.8rem;border-radius:10px;border:1px solid rgba(255,255,255,0.18);background:#0f0f16;color:#f3f4f6;">
+                <input type="hidden" id="utm-source" name="utm_source" />
+                <input type="hidden" id="utm-medium" name="utm_medium" />
+                <input type="hidden" id="utm-campaign" name="utm_campaign" />
+                <input type="hidden" id="selected-plan" name="selected_plan" value="daily" />
+                <input type="hidden" id="selected-billing" name="selected_billing" value="monthly" />
+                <button class="btn" type="submit" style="max-width:220px;">Get Early Access</button>
             </form>
+            <p id="plan-note" style="margin-top:0.65rem;color:#9ca3af;font-size:0.85rem;">Selected plan: Daily (monthly)</p>
         </div>
     </section>
 
@@ -691,58 +696,27 @@
         function toggleFaq(el) {
             const item = el.parentElement;
             const isActive = item.classList.contains('active');
-            
+
             // Close all
             document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
-            
+
             // Toggle current
             if (!isActive) {
                 item.classList.add('active');
             }
         }
 
-        // Replace with your real Stripe payment links
-        const CHECKOUT_LINKS = {
-            free: 'mailto:hello@wallpaperdaily.ai?subject=WallpaperDaily%20Free%20Signup',
-            daily_monthly: 'https://buy.stripe.com/test_daily_monthly_placeholder',
-            daily_annual: 'https://buy.stripe.com/test_daily_annual_placeholder',
-            pro_monthly: 'https://buy.stripe.com/test_pro_monthly_placeholder',
-            pro_annual: 'https://buy.stripe.com/test_pro_annual_placeholder'
-        };
-
         let selectedBilling = 'monthly';
 
-        function showSignup(plan) {
-            const checkoutKey = plan === 'free' ? 'free' : `${plan}_${selectedBilling}`;
-            const baseUrl = CHECKOUT_LINKS[checkoutKey] || CHECKOUT_LINKS.free;
-            if (baseUrl.includes('placeholder')) {
-                alert(`Checkout link for ${checkoutKey} is not configured yet.\n\nUpdate CHECKOUT_LINKS in index.html with your Stripe payment links.`);
-                return;
-            }
-
-            localStorage.setItem('wd_selected_plan', plan);
-            localStorage.setItem('wd_selected_billing', selectedBilling);
-            const url = new URL(baseUrl, window.location.origin);
-            url.searchParams.set('client_reference_id', `wd_${plan}_${selectedBilling}_${Date.now()}`);
-            url.searchParams.set('prefilled_email', document.getElementById('lead-email')?.value || '');
-            url.searchParams.set('utm_source', document.getElementById('utm-source')?.value || 'direct');
-            url.searchParams.set('utm_medium', document.getElementById('utm-medium')?.value || 'none');
-            url.searchParams.set('utm_campaign', document.getElementById('utm-campaign')?.value || 'wallpaper-launch');
-            window.location.href = url.toString();
-        }
-
-        function captureLead(e) {
-            e.preventDefault();
-            const email = document.getElementById('lead-email').value;
-            const attribution = {
-                utm_source: document.getElementById('utm-source').value,
-                utm_medium: document.getElementById('utm-medium').value,
-                utm_campaign: document.getElementById('utm-campaign').value
-            };
-            // Replace this with your backend endpoint / ConvertKit / Mailchimp form action
-            console.log('Lead captured:', { email, source: 'website-wallpaper', attribution, ts: new Date().toISOString() });
-            alert('Thanks! You are on the list.\n\nNext step: connect this form to your email provider.');
-            e.target.reset();
+        function selectPlan(plan) {
+            const planInput = document.getElementById('selected-plan');
+            const billingInput = document.getElementById('selected-billing');
+            const note = document.getElementById('plan-note');
+            if (planInput) planInput.value = plan;
+            if (billingInput) billingInput.value = selectedBilling;
+            if (note) note.textContent = `Selected plan: ${plan.charAt(0).toUpperCase() + plan.slice(1)} (${selectedBilling})`;
+            const waitlist = document.getElementById('waitlist');
+            if (waitlist) waitlist.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
         function setBilling(mode) {
@@ -754,6 +728,9 @@
             const descDaily = document.getElementById('desc-daily');
             const descPro = document.getElementById('desc-pro');
 
+            const billingInput = document.getElementById('selected-billing');
+            const note = document.getElementById('plan-note');
+
             if (mode === 'annual') {
                 monthlyBtn.className = 'btn btn-outline';
                 annualBtn.className = 'btn';
@@ -763,6 +740,7 @@
                 pricePro.innerHTML = '$80<span>/year</span>';
                 descDaily.textContent = 'Annual billing — save 2 months';
                 descPro.textContent = 'Annual billing — save 2 months';
+                if (billingInput) billingInput.value = 'annual';
             } else {
                 monthlyBtn.className = 'btn';
                 annualBtn.className = 'btn btn-outline';
@@ -772,7 +750,10 @@
                 pricePro.innerHTML = '$8<span>/month</span>';
                 descDaily.textContent = 'Perfect for wallpaper enthusiasts';
                 descPro.textContent = 'For designers and creators';
+                if (billingInput) billingInput.value = 'monthly';
             }
+            const selectedPlan = document.getElementById('selected-plan')?.value || 'daily';
+            if (note) note.textContent = `Selected plan: ${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} (${selectedBilling})`;
         }
 
         function hydrateAttributionFields() {

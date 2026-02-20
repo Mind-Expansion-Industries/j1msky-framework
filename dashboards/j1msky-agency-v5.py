@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.26 - Resize Flicker Reduction
-Patch release: aborts in-flight live polling fetches on stop/unload to prevent stale async updates after teardown
+J1MSKY Agency v6.0.27 - Resize Flicker Reduction
+Patch release: extends live log escaping to include quotes for stricter HTML safety and rendering stability
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.26</title>
+    <title>J1MSKY Agency v6.0.27</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -677,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.26</h1>
+        <h1>◈ J1MSKY Agency v6.0.27</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1108,9 +1108,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.26';
+                        header.textContent = '◈ J1MSKY Agency v6.0.27';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.26';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.27';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1597,7 +1597,9 @@ HTML = '''<!DOCTYPE html>
                         const esc = (v) => String(v)
                             .replace(/&/g, '&amp;')
                             .replace(/</g, '&lt;')
-                            .replace(/>/g, '&gt;');
+                            .replace(/>/g, '&gt;')
+                            .replace(/"/g, '&quot;')
+                            .replace(/'/g, '&#39;');
                         const nextLogHtml = (data.logs || []).map(l => `<div>${esc(l)}</div>`).join('');
                         if (this.lastLogHtml !== nextLogHtml) {
                             log.innerHTML = nextLogHtml;
@@ -1771,7 +1773,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.26 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.27 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

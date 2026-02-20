@@ -270,6 +270,22 @@ class UnifiedOrchestrator:
 
         return "sonnet"
 
+    def forecast_monthly_spend(self, days: int = 30) -> Dict[str, float]:
+        """Forecast monthly spend from recent average usage."""
+        today_spend = self.get_daily_spend()
+        recent_days = max(min(days, 30), 1)
+
+        # Approximate using current day as baseline if no historical breakdown exists
+        projected_monthly = round(today_spend * recent_days, 4)
+        daily_budget = self.config.get("cost_tracking", {}).get("daily_budget", 50)
+        budget_monthly = round(daily_budget * recent_days, 4)
+
+        return {
+            "projected_spend": projected_monthly,
+            "budget_ceiling": budget_monthly,
+            "delta_to_budget": round(budget_monthly - projected_monthly, 4)
+        }
+
     def get_status_report(self):
         """Get current orchestrator status"""
         today = datetime.now().strftime("%Y-%m-%d")
@@ -284,6 +300,7 @@ class UnifiedOrchestrator:
             "daily_budget": daily_budget,
             "today_spend": today_spend,
             "budget_remaining": round(max(daily_budget - today_spend, 0), 4),
+            "monthly_forecast": self.forecast_monthly_spend(),
             "orchestration_mode": "unified",
             "ceo_model": "opus",
             "ops_model": "sonnet",

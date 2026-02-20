@@ -1219,3 +1219,31 @@ Optimal price = where "too cheap" and "too expensive" intersect
 - 90-day retention after reactivation (target: >75%)
 - Payback period on incentive offers (target: <2 months)
 - Net recovered MRR per quarter
+
+## 21) Deal Desk & Approval Matrix
+
+### Discount Approval Rules
+
+| Discount Level | Approver | Conditions |
+|---|---|---|
+| 0-10% | Account Executive | Standard terms only |
+| 11-20% | Sales Manager | Multi-quarter commitment required |
+| 21-30% | Revenue Lead | Strategic logo or expansion path |
+| >30% | Executive approval | Written business case + payback model |
+
+### Non-Standard Term Controls
+
+Require legal/revops approval when any of these apply:
+- Custom SLA penalties
+- Net payment terms >45 days
+- Data residency guarantees
+- Unlimited usage requests
+- Liability cap modifications
+
+### Deal Hygiene Checklist
+
+- [ ] ICP fit confirmed
+- [ ] Champion + economic buyer identified
+- [ ] Success criteria in writing
+- [ ] Security/procurement timeline mapped
+- [ ] Renewal motion defined before close

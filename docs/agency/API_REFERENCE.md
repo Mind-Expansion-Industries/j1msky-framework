@@ -87,6 +87,11 @@ Idempotency-Key: 7f8f8c5a-4d6f-4f6c-ae4b-52a7c8aa2d9b
   "daily_budget": 50,
   "today_spend": 12.43,
   "budget_remaining": 37.57,
+  "monthly_forecast": {
+    "projected_spend": 372.9,
+    "budget_ceiling": 1500,
+    "delta_to_budget": 1127.1
+  },
   "provider_usage": {
     "anthropic": {
       "current": 14,
@@ -129,6 +134,7 @@ Idempotency-Key: 7f8f8c5a-4d6f-4f6c-ae4b-52a7c8aa2d9b
 ```
 
 Use this endpoint when you need a model choice that respects daily spend limits.
+Forecast fields in `/orchestrator/status` help finance and ops estimate month-end burn.
 
 ### Pagination & Filtering
 

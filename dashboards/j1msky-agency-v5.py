@@ -165,6 +165,7 @@ HTML = '''<!DOCTYPE html>
             font-size: 11px;
             border: 1px solid var(--border);
             transition: opacity 0.3s ease;
+            flex-shrink: 0;
         }
 
         .stat-badge.temp { color: var(--green); border-color: var(--green); }
@@ -468,6 +469,7 @@ HTML = '''<!DOCTYPE html>
 
         .form-group {
             margin-bottom: 16px;
+            min-width: 0;
         }
 
         .form-label {

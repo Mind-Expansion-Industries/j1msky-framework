@@ -445,9 +445,54 @@
             color: var(--gray);
         }
 
+
+
+        .sticky-cta {
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 14px;
+            width: min(940px, calc(100% - 24px));
+            background: rgba(18,18,26,0.92);
+            border: 1px solid rgba(139, 92, 246, 0.45);
+            border-radius: 14px;
+            padding: 0.7rem 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .8rem;
+            z-index: 80;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 10px 30px rgba(0,0,0,.35);
+        }
+
+        .sticky-cta p {
+            margin: 0;
+            color: #d1d5db;
+            font-size: .92rem;
+        }
+
+        .sticky-cta .btn {
+            width: auto;
+            min-width: 180px;
+            padding: .7rem 1rem;
+        }
+
         @media (max-width: 768px) {
             .pricing-card.popular { transform: none; }
             .hero h1 { font-size: 2rem; }
+            .sticky-cta {
+                padding: .65rem .7rem;
+                gap: .6rem;
+            }
+            .sticky-cta p {
+                font-size: .82rem;
+            }
+            .sticky-cta .btn {
+                min-width: 140px;
+                padding: .6rem .75rem;
+                font-size: .9rem;
+            }
         }
     </style>
 </head>
@@ -687,6 +732,11 @@
         </div>
     </section>
 
+    <div class="sticky-cta">
+        <p>🚀 Launch pricing ends in <strong id="countdown-mini">--:--:--</strong> — lock in 50% off first month.</p>
+        <a href="#waitlist" class="btn" onclick="selectPlan('daily')">Claim Access</a>
+    </div>
+
     <footer>
         <p>© 2026 WallpaperDaily. All wallpapers generated with AI.</p>
         <p style="margin-top:.5rem"><a href="./privacy.html" style="color:#9ca3af">Privacy</a> • <a href="./terms.html" style="color:#9ca3af">Terms</a> • <a href="mailto:hello@wallpaperdaily.ai" style="color:#9ca3af">Contact</a></p>
@@ -781,6 +831,8 @@
                 const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
                 const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
                 if (el) el.textContent = `${h}:${m}:${s}`;
+                const mini = document.getElementById('countdown-mini');
+                if (mini) mini.textContent = `${h}:${m}:${s}`;
             }
             tick();
             setInterval(tick, 1000);

@@ -36,3 +36,7 @@ If using a different host, point the form `action` to your backend/CRM endpoint.
 - Replace placeholder gallery with generated samples
 - Optional: add Stripe checkout links after validating pricing/offer
 - Validate UTM and plan-intent attribution in your CRM
+
+## Conversion Additions
+- Sticky bottom CTA bar keeps the launch offer visible while scrolling
+- Countdown is mirrored in hero promo + sticky CTA for urgency consistency

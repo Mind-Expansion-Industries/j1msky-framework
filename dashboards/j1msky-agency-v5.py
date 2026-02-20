@@ -1555,9 +1555,13 @@ HTML = '''<!DOCTYPE html>
             }
         });
         
-        // Prevent double-tap zoom
+        // Prevent double-tap zoom (without interfering with form/button taps)
         let lastTouchEnd = 0;
         document.addEventListener('touchend', (e) => {
+            if (e.target && e.target.closest('button, a, input, textarea, select, label, [role="button"]')) {
+                lastTouchEnd = Date.now();
+                return;
+            }
             const now = Date.now();
             if (now - lastTouchEnd <= 300) e.preventDefault();
             lastTouchEnd = now;
@@ -1709,6 +1713,7 @@ HTML = '''<!DOCTYPE html>
         
         // Smooth scroll polyfill for older browsers
         if (!('scrollBehavior' in document.documentElement.style)) {
+            const nativeScrollTo = window.scrollTo.bind(window);
             window.scrollTo = function(options) {
                 if (typeof options === 'object' && options.top !== undefined) {
                     const start = window.pageYOffset;
@@ -1720,7 +1725,7 @@ HTML = '''<!DOCTYPE html>
                         const elapsed = currentTime - startTime;
                         const progress = Math.min(elapsed / duration, 1);
                         const ease = 1 - Math.pow(1 - progress, 3);
-                        window.scrollTo(0, start + (target - start) * ease);
+                        nativeScrollTo(0, start + (target - start) * ease);
                         
                         if (progress < 1) {
                             requestAnimationFrame(step);
@@ -1729,7 +1734,7 @@ HTML = '''<!DOCTYPE html>
                     requestAnimationFrame(step);
                 } else {
                     // Fallback for non-object calls
-                    window.scrollTo(arguments[0], arguments[1]);
+                    nativeScrollTo(arguments[0], arguments[1]);
                 }
             };
         }

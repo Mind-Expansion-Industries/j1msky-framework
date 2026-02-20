@@ -638,6 +638,8 @@ HTML = '''<!DOCTYPE html>
             border-radius: 8px;
             margin-bottom: 12px;
             font-size: 12px;
+            min-width: 0;
+            gap: 8px;
         }
 
         .cost-value {
@@ -1698,7 +1700,7 @@ HTML = '''<!DOCTYPE html>
                         panel.innerHTML = `
                           <div class="card-title">📡 Live Watch</div>
                           <div id="live-watch-meta" style="font-size:12px;color:var(--text-2);margin-bottom:8px"></div>
-                          <div id="live-watch-log" style="font-family:monospace;font-size:12px;line-height:1.5;max-height:180px;overflow:auto;background:var(--bg-3);border:1px solid var(--border);border-radius:8px;padding:10px"></div>
+                          <div id="live-watch-log" style="font-family:monospace;font-size:12px;line-height:1.5;max-height:180px;overflow:auto;background:var(--bg-3);border:1px solid var(--border);border-radius:8px;padding:10px;overflow-wrap:anywhere;"></div>
                         `;
                         const dashboard = document.getElementById('dashboard');
                         if (dashboard) dashboard.appendChild(panel);

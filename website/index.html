@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>J1MSKY AI Agency — AI Agents That Work While You Sleep</title>
-    <meta name="description" content="Hire AI agents to handle your code, content, and research 24/7. Starting at $49/month. No hiring. No overhead. Just results.">
+    <meta name="description" content="Done-for-you AI operations for founders and agencies. Launch your first revenue-driving AI workflow in 7 days.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -661,7 +661,7 @@
             <h1>AI Agents That Work <span>While You Sleep</span></h1>
             <p>Hire an army of AI agents to handle your code, content, research, and business tasks 24/7. No hiring. No overhead. Just results.</p>
             <div class="hero-cta">
-                <a href="#pricing" class="btn btn-primary btn-large">Start Free Trial →</a>
+                <a href="#pricing" class="btn btn-primary btn-large">Book Free Strategy Call →</a>
                 <a href="#how-it-works" class="btn btn-secondary btn-large">See How It Works</a>
             </div>
             <div class="hero-stats">
@@ -779,46 +779,46 @@
         </div>
         <div class="pricing-grid">
             <div class="pricing-card">
-                <h3>Starter</h3>
-                <div class="price">$49<span>/month</span></div>
-                <p>Perfect for solo founders and small projects</p>
+                <h3>AI Quickstart Sprint</h3>
+                <div class="price">$750<span> one-time</span></div>
+                <p>Best for founders who need results fast</p>
                 <ul class="pricing-features">
-                    <li>2 Active Agent Teams</li>
-                    <li>100 Tasks/Month</li>
-                    <li>Standard Support</li>
-                    <li>Basic Analytics</li>
-                    <li>Email Deliverables</li>
+                    <li>1 revenue workflow built in 7 days</li>
+                    <li>Landing page + offer refinement</li>
+                    <li>Lead capture automation</li>
+                    <li>1 week async support</li>
+                    <li>Deployment checklist</li>
                 </ul>
-                <a href="#contact" class="btn btn-secondary">Get Started</a>
+                <a href="#contact" class="btn btn-secondary">Apply for Sprint</a>
             </div>
             <div class="pricing-card popular">
                 <div class="popular-badge">Most Popular</div>
-                <h3>Professional</h3>
-                <div class="price">$99<span>/month</span></div>
-                <p>For growing businesses and agencies</p>
+                <h3>Growth Operator</h3>
+                <div class="price">$2,500<span>/month</span></div>
+                <p>For agencies and SMBs scaling weekly output</p>
                 <ul class="pricing-features">
-                    <li>All Agent Teams</li>
-                    <li>Unlimited Tasks</li>
-                    <li>Priority Support</li>
-                    <li>Advanced Analytics</li>
-                    <li>API Access</li>
-                    <li>Custom Integrations</li>
+                    <li>Up to 3 active AI workflows</li>
+                    <li>Weekly conversion optimization</li>
+                    <li>Copy + creative production engine</li>
+                    <li>Slack/Telegram priority support</li>
+                    <li>Monthly strategy call</li>
+                    <li>SOP + team handoff docs</li>
                 </ul>
-                <a href="#contact" class="btn btn-primary">Get Started</a>
+                <a href="#contact" class="btn btn-primary">Book Discovery Call</a>
             </div>
             <div class="pricing-card">
-                <h3>Enterprise</h3>
-                <div class="price">$299<span>/month</span></div>
-                <p>Dedicated infrastructure for large teams</p>
+                <h3>Scale Partner</h3>
+                <div class="price">Custom<span> retainer</span></div>
+                <p>For teams ready to productize AI operations</p>
                 <ul class="pricing-features">
-                    <li>Everything in Pro</li>
-                    <li>Dedicated Agent Pool</li>
-                    <li>SLA Guarantee</li>
-                    <li>Custom Agent Training</li>
-                    <li>White-Label Options</li>
-                    <li>Account Manager</li>
+                    <li>Unlimited workflow builds</li>
+                    <li>Dedicated automation pod</li>
+                    <li>Internal tooling + integrations</li>
+                    <li>SLA and reporting cadence</li>
+                    <li>White-label client delivery option</li>
+                    <li>Exec-level strategy support</li>
                 </ul>
-                <a href="#contact" class="btn btn-secondary">Contact Sales</a>
+                <a href="#contact" class="btn btn-secondary">Request Proposal</a>
             </div>
         </div>
     </section>
@@ -869,8 +869,12 @@
     <!-- CTA Section -->
     <section id="contact" class="cta-section">
         <h2>Ready to 10x Your Output?</h2>
-        <p>Join the future of work. Start your free trial today — no credit card required.</p>
-        <form class="contact-form" onsubmit="handleSubmit(event)">
+        <p>Tell us your growth bottleneck and we'll send a 7-day AI execution plan with fixed pricing.</p>
+        <form class="contact-form" name="agency-leads" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you.html">
+            <input type="hidden" name="form-name" value="agency-leads">
+            <p style="display:none;">
+                <label>Don't fill this out if you're human: <input name="bot-field"></label>
+            </p>
             <div class="form-group">
                 <label for="name">Your Name</label>
                 <input type="text" id="name" name="name" placeholder="John Smith" required>
@@ -883,10 +887,10 @@
                 <label for="plan">Interested In</label>
                 <select id="plan" name="plan" required>
                     <option value="">Select a plan...</option>
-                    <option value="starter">Starter — $49/mo</option>
-                    <option value="professional">Professional — $99/mo</option>
-                    <option value="enterprise">Enterprise — $299/mo</option>
-                    <option value="custom">Custom Solution</option>
+                    <option value="quickstart">AI Quickstart Sprint — $750 one-time</option>
+                    <option value="growth">Growth Operator — $2,500/mo</option>
+                    <option value="scale">Scale Partner — Custom</option>
+                    <option value="not-sure">Not sure yet</option>
                 </select>
             </div>
             <div class="form-group">
@@ -894,10 +898,10 @@
                 <textarea id="message" name="message" placeholder="Tell us about your project or the tasks you want to automate..."></textarea>
             </div>
             <button type="submit" class="btn btn-primary btn-large" style="width: 100%; justify-content: center;">
-                Start Free Trial →
+                Book Free Strategy Call →
             </button>
             <p style="margin-top: 1rem; font-size: 0.875rem; color: var(--gray);">
-                ✓ 14-day free trial &nbsp;•&nbsp; ✓ No credit card required &nbsp;•&nbsp; ✓ Cancel anytime
+                ✓ Response within 24 hours &nbsp;•&nbsp; ✓ Fixed-scope proposal &nbsp;•&nbsp; ✓ No obligation
             </p>
         </form>
     </section>
@@ -909,23 +913,6 @@
     </footer>
 
     <script>
-        // Form submission handler
-        function handleSubmit(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
-            
-            // In production, this would send to your backend
-            alert('Thanks for your interest! We\'ll be in touch within 24 hours to set up your trial.\n\n(Note: This is a demo form. Connect to your CRM/email service for production.)');
-            
-            // Log the lead data (in production, send to your backend)
-            console.log('Lead captured:', {
-                ...data,
-                timestamp: new Date().toISOString(),
-                source: window.location.href
-            });
-        }
-
         // Smooth scroll for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {

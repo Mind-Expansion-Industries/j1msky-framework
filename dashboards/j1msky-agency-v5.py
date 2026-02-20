@@ -412,6 +412,7 @@ HTML = '''<!DOCTYPE html>
             cursor: pointer;
             transition: all 0.2s;
             min-width: 0;
+            overflow-wrap: anywhere;
         }
 
         .model-card:hover {
@@ -1476,7 +1477,8 @@ HTML = '''<!DOCTYPE html>
 
             // Ignore no-op popstate events that target the already-active tab
             // when no queued navigation is pending.
-            if (targetTab === NavState.currentTab && !NavState.isTransitioning && !NavState.queuedTab) {
+            const normalizedTarget = NavState.normalizeTab(targetTab);
+            if (normalizedTarget === NavState.currentTab && !NavState.isTransitioning && !NavState.queuedTab) {
                 return;
             }
 
@@ -1485,13 +1487,13 @@ HTML = '''<!DOCTYPE html>
                 if (NavState.popstateTimeoutId) clearTimeout(NavState.popstateTimeoutId);
                 NavState.popstateTimeoutId = setTimeout(() => {
                     NavState.popstateTimeoutId = null;
-                    const latestTarget = NavState.normalizeTab(window.location.hash.slice(1) || targetTab);
+                    const latestTarget = NavState.normalizeTab(window.location.hash.slice(1) || normalizedTarget);
                     showTab(latestTarget, false);
                 }, NavState.transitionCooldown + 20);
                 return;
             }
 
-            showTab(targetTab, false);
+            showTab(normalizedTarget, false);
         });
 
         function isTypingTarget(el) {

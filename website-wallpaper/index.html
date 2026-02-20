@@ -624,6 +624,9 @@
             <p style="margin-bottom:0.8rem;color:#9ca3af;font-size:0.95rem;">Want launch updates + promo codes?</p>
             <form onsubmit="captureLead(event)" style="display:flex;gap:0.6rem;flex-wrap:wrap;justify-content:center;">
                 <input id="lead-email" type="email" required placeholder="you@email.com" style="flex:1;min-width:220px;padding:0.8rem;border-radius:10px;border:1px solid rgba(255,255,255,0.18);background:#0f0f16;color:#f3f4f6;">
+                <input type="hidden" id="utm-source" />
+                <input type="hidden" id="utm-medium" />
+                <input type="hidden" id="utm-campaign" />
                 <button class="btn" type="submit" style="max-width:180px;">Notify Me</button>
             </form>
         </div>
@@ -655,22 +658,44 @@
         };
 
         function showSignup(plan) {
-            const url = CHECKOUT_LINKS[plan] || CHECKOUT_LINKS.free;
-            if (url.includes('placeholder')) {
+            const baseUrl = CHECKOUT_LINKS[plan] || CHECKOUT_LINKS.free;
+            if (baseUrl.includes('placeholder')) {
                 alert(`Checkout link for ${plan} is not configured yet.\n\nUpdate CHECKOUT_LINKS in index.html with your Stripe payment links.`);
                 return;
             }
-            window.location.href = url;
+
+            localStorage.setItem('wd_selected_plan', plan);
+            const url = new URL(baseUrl, window.location.origin);
+            url.searchParams.set('client_reference_id', `wd_${plan}_${Date.now()}`);
+            url.searchParams.set('prefilled_email', document.getElementById('lead-email')?.value || '');
+            url.searchParams.set('utm_source', document.getElementById('utm-source')?.value || 'direct');
+            url.searchParams.set('utm_medium', document.getElementById('utm-medium')?.value || 'none');
+            url.searchParams.set('utm_campaign', document.getElementById('utm-campaign')?.value || 'wallpaper-launch');
+            window.location.href = url.toString();
         }
 
         function captureLead(e) {
             e.preventDefault();
             const email = document.getElementById('lead-email').value;
+            const attribution = {
+                utm_source: document.getElementById('utm-source').value,
+                utm_medium: document.getElementById('utm-medium').value,
+                utm_campaign: document.getElementById('utm-campaign').value
+            };
             // Replace this with your backend endpoint / ConvertKit / Mailchimp form action
-            console.log('Lead captured:', { email, source: 'website-wallpaper', ts: new Date().toISOString() });
+            console.log('Lead captured:', { email, source: 'website-wallpaper', attribution, ts: new Date().toISOString() });
             alert('Thanks! You are on the list.\n\nNext step: connect this form to your email provider.');
             e.target.reset();
         }
+
+        function hydrateAttributionFields() {
+            const p = new URLSearchParams(window.location.search);
+            document.getElementById('utm-source').value = p.get('utm_source') || 'direct';
+            document.getElementById('utm-medium').value = p.get('utm_medium') || 'none';
+            document.getElementById('utm-campaign').value = p.get('utm_campaign') || 'wallpaper-launch';
+        }
+
+        hydrateAttributionFields();
     </script>
 </body>
 </html>

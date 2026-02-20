@@ -65,19 +65,19 @@ HTML = '''<!DOCTYPE html>
             --header-height: 56px;
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
-        
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
             user-select: none;
         }
-        
+
         /* Prevent body scroll when navigating */
         body.navigating { overflow: hidden; }
-        
+
         body {
             background: var(--bg);
             color: var(--text);
@@ -90,19 +90,19 @@ HTML = '''<!DOCTYPE html>
             -moz-osx-font-smoothing: grayscale;
             contain: layout style paint;
         }
-        
+
         /* Fix for mobile viewport height with dynamic toolbars */
         @supports (height: 100dvh) {
             body {
                 min-height: 100dvh;
             }
         }
-        
+
         /* iOS momentum scrolling */
         .main {
             -webkit-overflow-scrolling: touch;
         }
-        
+
         .header {
             background: var(--bg-2);
             padding: 12px 16px;
@@ -120,7 +120,7 @@ HTML = '''<!DOCTYPE html>
             transform: translateZ(0);
             will-change: transform;
         }
-        
+
         .header h1 {
             font-size: 18px;
             background: linear-gradient(90deg, var(--cyan), var(--green));
@@ -129,14 +129,14 @@ HTML = '''<!DOCTYPE html>
             background-clip: text;
             font-weight: 700;
         }
-        
+
         .header-stats {
             display: flex;
             gap: 8px;
             align-items: center;
             flex-shrink: 0;
         }
-        
+
         .help-btn {
             background: var(--bg-3);
             border: 1px solid var(--border);
@@ -151,13 +151,13 @@ HTML = '''<!DOCTYPE html>
             color: var(--text-2);
             transition: all 0.2s;
         }
-        
+
         .help-btn:hover {
             background: var(--cyan);
             color: var(--bg);
             border-color: var(--cyan);
         }
-        
+
         .stat-badge {
             background: var(--bg-3);
             padding: 6px 10px;
@@ -166,10 +166,10 @@ HTML = '''<!DOCTYPE html>
             border: 1px solid var(--border);
             transition: opacity 0.3s ease;
         }
-        
+
         .stat-badge.temp { color: var(--green); border-color: var(--green); }
         .stat-badge.mem { color: var(--cyan); border-color: var(--cyan); }
-        
+
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -190,7 +190,7 @@ HTML = '''<!DOCTYPE html>
             /* Prevent rubber-banding issues */
             overscroll-behavior: none;
         }
-        
+
         .nav-item {
             display: flex;
             flex-direction: column;
@@ -211,26 +211,26 @@ HTML = '''<!DOCTYPE html>
             touch-action: manipulation;
             -webkit-touch-callout: none;
         }
-        
+
         .nav-item:active {
             transform: scale(0.95);
             transition: transform 0.1s;
         }
-        
+
         .nav-item.active {
             color: var(--cyan);
         }
-        
+
         .nav-item span {
             font-size: 22px;
             line-height: 1;
             transition: transform 0.2s ease-out;
         }
-        
+
         .nav-item.active span {
             transform: translateY(-2px);
         }
-        
+
         .main {
             padding: 16px;
             /* Account for fixed header + nav + safe areas */
@@ -245,7 +245,7 @@ HTML = '''<!DOCTYPE html>
             overscroll-behavior-y: contain;
             touch-action: pan-y;
         }
-        
+
         .card {
             background: var(--bg-2);
             border: 1px solid var(--border);
@@ -254,7 +254,7 @@ HTML = '''<!DOCTYPE html>
             margin-bottom: 12px;
             overflow-wrap: anywhere;
         }
-        
+
         .card-title {
             font-size: 14px;
             font-weight: 600;
@@ -267,7 +267,7 @@ HTML = '''<!DOCTYPE html>
             gap: 8px;
             overflow-wrap: anywhere;
         }
-        
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -275,7 +275,7 @@ HTML = '''<!DOCTYPE html>
             margin-bottom: 16px;
             min-width: 0;
         }
-        
+
         .stat-card {
             background: var(--bg-3);
             border-radius: 10px;
@@ -285,17 +285,17 @@ HTML = '''<!DOCTYPE html>
             transition: all 0.3s ease;
             cursor: pointer;
         }
-        
+
         .stat-card:hover {
             border-color: var(--cyan);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 255, 255, 0.1);
         }
-        
+
         .stat-card:active {
             transform: translateY(0);
         }
-        
+
         .stat-value {
             font-size: clamp(20px, 6vw, 28px);
             font-weight: 700;
@@ -303,21 +303,21 @@ HTML = '''<!DOCTYPE html>
             line-height: 1.1;
             word-break: break-word;
         }
-        
+
         .stat-label {
             font-size: 10px;
             color: var(--text-2);
             text-transform: uppercase;
             margin-top: 4px;
         }
-        
+
         .quick-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
             min-width: 0;
         }
-        
+
         .quick-btn {
             background: var(--bg-3);
             border: 1px solid var(--border);
@@ -330,25 +330,25 @@ HTML = '''<!DOCTYPE html>
             transition: all 0.2s;
             min-width: 0;
         }
-        
+
         .quick-btn:active {
             transform: scale(0.98);
             background: var(--cyan);
             color: #000;
         }
-        
+
         .quick-btn .icon {
             font-size: 28px;
             margin-bottom: 8px;
             display: block;
         }
-        
+
         .agent-list {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
-        
+
         .agent-item {
             background: var(--bg-3);
             border-radius: 10px;
@@ -359,20 +359,20 @@ HTML = '''<!DOCTYPE html>
             min-width: 0;
             border-left: 3px solid var(--green);
         }
-        
+
         .agent-item.busy { border-left-color: var(--yellow); }
         .agent-item.offline { border-left-color: var(--text-2); }
-        
+
         .agent-icon {
             font-size: 28px;
             flex-shrink: 0;
         }
-        
+
         .agent-info {
             flex: 1;
             min-width: 0;
         }
-        
+
         .agent-name {
             font-weight: 600;
             font-size: 14px;
@@ -381,7 +381,7 @@ HTML = '''<!DOCTYPE html>
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        
+
         .agent-status {
             font-size: 11px;
             color: var(--text-2);
@@ -389,7 +389,7 @@ HTML = '''<!DOCTYPE html>
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        
+
         .agent-action {
             background: var(--cyan);
             color: #000;
@@ -401,7 +401,7 @@ HTML = '''<!DOCTYPE html>
             cursor: pointer;
             flex-shrink: 0;
         }
-        
+
         .model-card {
             background: var(--bg-3);
             border: 1px solid var(--border);
@@ -410,12 +410,13 @@ HTML = '''<!DOCTYPE html>
             margin-bottom: 10px;
             cursor: pointer;
             transition: all 0.2s;
+            min-width: 0;
         }
-        
+
         .model-card:hover {
             border-color: var(--cyan);
         }
-        
+
         .model-header {
             display: flex;
             justify-content: space-between;
@@ -424,14 +425,14 @@ HTML = '''<!DOCTYPE html>
             gap: 8px;
             margin-bottom: 8px;
         }
-        
+
         .model-name {
             font-weight: 600;
             font-size: 16px;
             color: var(--cyan);
             overflow-wrap: anywhere;
         }
-        
+
         .model-cost {
             font-size: 11px;
             color: var(--green);
@@ -440,14 +441,14 @@ HTML = '''<!DOCTYPE html>
             border-radius: 12px;
             white-space: nowrap;
         }
-        
+
         .model-desc {
             font-size: 12px;
             color: var(--text-2);
             margin-bottom: 8px;
             overflow-wrap: anywhere;
         }
-        
+
         .model-status {
             font-size: 11px;
             padding: 4px 10px;
@@ -455,16 +456,16 @@ HTML = '''<!DOCTYPE html>
             display: inline-block;
             white-space: nowrap;
         }
-        
+
         .status-active {
             background: rgba(0,255,136,0.15);
             color: var(--green);
         }
-        
+
         .form-group {
             margin-bottom: 16px;
         }
-        
+
         .form-label {
             display: block;
             font-size: 12px;
@@ -472,7 +473,7 @@ HTML = '''<!DOCTYPE html>
             margin-bottom: 6px;
             text-transform: uppercase;
         }
-        
+
         .form-input, .form-select, .form-textarea {
             width: 100%;
             min-width: 0;
@@ -484,17 +485,17 @@ HTML = '''<!DOCTYPE html>
             font-size: 14px;
             font-family: inherit;
         }
-        
+
         .form-input:focus, .form-select:focus, .form-textarea:focus {
             outline: none;
             border-color: var(--cyan);
         }
-        
+
         .form-textarea {
             min-height: 100px;
             resize: vertical;
         }
-        
+
         .btn-primary {
             width: 100%;
             padding: 16px;
@@ -507,28 +508,28 @@ HTML = '''<!DOCTYPE html>
             cursor: pointer;
             text-transform: uppercase;
         }
-        
+
         .btn-primary:active {
             transform: scale(0.98);
         }
-        
+
         .panel {
             display: none;
             /* Containment for better render performance */
             contain: layout style paint;
             min-width: 0;
         }
-        
+
         .panel.active {
             display: block;
             animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(8px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
+
         /* Reduced motion preference */
         @media (prefers-reduced-motion: reduce) {
             .panel.active {
@@ -545,13 +546,13 @@ HTML = '''<!DOCTYPE html>
                 animation: none;
             }
         }
-        
+
         /* Loading state */
         body.navigating .main {
             opacity: 0.7;
             pointer-events: none;
         }
-        
+
         body.navigating::after {
             content: '';
             position: fixed;
@@ -567,35 +568,35 @@ HTML = '''<!DOCTYPE html>
             z-index: 1000;
             pointer-events: none;
         }
-        
+
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        
+
         /* Offline state */
         body.offline .header h1 {
             color: var(--red);
         }
-        
+
         /* Help panel specific styles */
         #help {
             animation: fadeIn 0.3s ease-out;
         }
-        
+
         #help .agent-item {
             cursor: default;
         }
-        
+
         #help .agent-item:hover {
             border-left-color: var(--cyan);
         }
-        
+
         /* Ripple effect for buttons */
         .nav-item, .quick-btn, .btn-primary {
             position: relative;
             overflow: hidden;
         }
-        
+
         .nav-item::after, .quick-btn::after, .btn-primary::after {
             content: '';
             position: absolute;
@@ -609,7 +610,7 @@ HTML = '''<!DOCTYPE html>
             transition: width 0.3s, height 0.3s;
             pointer-events: none;
         }
-        
+
         .nav-item:active::after, .quick-btn:active::after, .btn-primary:active::after {
             width: 200%;
             height: 200%;
@@ -626,7 +627,7 @@ HTML = '''<!DOCTYPE html>
             outline: 2px solid var(--cyan);
             outline-offset: 2px;
         }
-        
+
         .cost-indicator {
             display: flex;
             justify-content: space-between;
@@ -636,12 +637,12 @@ HTML = '''<!DOCTYPE html>
             margin-bottom: 12px;
             font-size: 12px;
         }
-        
+
         .cost-value {
             color: var(--green);
             font-weight: 600;
         }
-        
+
         /* Small phones */
         @media (max-width: 360px) {
             .main {
@@ -679,7 +680,7 @@ HTML = '''<!DOCTYPE html>
             .nav-item { font-size: 12px; }
             .nav-item span { font-size: 24px; }
         }
-        
+
         /* Desktop */
         @media (min-width: 1024px) {
             :root {
@@ -687,8 +688,8 @@ HTML = '''<!DOCTYPE html>
             }
             .header { padding: 16px 32px; }
             .header h1 { font-size: 24px; }
-            .main { 
-                padding: 32px; 
+            .main {
+                padding: 32px;
                 padding-bottom: 32px;
                 padding-top: calc(var(--header-height) + 32px);
                 max-width: 1400px;
@@ -718,7 +719,7 @@ HTML = '''<!DOCTYPE html>
             .nav-item span { font-size: 20px; }
             body { padding-left: 240px; }
         }
-        
+
         /* Large desktop */
         @media (min-width: 1440px) {
             .main { max-width: 1600px; }
@@ -736,7 +737,7 @@ HTML = '''<!DOCTYPE html>
             <button class="help-btn" onclick="toggleHelp()" title="Help (? or h)" aria-label="Help" aria-expanded="false">?</button>
         </div>
     </header>
-    
+
     <main class="main" aria-busy="false">
         <div id="dashboard" class="panel active">
             <div class="stats-grid">
@@ -757,7 +758,7 @@ HTML = '''<!DOCTYPE html>
                     <div class="stat-label">Uptime</div>
                 </div>
             </div>
-            
+
             <div class="card">
                 <div class="card-title">⚡ Quick Actions</div>
                 <div class="quick-grid">
@@ -779,7 +780,7 @@ HTML = '''<!DOCTYPE html>
                     </button>
                 </div>
             </div>
-            
+
             <div class="card">
                 <div class="card-title">🤖 Active Models</div>
                 <div class="agent-list">
@@ -791,7 +792,7 @@ HTML = '''<!DOCTYPE html>
                         </div>
                         <span class="model-status status-active">Active</span>
                     </div>
-                    
+
                     <div class="agent-item">
                         <span class="agent-icon">⚡</span>
                         <div class="agent-info">
@@ -800,7 +801,7 @@ HTML = '''<!DOCTYPE html>
                         </div>
                         <span class="model-status status-active">Active</span>
                     </div>
-                    
+
                     <div class="agent-item">
                         <span class="agent-icon">💻</span>
                         <div class="agent-info">
@@ -812,11 +813,11 @@ HTML = '''<!DOCTYPE html>
                 </div>
             </div>
         </div>
-        
+
         <div id="models" class="panel">
             <div class="card">
                 <div class="card-title">All Models (Click to Spawn)</div>
-                
+
                 <div class="model-card" onclick="showTab('spawn')">
                     <div class="model-header">
                         <div class="model-name">🧠 Claude Opus</div>
@@ -825,7 +826,7 @@ HTML = '''<!DOCTYPE html>
                     <div class="model-desc">CEO/Mastermind • Architecture • Complex reasoning</div>
                     <span class="model-status status-active">🟢 Active</span>
                 </div>
-                
+
                 <div class="model-card" onclick="showTab('spawn')">
                     <div class="model-header">
                         <div class="model-name">⚡ Claude Sonnet</div>
@@ -834,7 +835,7 @@ HTML = '''<!DOCTYPE html>
                     <div class="model-desc">Operations Manager • Implementation • Documentation</div>
                     <span class="model-status status-active">🟢 Active</span>
                 </div>
-                
+
                 <div class="model-card" onclick="showTab('spawn')">
                     <div class="model-header">
                         <div class="model-name">💻 Kimi K2.5</div>
@@ -843,7 +844,7 @@ HTML = '''<!DOCTYPE html>
                     <div class="model-desc">Lead Developer • Code Architecture • Fast coding</div>
                     <span class="model-status status-active">🟢 Active</span>
                 </div>
-                
+
                 <div class="model-card" onclick="showTab('spawn')">
                     <div class="model-header">
                         <div class="model-name">🚀 MiniMax M2.5</div>
@@ -852,7 +853,7 @@ HTML = '''<!DOCTYPE html>
                     <div class="model-desc">Senior Developer • Fast Implementation • Prototyping</div>
                     <span class="model-status status-active">🟢 Active</span>
                 </div>
-                
+
                 <div class="model-card" onclick="showTab('spawn')">
                     <div class="model-header">
                         <div class="model-name">🔧 OpenAI Codex</div>
@@ -863,21 +864,21 @@ HTML = '''<!DOCTYPE html>
                 </div>
             </div>
         </div>
-        
+
         <div id="spawn" class="panel">
             <div class="card">
                 <div class="card-title">Spawn New Agent</div>
-                
+
                 <div class="cost-indicator">
                     <span>Estimated Cost:</span>
                     <span class="cost-value">$0.00 - $0.05</span>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label">Task Description</label>
                     <textarea class="form-textarea" placeholder="What should the agent do?"></textarea>
                 </div>
-                
+
                 <div class="form-group">
                     <label class="form-label">Select Model</label>
                     <select class="form-select">
@@ -888,15 +889,15 @@ HTML = '''<!DOCTYPE html>
                         <option value="opus">🧠 Claude Opus - CEO ($0.015/1K)</option>
                     </select>
                 </div>
-                
+
                 <button class="btn-primary">🚀 Spawn Agent</button>
             </div>
         </div>
-        
+
         <div id="teams" class="panel">
             <div class="card">
                 <div class="card-title">Agent Teams</div>
-                
+
                 <div class="model-card">
                     <div class="model-header">
                         <div class="model-name">💻 Code Team</div>
@@ -905,7 +906,7 @@ HTML = '''<!DOCTYPE html>
                     <div class="model-desc">Kimi + MiniMax • Programming • Development</div>
                     <button class="btn-primary" style="margin-top: 12px;">Deploy Team</button>
                 </div>
-                
+
                 <div class="model-card">
                     <div class="model-header">
                         <div class="model-name">🎨 Creative Team</div>
@@ -917,7 +918,7 @@ HTML = '''<!DOCTYPE html>
             </div>
         </div>
     </main>
-    
+
     <div id="help" class="panel" tabindex="-1" aria-hidden="true">
         <div class="card">
             <div class="card-title">⌨️ Keyboard Shortcuts</div>
@@ -943,7 +944,7 @@ HTML = '''<!DOCTYPE html>
             </div>
         </div>
     </div>
-    
+
     <nav class="bottom-nav">
         <button class="nav-item active" onclick="showTab('dashboard')" aria-label="Dashboard" aria-current="page">
             <span>🏠</span>
@@ -962,7 +963,7 @@ HTML = '''<!DOCTYPE html>
             Teams
         </button>
     </nav>
-    
+
     <script>
         // Navigation State Management
         const NavState = {
@@ -980,7 +981,7 @@ HTML = '''<!DOCTYPE html>
             tabs: ['dashboard', 'models', 'spawn', 'teams'],
             failedTransitions: 0,
             maxRetries: 3,
-            
+
             canTransition() {
                 const now = Date.now();
                 if (this.isTransitioning) return false;
@@ -992,7 +993,7 @@ HTML = '''<!DOCTYPE html>
                 if (!tabId || typeof tabId !== 'string') return 'dashboard';
                 return this.tabs.includes(tabId) ? tabId : 'dashboard';
             },
-            
+
             pushHistory(tabId) {
                 const normalized = this.normalizeTab(tabId);
                 if (this.history.length >= this.maxHistory) {
@@ -1002,32 +1003,32 @@ HTML = '''<!DOCTYPE html>
                     this.history.push(normalized);
                 }
             },
-            
+
             goBack() {
                 if (this.history.length < 2) return false;
                 this.history.pop();
                 return this.normalizeTab(this.history[this.history.length - 1]);
             },
-            
+
             getNextTab() {
                 const idx = this.tabs.indexOf(this.currentTab);
-                return this.tabs[(idx + 1) % this.tabs.length];
+                return this.normalizeTab(this.tabs[(idx + 1) % this.tabs.length]);
             },
-            
+
             getPrevTab() {
                 const idx = this.tabs.indexOf(this.currentTab);
-                return this.tabs[(idx - 1 + this.tabs.length) % this.tabs.length];
+                return this.normalizeTab(this.tabs[(idx - 1 + this.tabs.length) % this.tabs.length]);
             },
-            
+
             recordSuccess() {
                 this.failedTransitions = 0;
             },
-            
+
             recordFailure() {
                 this.failedTransitions++;
                 return this.failedTransitions < this.maxRetries;
             },
-            
+
             reset() {
                 this.isTransitioning = false;
                 this.pendingTab = null;
@@ -1048,7 +1049,7 @@ HTML = '''<!DOCTYPE html>
                 hideLoading();
             }
         };
-        
+
         // Touch/Swipe Handling with improved edge rejection
         const TouchHandler = {
             startX: 0,
@@ -1060,7 +1061,7 @@ HTML = '''<!DOCTYPE html>
             minIntervalMs: 180,
             lastSwipeAt: 0,
             isTracking: false,
-            
+
             init() {
                 // Only enable swipe navigation on touch-centric devices.
                 if (!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches)) {
@@ -1071,7 +1072,7 @@ HTML = '''<!DOCTYPE html>
                 document.addEventListener('touchend', this.onEnd.bind(this), opts);
                 document.addEventListener('touchcancel', this.onCancel.bind(this), opts);
             },
-            
+
             onStart(e) {
                 // Ignore gestures starting on interactive controls.
                 if (e.target && e.target.closest('button, a, input, textarea, select, label, [role="button"]')) {
@@ -1087,20 +1088,20 @@ HTML = '''<!DOCTYPE html>
 
                 const touch = e.touches[0];
                 const viewportWidth = window.innerWidth;
-                
+
                 // Ignore edge touches (iOS edge swipe gestures)
-                if (touch.clientX < this.edgeThreshold || 
+                if (touch.clientX < this.edgeThreshold ||
                     touch.clientX > viewportWidth - this.edgeThreshold) {
                     this.isTracking = false;
                     return;
                 }
-                
+
                 this.startX = touch.clientX;
                 this.startY = touch.clientY;
                 this.startTime = Date.now();
                 this.isTracking = true;
             },
-            
+
             onEnd(e) {
                 if (!this.isTracking) return;
                 this.isTracking = false;
@@ -1110,12 +1111,12 @@ HTML = '''<!DOCTYPE html>
                 const deltaX = touch.clientX - this.startX;
                 const deltaY = touch.clientY - this.startY;
                 const deltaTime = Date.now() - this.startTime;
-                
+
                 // Validate swipe
                 if (deltaTime > this.maxTime) return;
                 if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) return; // Mostly vertical
                 if (Math.abs(deltaX) < this.threshold) return;
-                
+
                 // Guard against swipe burst spam / in-flight transitions
                 if (NavState.isTransitioning) return;
                 const now = Date.now();
@@ -1129,17 +1130,17 @@ HTML = '''<!DOCTYPE html>
                     showTab(NavState.getNextTab());
                 }
             },
-            
+
             onCancel() {
                 this.isTracking = false;
             }
         };
-        
+
         // Online/Offline Detection with debouncing
         const ConnectionHandler = {
             offlineTimer: null,
             debounceMs: 1000,
-            
+
             init() {
                 window.addEventListener('online', () => this.setOnline(true));
                 window.addEventListener('offline', () => this.setOnline(false));
@@ -1152,10 +1153,10 @@ HTML = '''<!DOCTYPE html>
                     this.offlineTimer = null;
                 }
             },
-            
+
             setOnline(isOnline) {
                 clearTimeout(this.offlineTimer);
-                
+
                 if (isOnline) {
                     this.updateStatus(true);
                 } else {
@@ -1165,11 +1166,11 @@ HTML = '''<!DOCTYPE html>
                     }, this.debounceMs);
                 }
             },
-            
+
             updateStatus(isOnline) {
                 const header = document.querySelector('.header h1');
                 const title = document.querySelector('title');
-                
+
                 if (isOnline) {
                     document.body.classList.remove('offline');
                     if (header) {
@@ -1187,14 +1188,14 @@ HTML = '''<!DOCTYPE html>
                 }
             }
         };
-        
+
         // ResizeObserver for responsive adjustments
         const ResizeHandler = {
             observer: null,
             lastWidth: 0,
             lastHeight: 0,
             debounceTimer: null,
-            
+
             init() {
                 if (window.ResizeObserver) {
                     this.observer = new ResizeObserver(entries => {
@@ -1209,13 +1210,13 @@ HTML = '''<!DOCTYPE html>
                         this.debounceTimer = setTimeout(() => this.handleResize(), 100);
                     });
                 }
-                
+
                 // Orientation change (mobile)
                 window.addEventListener('orientationchange', () => {
                     setTimeout(() => this.handleResize(), 300);
                 });
             },
-            
+
             handleResize(entry) {
                 const width = entry?.contentRect?.width || window.innerWidth;
                 const height = entry?.contentRect?.height || window.innerHeight;
@@ -1238,7 +1239,7 @@ HTML = '''<!DOCTYPE html>
                     }
                 });
             },
-            
+
             destroy() {
                 if (this.debounceTimer) {
                     clearTimeout(this.debounceTimer);
@@ -1250,7 +1251,7 @@ HTML = '''<!DOCTYPE html>
                 }
             }
         };
-        
+
         // Focus management for accessibility
         const FocusManager = {
             init() {
@@ -1269,7 +1270,7 @@ HTML = '''<!DOCTYPE html>
                 });
             }
         };
-        
+
         function showLoading() {
             document.body.classList.add('navigating');
             const main = document.querySelector('.main');
@@ -1287,10 +1288,10 @@ HTML = '''<!DOCTYPE html>
                 StatsUpdater.resumeAfterTransition();
             }
         }
-        
+
         function showTab(tabId, pushState = true) {
             tabId = NavState.normalizeTab(tabId);
-            
+
             // Prevent duplicate or conflicting transitions
             if (tabId === NavState.currentTab || tabId === NavState.pendingTab || tabId === NavState.queuedTab) {
                 return;
@@ -1309,7 +1310,7 @@ HTML = '''<!DOCTYPE html>
                 }
                 return;
             }
-            
+
             // Verify target exists
             const targetPanel = document.getElementById(tabId);
             if (!targetPanel) {
@@ -1320,7 +1321,7 @@ HTML = '''<!DOCTYPE html>
                 }
                 return;
             }
-            
+
             // If help overlay is open, close it before navigating.
             if (typeof helpVisible !== 'undefined' && helpVisible) {
                 toggleHelp();
@@ -1343,20 +1344,20 @@ HTML = '''<!DOCTYPE html>
                     NavState.reset();
                 }
             }, Math.max(1000, NavState.transitionCooldown * 6));
-            
+
             try {
                 const panels = document.querySelectorAll('.panel');
                 const navItems = document.querySelectorAll('.nav-item');
                 const tabIndex = NavState.tabs.indexOf(tabId);
-                
+
                 // Validate tab index
                 if (tabIndex === -1) {
                     throw new Error('Invalid tab index for: ' + tabId);
                 }
-                
+
                 // Hide current panels
                 panels.forEach(p => p.classList.remove('active'));
-                
+
                 // Use requestAnimationFrame for smooth transition
                 requestAnimationFrame(() => {
                     try {
@@ -1364,7 +1365,7 @@ HTML = '''<!DOCTYPE html>
                         targetPanel.style.display = 'block';
                         targetPanel.offsetHeight; // Force reflow
                         targetPanel.classList.add('active');
-                        
+
                         // Update navigation
                         navItems.forEach((n, i) => {
                             const isActive = i === tabIndex;
@@ -1375,23 +1376,23 @@ HTML = '''<!DOCTYPE html>
                                 n.removeAttribute('aria-current');
                             }
                         });
-                        
+
                         // Scroll to top (respect reduced-motion preferences)
                         const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                         if (!document.hidden) {
                             window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
                         }
-                        
+
                         // Update state
                         NavState.currentTab = tabId;
                         SessionStore.save(tabId);
                         NavState.recordSuccess();
                         NavState.pushHistory(tabId);
-                        
+
                         if (pushState) {
                             safePushState({ tab: tabId }, '#' + tabId);
                         }
-                        
+
                         // Cleanup after transition
                         setTimeout(() => {
                             NavState.isTransitioning = false;
@@ -1411,19 +1412,19 @@ HTML = '''<!DOCTYPE html>
                                 }
                             });
                         }, NavState.transitionCooldown);
-                        
+
                     } catch (innerError) {
                         console.error('Error during transition:', innerError);
                         handleTransitionError(tabId, pushState);
                     }
                 });
-                
+
             } catch (error) {
                 console.error('Error starting transition:', error);
                 handleTransitionError(tabId, pushState);
             }
         }
-        
+
         function handleTransitionError(tabId, pushState = true) {
             if (NavState.recordFailure()) {
                 // Retry once after a short delay
@@ -1436,11 +1437,11 @@ HTML = '''<!DOCTYPE html>
                 }
             }
         }
-        
+
         // Session persistence
         const SessionStore = {
             STORAGE_KEY: 'j1msky_last_tab',
-            
+
             save(tabId) {
                 try {
                     sessionStorage.setItem(this.STORAGE_KEY, tabId);
@@ -1448,7 +1449,7 @@ HTML = '''<!DOCTYPE html>
                     console.warn('Session storage not available');
                 }
             },
-            
+
             load() {
                 try {
                     return sessionStorage.getItem(this.STORAGE_KEY);
@@ -1456,14 +1457,14 @@ HTML = '''<!DOCTYPE html>
                     return null;
                 }
             },
-            
+
             clear() {
                 try {
                     sessionStorage.removeItem(this.STORAGE_KEY);
                 } catch (e) {}
             }
         };
-        
+
         window.addEventListener('popstate', (e) => {
             const targetTab = NavState.normalizeTab(e.state?.tab || window.location.hash.slice(1) || 'dashboard');
 
@@ -1491,7 +1492,7 @@ HTML = '''<!DOCTYPE html>
 
             showTab(targetTab, false);
         });
-        
+
         function isTypingTarget(el) {
             if (!el) return false;
             const tag = (el.tagName || '').toLowerCase();
@@ -1543,16 +1544,16 @@ HTML = '''<!DOCTYPE html>
                 }
             }
         });
-        
+
         // Toggle help panel with state management
         let helpVisible = false;
         function toggleHelp() {
             const helpPanel = document.getElementById('help');
             if (!helpPanel) return;
-            
+
             helpVisible = !helpVisible;
             const mainPanels = document.querySelectorAll('.main .panel');
-            
+
             const helpBtn = document.querySelector('.help-btn');
             if (helpBtn) helpBtn.setAttribute('aria-expanded', helpVisible ? 'true' : 'false');
 
@@ -1582,7 +1583,7 @@ HTML = '''<!DOCTYPE html>
                 if (helpBtn) helpBtn.focus();
             }
         }
-        
+
         // Close help on Escape key
         document.addEventListener('keydown', (e) => {
             if (isTypingTarget(e.target)) return;
@@ -1591,7 +1592,7 @@ HTML = '''<!DOCTYPE html>
                 toggleHelp();
             }
         });
-        
+
         // Visibility handling
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
@@ -1604,7 +1605,7 @@ HTML = '''<!DOCTYPE html>
                 });
             }
         });
-        
+
         // Prevent double-tap zoom (without interfering with form/button taps)
         let lastTouchEnd = 0;
         document.addEventListener('touchend', (e) => {
@@ -1616,7 +1617,7 @@ HTML = '''<!DOCTYPE html>
             if (now - lastTouchEnd <= 300) e.preventDefault();
             lastTouchEnd = now;
         }, { passive: false });
-        
+
         // Real-time stats updater
         const StatsUpdater = {
             interval: null,
@@ -1626,7 +1627,7 @@ HTML = '''<!DOCTYPE html>
             lastLogHtml: '',
             lastMetaText: '',
             updateInterval: 5000, // 5 seconds
-            
+
             init() {
                 this.start();
                 // Resume on visibility change
@@ -1639,12 +1640,12 @@ HTML = '''<!DOCTYPE html>
                     }
                 });
             },
-            
+
             start() {
                 if (this.interval) return;
                 this.interval = setInterval(() => this.update(), this.updateInterval);
             },
-            
+
             stop() {
                 if (this.interval) {
                     clearInterval(this.interval);
@@ -1669,7 +1670,7 @@ HTML = '''<!DOCTYPE html>
                 this.pausedByTransition = false;
                 this.start();
             },
-            
+
             async update() {
                 if (this.inFlight || document.hidden) return;
                 this.inFlight = true;
@@ -1736,7 +1737,7 @@ HTML = '''<!DOCTYPE html>
                 }
             }
         };
-        
+
         // Add pulse animation
         const style = document.createElement('style');
         style.textContent = `
@@ -1746,7 +1747,7 @@ HTML = '''<!DOCTYPE html>
             }
         `;
         document.head.appendChild(style);
-        
+
         // Error Boundary for uncaught errors
         window.addEventListener('error', (e) => {
             console.error('Global error:', e.message);
@@ -1754,13 +1755,13 @@ HTML = '''<!DOCTYPE html>
             // Prevent complete crash
             e.preventDefault();
         });
-        
+
         window.addEventListener('unhandledrejection', (e) => {
             console.error('Unhandled promise rejection:', e.reason);
             NavState.reset();
             e.preventDefault();
         });
-        
+
         // Smooth scroll polyfill for older browsers
         if (!('scrollBehavior' in document.documentElement.style)) {
             const nativeScrollTo = window.scrollTo.bind(window);
@@ -1770,13 +1771,13 @@ HTML = '''<!DOCTYPE html>
                     const target = options.top;
                     const duration = 300;
                     const startTime = performance.now();
-                    
+
                     function step(currentTime) {
                         const elapsed = currentTime - startTime;
                         const progress = Math.min(elapsed / duration, 1);
                         const ease = 1 - Math.pow(1 - progress, 3);
                         nativeScrollTo(0, start + (target - start) * ease);
-                        
+
                         if (progress < 1) {
                             requestAnimationFrame(step);
                         }
@@ -1788,7 +1789,7 @@ HTML = '''<!DOCTYPE html>
                 }
             };
         }
-        
+
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             TouchHandler.init();
@@ -1797,22 +1798,22 @@ HTML = '''<!DOCTYPE html>
             FocusManager.init();
             StatsUpdater.init();
             syncNavAriaFromActive();
-            
+
             // Determine initial tab: hash > session > default
             const hash = window.location.hash.slice(1);
             const sessionTab = SessionStore.load();
             const initialTab = NavState.normalizeTab(hash || sessionTab || 'dashboard');
-            
+
             NavState.currentTab = initialTab;
             NavState.pushHistory(initialTab);
             if (!hash) safeReplaceState({ tab: initialTab }, '#' + initialTab);
-            
+
             // Sync UI with initial tab
             if (initialTab !== 'dashboard') {
                 showTab(initialTab, false);
             }
         });
-        
+
         // Cleanup on page unload
         window.addEventListener('pageshow', () => {
             // Recover from back-forward cache restores where transitional flags may be stale.
@@ -1836,11 +1837,11 @@ HTML = '''<!DOCTYPE html>
 class AgencyServer(http.server.BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         pass
-    
+
     def do_GET(self):
         global REQUEST_COUNT
         REQUEST_COUNT += 1
-        
+
         if self.path == '/':
             stats = get_stats()
             html = HTML.replace('{{TEMP}}', str(stats['temp'])).replace('{{MEM}}', str(stats['mem'])).replace('{{UPTIME}}', stats['uptime'])

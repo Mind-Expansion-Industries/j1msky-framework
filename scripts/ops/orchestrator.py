@@ -301,6 +301,23 @@ class UnifiedOrchestrator:
             "delta_to_budget": round(budget_monthly - projected_monthly, 4)
         }
 
+    def get_usage_summary(self, limit: int = 5) -> Dict[str, Any]:
+        """Return a compact usage summary by model for quick ops review."""
+        by_model: Dict[str, Dict[str, float]] = defaultdict(lambda: {"calls": 0, "tokens": 0})
+        for item in self.usage_log:
+            model = item.get("model", "unknown")
+            by_model[model]["calls"] += 1
+            by_model[model]["tokens"] += item.get("tokens", 0)
+
+        ranked = sorted(by_model.items(), key=lambda kv: kv[1]["calls"], reverse=True)[:limit]
+        return {
+            "top_models": [
+                {"model": model, "calls": stats["calls"], "tokens": stats["tokens"]}
+                for model, stats in ranked
+            ],
+            "total_calls": len(self.usage_log)
+        }
+
     def get_status_report(self):
         """Get current orchestrator status"""
         today = datetime.now().strftime("%Y-%m-%d")
@@ -311,6 +328,7 @@ class UnifiedOrchestrator:
             "models_active": len(self.config["models"]),
             "rate_limits": self.config.get("rate_limits", {}),
             "provider_usage": self.get_provider_usage_snapshot(),
+            "usage_summary": self.get_usage_summary(),
             "recent_usage": len(self.usage_log),
             "daily_budget": daily_budget,
             "today_spend": today_spend,

@@ -1302,3 +1302,26 @@ Require legal/revops approval when any of these apply:
 - **"We can build this internally"** → "Totally valid; we usually coexist by accelerating first outcomes while your internal team scales."
 - **"Price is high"** → "Let’s compare against manual delivery cost and missed SLA risk, not just tool subscription line items."
 - **"Security concern"** → "We can start with scoped keys, least privilege, and auditable status/usage reporting."
+
+## 24) Handoff & Internal Enablement
+
+### Closed-Won Handoff Checklist
+
+- [ ] Sales notes attached to implementation ticket
+- [ ] Success criteria copied into kickoff agenda
+- [ ] Commercial terms (discounts/SLA) confirmed in project brief
+- [ ] Security requirements mapped to technical owner
+- [ ] Renewal date + expansion hypotheses logged
+
+### Internal Enablement Artifacts
+
+- One-page account brief
+- Stakeholder map (champion, approver, procurement)
+- Top 3 risks + mitigation owner
+- 30/60/90 day adoption milestones
+
+### Handoff KPIs
+
+- Time from close to kickoff (target: <5 business days)
+- % of projects with complete handoff packet (target: >95%)
+- % of onboarding delays caused by missing sales context (target: <5%)

@@ -91,6 +91,13 @@ Returns live budget/rate-limit state sourced from orchestrator config and usage 
 {
   "timestamp": "2026-02-19T13:11:00-05:00",
   "models_active": 4,
+  "usage_summary": {
+    "top_models": [
+      {"model": "k2p5", "calls": 68, "tokens": 112000},
+      {"model": "sonnet", "calls": 39, "tokens": 94000}
+    ],
+    "total_calls": 128
+  },
   "recent_usage": 128,
   "daily_budget": 50,
   "today_spend": 12.43,
@@ -143,6 +150,7 @@ Returns live budget/rate-limit state sourced from orchestrator config and usage 
 
 Use this endpoint when you need a model choice that respects daily spend limits.
 Forecast fields in `/orchestrator/status` help finance and ops estimate month-end burn.
+`usage_summary` is intended for quick dashboard rollups and model-mix reviews.
 
 ### Response Headers (Observability)
 

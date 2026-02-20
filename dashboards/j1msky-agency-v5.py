@@ -168,8 +168,8 @@ HTML = '''<!DOCTYPE html>
             flex-shrink: 0;
         }
 
-        .stat-badge.temp { color: var(--green); border-color: var(--green); }
-        .stat-badge.mem { color: var(--cyan); border-color: var(--cyan); }
+        .stat-badge.temp { color: var(--green); border-color: var(--green); flex-shrink: 0; }
+        .stat-badge.mem { color: var(--cyan); border-color: var(--cyan); flex-shrink: 0; }
 
         .bottom-nav {
             position: fixed;
@@ -484,16 +484,12 @@ HTML = '''<!DOCTYPE html>
             white-space: nowrap;
         }
 
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            min-width: 0;
-            padding: 14px;
-            background: var(--bg-3);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-size: 14px;
-            font-family: inherit;
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2300ffff' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 36px;
         }
 
         .form-input:focus, .form-select:focus, .form-textarea:focus {

@@ -324,11 +324,14 @@ class UnifiedOrchestrator:
         compliant_count = sum(1 for r in results if r.get("is_compliant"))
         avg_margin = round(sum(q.get("gross_margin_pct", 0.0) for q in quotes) / len(quotes), 2)
 
+        compliance_ratio = round(compliant_count / len(quotes), 2)
         return {
             "delivery_type": delivery_type,
             "scenario_count": len(quotes),
             "compliant_count": compliant_count,
+            "compliance_ratio": compliance_ratio,
             "needs_escalation": compliant_count < len(quotes),
+            "requires_executive_review": compliance_ratio < 0.67,
             "average_margin_pct": avg_margin
         }
     

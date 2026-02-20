@@ -94,6 +94,7 @@ Use `budget_utilization_pct` for alerting thresholds (for example: warn at 70%, 
 `example_task_quote` gives a ready-to-display sample quote (internal cost, markup, recommended customer price, margin).
 `quote_decision_preview` provides an auditable decision packet (approved/escalated + next step) for CRM syncing.
 `quote_portfolio_preview` gives a multi-scenario compliance rollup for proposal-level pricing checks.
+Use `quote_portfolio_preview.requires_executive_review=true` to trigger leadership review workflow before proposals are sent.
 `usage_anomalies` is intended for alerting pipelines and overnight ops watchlists.
 Use `usage_anomalies.severity` to route alerts (`warning` to ops queue, `critical` to on-call).
 
@@ -157,7 +158,9 @@ Use `usage_anomalies.severity` to route alerts (`warning` to ops queue, `critica
     "delivery_type": "task",
     "scenario_count": 3,
     "compliant_count": 3,
+    "compliance_ratio": 1.0,
     "needs_escalation": false,
+    "requires_executive_review": false,
     "average_margin_pct": 88.13
   },
   "usage_anomalies": {

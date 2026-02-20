@@ -1681,3 +1681,18 @@ Track every non-compliant quote approved as a strategic exception so margin leak
 
 - Any exception without a recovery plan is auto-rejected.
 - Exceptions older than 30 days must be reviewed in weekly revenue meeting.
+
+## 40) Executive Review Trigger Policy
+
+### Trigger Conditions
+
+Escalate proposal portfolio to executive review when any of the following is true:
+- Compliance ratio is below 0.67
+- More than one quote option requires Deal Desk escalation
+- Average portfolio margin drops below 55%
+
+### Executive Decision Options
+
+- Approve with strategic exception memo
+- Rework proposal structure and rerun pricing scenarios
+- Decline opportunity due to sustained margin risk

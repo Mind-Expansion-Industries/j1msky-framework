@@ -28,6 +28,12 @@ class UnifiedOrchestrator:
         except Exception as e:
             print(f"Error loading config: {e}")
             return self.get_default_config()
+
+    def save_config(self):
+        """Persist orchestrator config to disk."""
+        self.config_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(self.config_path, 'w') as f:
+            json.dump(self.config, f, indent=2)
     
     def get_default_config(self):
         """Default configuration if file missing"""
@@ -166,6 +172,9 @@ class UnifiedOrchestrator:
                 }
             self._refresh_rate_limit_window(provider)
             self.config["rate_limits"][provider]["current"] += 1
+
+        # Persist counters and budget context
+        self.save_config()
     
     def get_team_for_project(self, project_type):
         """Get recommended team composition for project type"""

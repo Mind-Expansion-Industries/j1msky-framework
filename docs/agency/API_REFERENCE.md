@@ -62,6 +62,12 @@ Idempotency-Key: 7f8f8c5a-4d6f-4f6c-ae4b-52a7c8aa2d9b
 
 ### Operational Status Endpoints
 
+#### Config Persistence Notes
+
+- Provider rate-limit counters are persisted to config storage.
+- Daily budget context is preserved across process restarts.
+- After restart, status endpoints reflect last persisted counters plus new runtime usage.
+
 #### Health Check
 **Endpoint:** `GET /health`
 
@@ -77,6 +83,8 @@ Idempotency-Key: 7f8f8c5a-4d6f-4f6c-ae4b-52a7c8aa2d9b
 
 #### Orchestrator Status
 **Endpoint:** `GET /orchestrator/status`
+
+Returns live budget/rate-limit state sourced from orchestrator config and usage tracking.
 
 **Response:**
 ```json

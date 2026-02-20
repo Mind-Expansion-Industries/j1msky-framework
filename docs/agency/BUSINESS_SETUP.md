@@ -1247,3 +1247,26 @@ Require legal/revops approval when any of these apply:
 - [ ] Success criteria in writing
 - [ ] Security/procurement timeline mapped
 - [ ] Renewal motion defined before close
+
+## 22) Implementation Quality Program
+
+### First-30-Day Delivery Standards
+
+- Kickoff completed within 5 business days of close
+- First production workflow live within 10 business days
+- Executive readout delivered by day 30
+
+### Delivery QA Gates
+
+1. **Scope QA** — SOW mapped to measurable outcomes
+2. **Technical QA** — integrations validated in staging
+3. **Security QA** — access controls and logging verified
+4. **Adoption QA** — champion training complete
+5. **Value QA** — baseline vs current KPI snapshot shared
+
+### Implementation KPIs
+
+- Time-to-first-value (target: <14 days)
+- On-time implementation rate (target: >90%)
+- First-30-day activation rate (target: >80%)
+- Post-implementation CSAT (target: >4.5/5)

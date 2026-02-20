@@ -98,8 +98,8 @@ Use `budget_utilization_pct` for alerting thresholds (for example: warn at 70%, 
   "models_active": 4,
   "usage_summary": {
     "top_models": [
-      {"model": "k2p5", "calls": 68, "tokens": 112000},
-      {"model": "sonnet", "calls": 39, "tokens": 94000}
+      {"model": "k2p5", "calls": 68, "tokens": 112000, "avg_tokens_per_call": 1647.06, "estimated_spend": 0.112},
+      {"model": "sonnet", "calls": 39, "tokens": 94000, "avg_tokens_per_call": 2410.26, "estimated_spend": 0.282}
     ],
     "total_calls": 128
   },
@@ -172,6 +172,7 @@ Use `budget_utilization_pct` for alerting thresholds (for example: warn at 70%, 
 Use this endpoint when you need a model choice that respects daily spend limits.
 Forecast fields in `/orchestrator/status` help finance and ops estimate month-end burn.
 `usage_summary` is intended for quick dashboard rollups and model-mix reviews.
+Per-model fields `avg_tokens_per_call` and `estimated_spend` support cost-efficiency tuning.
 
 ### Response Headers (Observability)
 

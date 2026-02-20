@@ -310,11 +310,21 @@ class UnifiedOrchestrator:
             by_model[model]["tokens"] += item.get("tokens", 0)
 
         ranked = sorted(by_model.items(), key=lambda kv: kv[1]["calls"], reverse=True)[:limit]
+        top_models = []
+        for model, stats in ranked:
+            calls = max(stats["calls"], 1)
+            avg_tokens = round(stats["tokens"] / calls, 2)
+            est_cost = round(self.estimate_cost(model, stats["tokens"]), 4)
+            top_models.append({
+                "model": model,
+                "calls": stats["calls"],
+                "tokens": stats["tokens"],
+                "avg_tokens_per_call": avg_tokens,
+                "estimated_spend": est_cost
+            })
+
         return {
-            "top_models": [
-                {"model": model, "calls": stats["calls"], "tokens": stats["tokens"]}
-                for model, stats in ranked
-            ],
+            "top_models": top_models,
             "total_calls": len(self.usage_log)
         }
 

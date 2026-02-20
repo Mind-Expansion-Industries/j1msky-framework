@@ -1440,3 +1440,35 @@ Require legal/revops approval when any of these apply:
 - Risk register with mitigation owner
 - 90-day operating scorecard
 - Executive narrative: bets, tradeoffs, and expected outcomes
+
+## 30) Pricing Governance Council
+
+### Purpose
+
+Create a recurring forum to approve pricing changes with cross-functional alignment.
+
+### Membership
+
+- Revenue lead (chair)
+- Finance owner
+- Product lead
+- Customer success lead
+- Operations representative
+
+### Decision Cadence
+
+- Bi-weekly during active pricing tests
+- Monthly during steady-state operations
+
+### Required Inputs
+
+- Conversion and churn impact by segment
+- Margin impact (gross + support load)
+- Win/loss notes mentioning pricing
+- Competitor pricing movement summary
+
+### Decision Outputs
+
+- Approved experiments and rollback criteria
+- Effective date + communication plan
+- Owner and success metric for each change

@@ -461,6 +461,12 @@
         <a href="#pricing" class="nav-cta">Get Started →</a>
     </nav>
 
+    <div style="max-width:1100px;margin:0 auto;padding:0 2rem;">
+        <div style="background:linear-gradient(90deg,#8b5cf6,#06b6d4);color:#fff;border-radius:12px;padding:0.7rem 1rem;text-align:center;font-weight:600;">
+            ⚡ Launch promo ends soon: <span id="countdown">--:--:--</span> • 50% off first month
+        </div>
+    </div>
+
     <section class="hero">
         <div class="hero-badge">🎨 AI-Generated Daily</div>
         <h1>Stunning 4K Wallpapers <span>Delivered Daily</span></h1>
@@ -775,8 +781,32 @@
             document.getElementById('utm-campaign').value = p.get('utm_campaign') || 'wallpaper-launch';
         }
 
+        function startCountdown() {
+            // 24h rolling promo countdown from first page view
+            const key = 'wd_launch_promo_ends_at';
+            let endsAt = localStorage.getItem(key);
+            if (!endsAt) {
+                endsAt = Date.now() + (24 * 60 * 60 * 1000);
+                localStorage.setItem(key, String(endsAt));
+            } else {
+                endsAt = Number(endsAt);
+            }
+
+            const el = document.getElementById('countdown');
+            function tick() {
+                const diff = Math.max(0, endsAt - Date.now());
+                const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+                const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+                const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+                if (el) el.textContent = `${h}:${m}:${s}`;
+            }
+            tick();
+            setInterval(tick, 1000);
+        }
+
         hydrateAttributionFields();
         setBilling('monthly');
+        startCountdown();
     </script>
 </body>
 </html>

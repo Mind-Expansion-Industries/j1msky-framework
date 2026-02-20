@@ -1325,3 +1325,25 @@ Require legal/revops approval when any of these apply:
 - Time from close to kickoff (target: <5 business days)
 - % of projects with complete handoff packet (target: >95%)
 - % of onboarding delays caused by missing sales context (target: <5%)
+
+## 25) Weekly Operating Cadence
+
+### Monday (Planning)
+- Review pipeline changes and forecast updates
+- Confirm implementation capacity for new deals
+- Set top 3 commercial priorities for the week
+
+### Wednesday (Execution Check)
+- Inspect deal progression and blockers
+- Review active onboarding health and risk flags
+- Validate margin guardrails (discounts, model mix, support load)
+
+### Friday (Business Review)
+- KPI snapshot: MRR, churn, win-back, collections, activation
+- Document lessons learned from lost deals and at-risk renewals
+- Lock next-week actions with owner + due date
+
+### Cadence KPIs
+- % weekly action items closed (target: >85%)
+- Forecast accuracy (target: within ±10%)
+- % at-risk accounts with active mitigation plan (target: 100%)

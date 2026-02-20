@@ -318,6 +318,13 @@ class UnifiedOrchestrator:
             "total_calls": len(self.usage_log)
         }
 
+    def get_budget_utilization_pct(self) -> float:
+        """Return today's budget utilization percentage."""
+        daily_budget = self.config.get("cost_tracking", {}).get("daily_budget", 50)
+        if daily_budget <= 0:
+            return 0.0
+        return round((self.get_daily_spend() / daily_budget) * 100, 2)
+
     def get_status_report(self):
         """Get current orchestrator status"""
         today = datetime.now().strftime("%Y-%m-%d")
@@ -333,6 +340,7 @@ class UnifiedOrchestrator:
             "daily_budget": daily_budget,
             "today_spend": today_spend,
             "budget_remaining": round(max(daily_budget - today_spend, 0), 4),
+            "budget_utilization_pct": self.get_budget_utilization_pct(),
             "monthly_forecast": self.forecast_monthly_spend(),
             "orchestration_mode": "unified",
             "ceo_model": "opus",

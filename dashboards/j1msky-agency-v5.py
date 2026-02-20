@@ -235,6 +235,7 @@ HTML = '''<!DOCTYPE html>
             padding-bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
             padding-top: calc(var(--header-height) + 16px);
             max-width: 1400px;
+            width: 100%;
             margin: 0 auto;
             /* Smooth scrolling */
             scroll-behavior: smooth;
@@ -614,6 +615,25 @@ HTML = '''<!DOCTYPE html>
             font-weight: 600;
         }
         
+        /* Small phones */
+        @media (max-width: 360px) {
+            .main {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+            .quick-grid,
+            .stats-grid {
+                gap: 8px;
+            }
+            .nav-item {
+                min-width: 56px;
+                padding: 8px 10px;
+            }
+            .header h1 {
+                font-size: 16px;
+            }
+        }
+
         /* Tablet */
         @media (min-width: 768px) {
             :root {
@@ -682,7 +702,7 @@ HTML = '''<!DOCTYPE html>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
-            <button class="help-btn" onclick="toggleHelp()" title="Help (? or h)" aria-label="Help">?</button>
+            <button class="help-btn" onclick="toggleHelp()" title="Help (? or h)" aria-label="Help" aria-expanded="false">?</button>
         </div>
     </header>
     
@@ -867,7 +887,7 @@ HTML = '''<!DOCTYPE html>
         </div>
     </main>
     
-    <div id="help" class="panel" tabindex="-1">
+    <div id="help" class="panel" tabindex="-1" aria-hidden="true">
         <div class="card">
             <div class="card-title">⌨️ Keyboard Shortcuts</div>
             <div class="agent-list">
@@ -1332,7 +1352,7 @@ HTML = '''<!DOCTYPE html>
                         
                         if (pushState) {
                             NavState.pushHistory(tabId);
-                            history.pushState({ tab: tabId }, '', '#' + tabId);
+                            safePushState({ tab: tabId }, '#' + tabId);
                         }
                         
                         // Cleanup after transition
@@ -1431,6 +1451,22 @@ HTML = '''<!DOCTYPE html>
             return el.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select';
         }
 
+        function safePushState(state, hash) {
+            try {
+                history.pushState(state, '', hash);
+            } catch (e) {
+                // no-op on environments that restrict history mutations
+            }
+        }
+
+        function safeReplaceState(state, hash) {
+            try {
+                history.replaceState(state, '', hash);
+            } catch (e) {
+                // no-op on environments that restrict history mutations
+            }
+        }
+
         function syncNavAriaFromActive() {
             const navItems = document.querySelectorAll('.nav-item');
             navItems.forEach((n) => {
@@ -1470,6 +1506,9 @@ HTML = '''<!DOCTYPE html>
             helpVisible = !helpVisible;
             const mainPanels = document.querySelectorAll('.main .panel');
             
+            const helpBtn = document.querySelector('.help-btn');
+            if (helpBtn) helpBtn.setAttribute('aria-expanded', helpVisible ? 'true' : 'false');
+
             if (helpVisible) {
                 // Store current state before showing help
                 helpPanel.dataset.previousTab = NavState.currentTab;
@@ -1479,9 +1518,11 @@ HTML = '''<!DOCTYPE html>
                 });
                 helpPanel.style.display = 'block';
                 helpPanel.classList.add('active');
+                helpPanel.setAttribute('aria-hidden', 'false');
             } else {
                 helpPanel.style.display = 'none';
                 helpPanel.classList.remove('active');
+                helpPanel.setAttribute('aria-hidden', 'true');
                 // Restore previous tab
                 const previousTab = helpPanel.dataset.previousTab || NavState.currentTab;
                 const current = document.getElementById(previousTab);
@@ -1708,7 +1749,7 @@ HTML = '''<!DOCTYPE html>
             const initialTab = NavState.normalizeTab(hash || sessionTab || 'dashboard');
             
             NavState.pushHistory(initialTab);
-            if (!hash) history.replaceState({ tab: initialTab }, '', '#' + initialTab);
+            if (!hash) safeReplaceState({ tab: initialTab }, '#' + initialTab);
             
             // Sync UI with initial tab
             if (initialTab !== 'dashboard') {

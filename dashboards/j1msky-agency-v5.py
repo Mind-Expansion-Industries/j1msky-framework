@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.13 - Resize Flicker Reduction
-Patch release: adds defensive touch list guards to prevent rare undefined touch access errors
+J1MSKY Agency v6.0.14 - Resize Flicker Reduction
+Patch release: defers history navigation when transitions are in-flight to avoid dropped back/forward state changes
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.13</title>
+    <title>J1MSKY Agency v6.0.14</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -677,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.13</h1>
+        <h1>◈ J1MSKY Agency v6.0.14</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1095,9 +1095,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.13';
+                        header.textContent = '◈ J1MSKY Agency v6.0.14';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.13';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.14';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1344,16 +1344,20 @@ HTML = '''<!DOCTYPE html>
         };
         
         window.addEventListener('popstate', (e) => {
+            const targetTab = e.state?.tab || 'dashboard';
+
             // Ensure overlay state doesn't conflict with browser history navigation.
             if (typeof helpVisible !== 'undefined' && helpVisible) {
                 toggleHelp();
             }
 
-            if (e.state?.tab) {
-                showTab(e.state.tab, false);
-            } else {
-                showTab('dashboard', false);
+            // If a transition is already active, defer popstate nav slightly.
+            if (NavState.isTransitioning) {
+                setTimeout(() => showTab(targetTab, false), NavState.transitionCooldown + 20);
+                return;
             }
+
+            showTab(targetTab, false);
         });
         
         function isTypingTarget(el) {
@@ -1676,7 +1680,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.13 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.14 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.22 - Resize Flicker Reduction
-Patch release: adds aria-busy loading semantics and blocks swipe navigation while transitions are active
+J1MSKY Agency v6.0.23 - Resize Flicker Reduction
+Patch release: clears pending offline debounce timers on teardown to avoid stale callbacks after unload/reload
 """
 
 import http.server
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.22</title>
+    <title>J1MSKY Agency v6.0.23</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -677,7 +677,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.22</h1>
+        <h1>◈ J1MSKY Agency v6.0.23</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1074,6 +1074,13 @@ HTML = '''<!DOCTYPE html>
                 window.addEventListener('offline', () => this.setOnline(false));
                 this.updateStatus(navigator.onLine);
             },
+
+            destroy() {
+                if (this.offlineTimer) {
+                    clearTimeout(this.offlineTimer);
+                    this.offlineTimer = null;
+                }
+            },
             
             setOnline(isOnline) {
                 clearTimeout(this.offlineTimer);
@@ -1096,9 +1103,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.22';
+                        header.textContent = '◈ J1MSKY Agency v6.0.23';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.22';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.23';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1676,6 +1683,7 @@ HTML = '''<!DOCTYPE html>
         window.addEventListener('beforeunload', () => {
             ResizeHandler.destroy();
             StatsUpdater.stop();
+            ConnectionHandler.destroy();
             // Keep SessionStore intact so tab persistence survives refresh/reopen.
         });
     </script>
@@ -1744,7 +1752,7 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.22 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.23 - Transition Guard Patch          ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Real-time stats updater                               ║")
         print("║  ✓ Session persistence across refreshes                  ║")

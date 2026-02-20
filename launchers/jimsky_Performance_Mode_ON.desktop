@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=jimsky Performance Mode ON
+Comment=Stop non-essential services for max Pi performance
+Exec=/bin/bash -lc '/home/m1ndb0t/Desktop/J1MSKY/scripts/startup/performance-mode-on.sh'
+Icon=utilities-system-monitor
+Terminal=true
+Type=Application
+Categories=System;

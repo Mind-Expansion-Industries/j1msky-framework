@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=jimsky Performance Mode OFF
+Comment=Restore dashboard/services after performance mode
+Exec=/bin/bash -lc '/home/m1ndb0t/Desktop/J1MSKY/scripts/startup/performance-mode-off.sh'
+Icon=utilities-terminal
+Terminal=true
+Type=Application
+Categories=System;

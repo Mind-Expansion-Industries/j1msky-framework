@@ -2050,7 +2050,59 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
         body = self.rfile.read(content_length).decode()
         params = parse_qs(body)
         
-        if self.path == '/api/pricing/quote':
+        if self.path == '/api/pricing/scenario':
+            delivery_type = params.get('delivery_type', ['task'])[0]
+            raw_scenarios = params.get('scenarios', ['[]'])[0]
+
+            try:
+                scenarios = json.loads(raw_scenarios)
+                if not isinstance(scenarios, list) or not scenarios:
+                    raise ValueError('scenarios must be a non-empty JSON array')
+            except Exception as e:
+                self.send_json({'success': False, 'error': f'Invalid scenarios payload: {e}'})
+                return
+
+            evaluated = []
+            for idx, item in enumerate(scenarios):
+                model = item.get('model', 'k2p5')
+                complexity = item.get('complexity', 'medium')
+                try:
+                    estimated_input = int(item.get('estimated_input', 1000))
+                    estimated_output = int(item.get('estimated_output', 500))
+                except (TypeError, ValueError):
+                    self.send_json({'success': False, 'error': f'Invalid token estimates in scenario {idx}'})
+                    return
+
+                if model not in cost_tracker.MODEL_PRICING:
+                    self.send_json({'success': False, 'error': f'Unsupported model in scenario {idx}: {model}'})
+                    return
+                if complexity not in {'low', 'medium', 'high'}:
+                    self.send_json({'success': False, 'error': f'Invalid complexity in scenario {idx}: {complexity}'})
+                    return
+
+                quote = cost_tracker.recommend_task_quote(
+                    model,
+                    estimated_input=estimated_input,
+                    estimated_output=estimated_output,
+                    complexity=complexity
+                )
+                guardrail = cost_tracker.evaluate_margin_guardrail(quote, delivery_type=delivery_type)
+                evaluated.append({'quote': quote, 'guardrail_check': guardrail})
+
+            compliant_count = sum(1 for e in evaluated if e['guardrail_check'].get('is_compliant'))
+            avg_margin = round(sum(e['quote'].get('gross_margin_pct', 0.0) for e in evaluated) / len(evaluated), 2)
+
+            self.send_json({
+                'success': True,
+                'delivery_type': delivery_type,
+                'scenario_count': len(evaluated),
+                'compliant_count': compliant_count,
+                'needs_escalation': compliant_count < len(evaluated),
+                'average_margin_pct': avg_margin,
+                'results': evaluated
+            })
+
+        elif self.path == '/api/pricing/quote':
             model = params.get('model', ['k2p5'])[0]
             complexity = params.get('complexity', ['medium'])[0]
             delivery_type = params.get('delivery_type', ['task'])[0]

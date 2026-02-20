@@ -362,6 +362,43 @@ Returns active pricing policy, a sample quote, and margin guardrail result.
 }
 ```
 
+#### Evaluate Pricing Scenarios
+**Endpoint:** `POST /pricing/scenario`
+
+Batch-evaluates multiple pricing options and returns compliance rollup.
+
+**Request (form fields):**
+- `delivery_type`: `task|subscription|enterprise`
+- `scenarios`: JSON array of scenario objects
+
+**Scenario object fields:**
+- `model`: `k2p5|sonnet|opus|minimax-m2.5`
+- `estimated_input`: integer
+- `estimated_output`: integer
+- `complexity`: `low|medium|high`
+
+**Response:**
+```json
+{
+  "success": true,
+  "delivery_type": "task",
+  "scenario_count": 3,
+  "compliant_count": 2,
+  "needs_escalation": true,
+  "average_margin_pct": 63.42,
+  "results": [
+    {
+      "quote": {"model": "k2p5", "gross_margin_pct": 99.6, "margin_band": "strong"},
+      "guardrail_check": {"is_compliant": true, "action": "approve_quote"}
+    },
+    {
+      "quote": {"model": "opus", "gross_margin_pct": 41.2, "margin_band": "at_risk"},
+      "guardrail_check": {"is_compliant": false, "action": "escalate_deal_desk"}
+    }
+  ]
+}
+```
+
 ---
 
 ### 1. Spawn Agent

@@ -1627,3 +1627,21 @@ Turn overnight quote risk flags into concrete owner actions before new outbound 
 - **Owner**
 - **Action by EOD**
 - **Expected margin after changes**
+
+## 37) Scenario Pricing Review (Pre-Proposal)
+
+### Why
+Before sending proposals with multiple options, test all scenarios against guardrails to avoid accidental low-margin offers.
+
+### Process
+
+1. Draft 2-4 pricing scenarios (different model mixes or scope options).
+2. Run automated scenario check in ops tooling.
+3. Reject any scenario below margin threshold unless strategic exception is approved.
+4. Present only compliant scenarios to customers, plus one premium stretch option.
+
+### Decision Rule
+
+- If **all scenarios compliant** → proceed to proposal
+- If **some scenarios non-compliant** → revise and rerun
+- If **none compliant** → escalate to Deal Desk for restructure

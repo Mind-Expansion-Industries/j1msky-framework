@@ -1725,3 +1725,19 @@ Escalate proposal portfolio to executive review when any of the following is tru
 
 - Open exception count should trend down week-over-week.
 - Target: at least 25% reduction in at-risk exceptions each month.
+
+## 43) Exception Risk Scoring Playbook
+
+### Risk Levels
+
+- **none:** no open exceptions
+- **ok:** open exceptions exist, but none are aging-risk
+- **warning:** at least one exception is 14+ days old
+- **critical:** oldest exception >=30 days or 2+ aging-risk exceptions
+
+### Standard Next Actions
+
+- `no_action` → keep monitoring
+- `continue_recovery_plan` → owner executes current plan
+- `manager_followup` → line manager reviews blockers within 24h
+- `schedule_executive_review` → leadership review added to next operating meeting

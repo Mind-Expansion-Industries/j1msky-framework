@@ -342,16 +342,32 @@ class UnifiedOrchestrator:
                 "open_exceptions": 0,
                 "oldest_days": 0,
                 "at_risk_count": 0,
-                "requires_exec_followup": False
+                "requires_exec_followup": False,
+                "risk_level": "none",
+                "next_action": "no_action"
             }
 
         oldest = max(open_exception_days)
         at_risk = sum(1 for d in open_exception_days if d >= 14)
+        requires_exec = oldest >= 30 or at_risk >= 2
+
+        if requires_exec:
+            risk_level = "critical"
+            next_action = "schedule_executive_review"
+        elif at_risk >= 1:
+            risk_level = "warning"
+            next_action = "manager_followup"
+        else:
+            risk_level = "ok"
+            next_action = "continue_recovery_plan"
+
         return {
             "open_exceptions": len(open_exception_days),
             "oldest_days": oldest,
             "at_risk_count": at_risk,
-            "requires_exec_followup": oldest >= 30 or at_risk >= 2
+            "requires_exec_followup": requires_exec,
+            "risk_level": risk_level,
+            "next_action": next_action
         }
     
     def get_daily_spend(self, day: Optional[str] = None) -> float:

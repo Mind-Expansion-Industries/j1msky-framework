@@ -31,6 +31,8 @@ COPY . /usr/share/nginx/html
 - `index.html` — Complete landing page + pricing offer + Netlify-ready lead form
 - `thank-you.html` — Post-submit conversion page
 - `book.html` — Pre-qualifier intake page before scheduling
+- `netlify.toml` — Deploy config (redirects + security/cache headers)
+- `robots.txt` and `sitemap.xml` — Basic SEO crawl/index support
 - Embedded CSS & JavaScript
 - Zero external dependencies except Google Fonts
 
@@ -69,6 +71,15 @@ Edit the pricing cards in the HTML directly:
 - Logo: Find `class="logo"`
 - Colors: Edit CSS `:root` variables
 - Copy: Modify text throughout
+
+## 🌐 Deploy Hardening + SEO
+
+- `netlify.toml` adds:
+  - clean redirects (`/`, `/book`, `/thanks`)
+  - baseline security headers
+  - short cache policy for quick iteration
+- `robots.txt` + `sitemap.xml` are included for search indexing
+- Update `https://j1msky.ai` in `sitemap.xml` and `robots.txt` if your domain differs
 
 ## 📊 Analytics Setup
 

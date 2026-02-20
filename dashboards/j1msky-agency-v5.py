@@ -1330,7 +1330,7 @@ HTML = '''<!DOCTYPE html>
 
             // Begin transition
             NavState.isTransitioning = true;
-            NavState.pendingTab = tabId;
+            NavState.pendingTab = NavState.normalizeTab(tabId);
             NavState.lastTransitionTime = Date.now();
             if (NavState.popstateTimeoutId) {
                 clearTimeout(NavState.popstateTimeoutId);

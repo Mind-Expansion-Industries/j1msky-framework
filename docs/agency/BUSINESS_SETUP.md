@@ -1645,3 +1645,20 @@ Before sending proposals with multiple options, test all scenarios against guard
 - If **all scenarios compliant** → proceed to proposal
 - If **some scenarios non-compliant** → revise and rerun
 - If **none compliant** → escalate to Deal Desk for restructure
+
+## 38) Quote Portfolio Governance
+
+### Objective
+Manage bundles of quote options as a portfolio so teams optimize total win probability and margin together.
+
+### Portfolio Rules
+
+- Every proposal should include a **base**, **recommended**, and **premium** option.
+- At least 2 of 3 options must clear margin guardrails.
+- Any non-compliant option requires explicit "strategic exception" owner.
+- Portfolio average margin should remain above 60% for task-heavy proposals.
+
+### Review Cadence
+
+- Weekly: inspect portfolio compliance trend by segment.
+- Monthly: adjust markup defaults if portfolio margins drift below target.

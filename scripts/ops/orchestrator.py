@@ -308,6 +308,29 @@ class UnifiedOrchestrator:
             "next_step": "send_quote" if approved else "route_to_deal_desk",
             "generated_at": datetime.now().isoformat()
         }
+
+    def summarize_quote_portfolio(self, quotes: List[Dict[str, Any]], delivery_type: str = "task") -> Dict[str, Any]:
+        """Return compliance rollup for a list of quote candidates."""
+        if not quotes:
+            return {
+                "delivery_type": delivery_type,
+                "scenario_count": 0,
+                "compliant_count": 0,
+                "needs_escalation": False,
+                "average_margin_pct": 0.0
+            }
+
+        results = [self.evaluate_pricing_guardrails(q, delivery_type=delivery_type) for q in quotes]
+        compliant_count = sum(1 for r in results if r.get("is_compliant"))
+        avg_margin = round(sum(q.get("gross_margin_pct", 0.0) for q in quotes) / len(quotes), 2)
+
+        return {
+            "delivery_type": delivery_type,
+            "scenario_count": len(quotes),
+            "compliant_count": compliant_count,
+            "needs_escalation": compliant_count < len(quotes),
+            "average_margin_pct": avg_margin
+        }
     
     def get_daily_spend(self, day: Optional[str] = None) -> float:
         """Get spend for a specific day (YYYY-MM-DD) or today."""
@@ -518,6 +541,11 @@ class UnifiedOrchestrator:
         sample_quote = self.recommend_task_price(default_quote_model, estimated_tokens=2000, complexity="medium")
         sample_guardrail = self.evaluate_pricing_guardrails(sample_quote, delivery_type="task")
         sample_decision = self.build_quote_decision_record(sample_quote, delivery_type="task", approver="ops-auto")
+        sample_portfolio = self.summarize_quote_portfolio([
+            sample_quote,
+            self.recommend_task_price("sonnet", estimated_tokens=3500, complexity="high"),
+            self.recommend_task_price("opus", estimated_tokens=5000, complexity="high")
+        ], delivery_type="task")
         return {
             "timestamp": datetime.now().isoformat(),
             "models_active": len(self.config["models"]),
@@ -536,6 +564,7 @@ class UnifiedOrchestrator:
             "example_task_quote": sample_quote,
             "pricing_guardrail_check": sample_guardrail,
             "quote_decision_preview": sample_decision,
+            "quote_portfolio_preview": sample_portfolio,
             "usage_anomalies": self.detect_usage_anomalies(),
             "monthly_forecast": self.forecast_monthly_spend(),
             "orchestration_mode": "unified",

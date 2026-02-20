@@ -251,6 +251,7 @@ HTML = '''<!DOCTYPE html>
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 12px;
+            overflow-wrap: anywhere;
         }
         
         .card-title {
@@ -1444,6 +1445,11 @@ HTML = '''<!DOCTYPE html>
             // Ensure overlay state doesn't conflict with browser history navigation.
             if (typeof helpVisible !== 'undefined' && helpVisible) {
                 toggleHelp();
+            }
+
+            // Ignore no-op popstate events that target the already-active tab.
+            if (targetTab === NavState.currentTab && !NavState.isTransitioning) {
+                return;
             }
 
             // If a transition is already active, defer popstate nav slightly.

@@ -541,6 +541,7 @@ HTML = '''<!DOCTYPE html>
             display: block;
             animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             overflow-x: hidden;
+            will-change: opacity, transform;
         }
 
         @keyframes fadeIn {
@@ -552,6 +553,7 @@ HTML = '''<!DOCTYPE html>
         @media (prefers-reduced-motion: reduce) {
             .panel.active {
                 animation: none;
+                will-change: auto;
             }
             .nav-item span {
                 transition: none;
@@ -559,9 +561,11 @@ HTML = '''<!DOCTYPE html>
             .stat-card:hover {
                 transform: none;
                 box-shadow: none;
+                will-change: auto;
             }
             body.navigating::after {
                 animation: none;
+                display: none;
             }
         }
 

@@ -335,6 +335,7 @@ HTML = '''<!DOCTYPE html>
             cursor: pointer;
             transition: all 0.2s;
             min-width: 0;
+            overflow-wrap: anywhere;
         }
 
         .quick-btn:hover {

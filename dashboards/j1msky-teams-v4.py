@@ -2463,6 +2463,65 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
 
             self.send_json({'success': True, 'quote': quote, 'guardrail_check': guardrail})
 
+        elif self.path == '/api/pricing/batch-quotes':
+            # Generate quotes for multiple segments at once
+            model = params.get('model', ['k2p5'])[0]
+            complexity = params.get('complexity', ['medium'])[0]
+            delivery_type = params.get('delivery_type', ['task'])[0]
+
+            try:
+                estimated_input = int(params.get('estimated_input', ['1000'])[0])
+                estimated_output = int(params.get('estimated_output', ['500'])[0])
+            except ValueError:
+                self.send_json({'success': False, 'error': 'estimated_input and estimated_output must be integers'})
+                return
+
+            if model not in cost_tracker.MODEL_PRICING:
+                self.send_json({'success': False, 'error': f'Unsupported model: {model}'})
+                return
+            if complexity not in {'low', 'medium', 'high'}:
+                self.send_json({'success': False, 'error': 'complexity must be low|medium|high'})
+                return
+
+            segments = ['enterprise', 'mid_market', 'smb', 'startup']
+            quotes_by_segment = {}
+
+            for seg in segments:
+                quote = cost_tracker.recommend_task_quote(
+                    model,
+                    estimated_input=estimated_input,
+                    estimated_output=estimated_output,
+                    complexity=complexity,
+                    segment=seg
+                )
+                guardrail = cost_tracker.evaluate_margin_guardrail(quote, delivery_type=delivery_type)
+                quotes_by_segment[seg] = {
+                    'quote': quote,
+                    'guardrail_check': guardrail
+                }
+
+            # Find best value and highest margin options
+            best_value = min(quotes_by_segment.items(), key=lambda x: x[1]['quote']['recommended_price'])
+            highest_margin = max(quotes_by_segment.items(), key=lambda x: x[1]['quote']['gross_margin_pct'])
+
+            self.send_json({
+                'success': True,
+                'input_params': {
+                    'model': model,
+                    'complexity': complexity,
+                    'estimated_input': estimated_input,
+                    'estimated_output': estimated_output,
+                    'delivery_type': delivery_type
+                },
+                'quotes_by_segment': quotes_by_segment,
+                'comparison': {
+                    'best_value_segment': best_value[0],
+                    'best_value_price': best_value[1]['quote']['recommended_price'],
+                    'highest_margin_segment': highest_margin[0],
+                    'highest_margin_pct': highest_margin[1]['quote']['gross_margin_pct']
+                }
+            })
+
         elif self.path == '/api/spawn':
             model = params.get('model', ['k2p5'])[0]
             task = sanitize_task(params.get('task', ['No task'])[0])

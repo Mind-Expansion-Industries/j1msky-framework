@@ -487,6 +487,100 @@ Returns operational health status of the pricing system including daily costs, b
 }
 ```
 
+#### Generate Batch Segment Quotes
+**Endpoint:** `POST /pricing/batch-quotes`
+
+Generates quotes for all customer segments simultaneously to compare pricing across enterprise, mid-market, SMB, and startup segments.
+
+**Request (form fields):**
+- `model`: `k2p5|sonnet|opus|minimax-m2.5`
+- `estimated_input`: integer token estimate
+- `estimated_output`: integer token estimate
+- `complexity`: `low|medium|high`
+- `delivery_type`: `task|subscription|enterprise`
+
+**Response:**
+```json
+{
+  "success": true,
+  "input_params": {
+    "model": "k2p5",
+    "complexity": "medium",
+    "estimated_input": 2000,
+    "estimated_output": 800,
+    "delivery_type": "task"
+  },
+  "quotes_by_segment": {
+    "enterprise": {
+      "quote": {
+        "model": "k2p5",
+        "complexity": "medium",
+        "segment": "enterprise",
+        "final_markup": 4.5,
+        "recommended_price": 0.75,
+        "gross_margin_pct": 98.5
+      },
+      "guardrail_check": {
+        "is_compliant": true,
+        "action": "approve_quote"
+      }
+    },
+    "mid_market": {
+      "quote": {
+        "model": "k2p5",
+        "segment": "mid_market",
+        "final_markup": 4.0,
+        "recommended_price": 0.50,
+        "gross_margin_pct": 99.6
+      },
+      "guardrail_check": {
+        "is_compliant": true,
+        "action": "approve_quote"
+      }
+    },
+    "smb": {
+      "quote": {
+        "model": "k2p5",
+        "segment": "smb",
+        "final_markup": 3.5,
+        "recommended_price": 0.50,
+        "gross_margin_pct": 99.4
+      },
+      "guardrail_check": {
+        "is_compliant": true,
+        "action": "approve_quote"
+      }
+    },
+    "startup": {
+      "quote": {
+        "model": "k2p5",
+        "segment": "startup",
+        "final_markup": 3.0,
+        "recommended_price": 0.50,
+        "gross_margin_pct": 99.2
+      },
+      "guardrail_check": {
+        "is_compliant": true,
+        "action": "approve_quote"
+      }
+    }
+  },
+  "comparison": {
+    "best_value_segment": "startup",
+    "best_value_price": 0.50,
+    "highest_margin_segment": "mid_market",
+    "highest_margin_pct": 99.6
+  }
+}
+```
+
+**Use Cases:**
+- Compare pricing across segments before targeting a new market
+- Identify optimal segment positioning for a new service
+- Sales training on segment-based pricing differences
+
+---
+
 #### Generate Quote Decision Record
 **Endpoint:** `POST /pricing/decision`
 

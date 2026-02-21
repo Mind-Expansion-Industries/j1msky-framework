@@ -2294,4 +2294,65 @@ Every pricing decision must be traceable to:
 - Executive onboarding: Review pricing strategy and exceptions
 - Annual refresh: All staff retake pricing certification
 
+## 59) Pricing Training and Certification
+
+### Purpose
+Ensure all customer-facing staff understand and can apply pricing policies correctly.
+
+### Training Levels
+
+**Level 1: Sales Representative**
+- Duration: 2 hours
+- Topics:
+  - Pricing policy overview
+  - How to use pricing APIs
+  - Segment identification
+  - When to escalate to Deal Desk
+- Assessment: 10-question quiz (80% to pass)
+- Renewal: Annual
+
+**Level 2: Revenue Manager**
+- Duration: 4 hours
+- Topics:
+  - All Level 1 content
+  - Exception evaluation criteria
+  - Margin analysis
+  - Competitive positioning
+  - Experiment design basics
+- Assessment: Case study review (3 scenarios)
+- Renewal: Annual
+
+**Level 3: Pricing Administrator**
+- Duration: 8 hours
+- Topics:
+  - All Level 2 content
+  - Policy change process
+  - Experiment analysis
+  - System configuration
+  - Troubleshooting
+- Assessment: Practical exam (configure policy, run experiment)
+- Renewal: Bi-annual
+
+### Certification Tracking
+
+| Role | Level | Last Certified | Expires | Status |
+|------|-------|----------------|---------|--------|
+| Jane D. | Level 2 | 2026-01-15 | 2027-01-15 | Active |
+| John S. | Level 1 | 2026-02-01 | 2027-02-01 | Active |
+| Sarah M. | Level 2 | 2025-06-10 | 2026-06-10 | Expiring |
+
+### Consequences of Non-Certification
+
+- Level 1: Cannot send quotes without manager approval
+- Level 2: Cannot approve exceptions or experiments
+- Level 3: Cannot modify pricing policies
+
+### Training Resources
+
+- Pricing playbook (this document)
+- API documentation
+- Video tutorials (internal)
+- Office hours (weekly, RevOps team)
+- Certification exam (online, self-paced)
+
 

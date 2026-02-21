@@ -2507,4 +2507,102 @@ Ensure pricing integrity through regular audits that verify compliance, accuracy
 - Output: External audit report
 - Distribution: Executive team, Board (if material findings)
 
+## 62) Pricing Notifications and Webhooks
+
+### Purpose
+Enable real-time notifications for pricing events to integrate with external systems and alert stakeholders.
+
+### Supported Events
+
+| Event | Description | Payload |
+|-------|-------------|---------|
+| `pricing.quote_generated` | New quote created | Quote details, segment, margin |
+| `pricing.quote_approved` | Quote approved | Quote ID, approver, timestamp |
+| `pricing.quote_escalated` | Quote escalated | Quote ID, reason, to whom |
+| `pricing.exception_created` | Exception approved | Exception details, recovery plan |
+| `pricing.margin_alert` | Margin below threshold | Alert level, affected quotes |
+| `pricing.budget_warning` | Budget >80% | Current spend, projected |
+| `pricing.budget_critical` | Budget >95% | Immediate action required |
+| `pricing.policy_changed` | Policy updated | Changes, effective date |
+
+### Webhook Registration
+
+Register a webhook to receive pricing events:
+
+```bash
+curl -X POST http://localhost:8080/api/pricing/webhook \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://your-system.com/webhooks/pricing",
+    "events": ["pricing.quote_generated", "pricing.exception_created"],
+    "secret": "your_webhook_secret"
+  }'
+```
+
+Response:
+```json
+{
+  "success": true,
+  "webhook_id": "pricing_webhook_1708473600",
+  "url": "https://your-system.com/webhooks/pricing",
+  "events": ["pricing.quote_generated", "pricing.exception_created"],
+  "message": "Pricing webhook registered"
+}
+```
+
+### Webhook Payload Example
+
+```json
+{
+  "event": "pricing.quote_generated",
+  "timestamp": "2026-02-21T02:45:00Z",
+  "webhook_id": "pricing_webhook_1708473600",
+  "data": {
+    "quote_id": "quote_12345",
+    "model": "k2p5",
+    "segment": "enterprise",
+    "complexity": "medium",
+    "recommended_price": 0.75,
+    "gross_margin_pct": 98.5,
+    "decision_status": "approved"
+  }
+}
+```
+
+### Security
+
+- Webhook requests include HMAC signature in `X-Webhook-Signature` header
+- Verify signature using your webhook secret
+- Use HTTPS endpoints only
+- Implement idempotency to handle duplicate deliveries
+
+### Retry Policy
+
+- Failed webhooks retried 3 times with exponential backoff
+- First retry: 1 second
+- Second retry: 5 seconds
+- Third retry: 30 seconds
+- After 3 failures, webhook disabled and admin notified
+
+### Common Integrations
+
+| System | Events Used | Purpose |
+|--------|-------------|---------|
+| Slack | `pricing.exception_created`, `pricing.budget_critical` | Ops alerts |
+| CRM | `pricing.quote_generated`, `pricing.quote_approved` | Opportunity tracking |
+| BI Tool | All events | Analytics and reporting |
+| Accounting | `pricing.quote_approved` | Revenue recognition |
+
+### Managing Webhooks
+
+List registered webhooks:
+```bash
+curl http://localhost:8080/api/pricing/webhooks
+```
+
+Delete a webhook:
+```bash
+curl -X DELETE http://localhost:8080/api/pricing/webhook/pricing_webhook_1708473600
+```
+
 

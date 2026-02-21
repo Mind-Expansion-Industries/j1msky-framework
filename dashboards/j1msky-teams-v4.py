@@ -2637,6 +2637,52 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
                 }
             })
 
+        elif self.path == '/api/pricing/webhook':
+            content_length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(content_length).decode()
+            try:
+                data = json.loads(body)
+                url = data.get('url')
+                events = data.get('events', ['pricing.quote_generated'])
+                secret = data.get('secret')
+                if not url:
+                    self.send_json({'success': False, 'error': 'URL required'})
+                    return
+                webhook_id = f"pricing_webhook_{int(time.time())}"
+                if not hasattr(self, 'pricing_webhooks'):
+                    self.__class__.pricing_webhooks = {}
+                self.__class__.pricing_webhooks[webhook_id] = {
+                    'url': url,
+                    'events': events,
+                    'secret': secret,
+                    'created_at': datetime.now().isoformat()
+                }
+                self.send_json({
+                    'success': True,
+                    'webhook_id': webhook_id,
+                    'url': url,
+                    'events': events,
+                    'message': 'Pricing webhook registered'
+                })
+            except json.JSONDecodeError:
+                self.send_json({'success': False, 'error': 'Invalid JSON'})
+
+        elif self.path == '/api/pricing/webhooks':
+            webhooks = getattr(self.__class__, 'pricing_webhooks', {})
+            self.send_json({
+                'success': True,
+                'webhooks': [
+                    {
+                        'webhook_id': wid,
+                        'url': config['url'],
+                        'events': config['events'],
+                        'created_at': config['created_at']
+                    }
+                    for wid, config in webhooks.items()
+                ],
+                'count': len(webhooks)
+            })
+
         else:
             self.send_error(404)
     

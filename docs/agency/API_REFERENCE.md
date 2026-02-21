@@ -530,6 +530,89 @@ Generates a comprehensive daily pricing report including health metrics, model b
 
 ---
 
+#### Register Pricing Webhook
+**Endpoint:** `POST /pricing/webhook`
+
+Register a webhook URL to receive real-time notifications for pricing events.
+
+**Request (JSON body):**
+- `url`: Webhook endpoint URL (HTTPS required)
+- `events`: Array of event types to subscribe to
+- `secret`: Optional secret for HMAC signature verification
+
+**Supported Events:**
+- `pricing.quote_generated` - New quote created
+- `pricing.quote_approved` - Quote approved
+- `pricing.quote_escalated` - Quote escalated
+- `pricing.exception_created` - Exception approved
+- `pricing.margin_alert` - Margin below threshold
+- `pricing.budget_warning` - Budget >80%
+- `pricing.budget_critical` - Budget >95%
+- `pricing.policy_changed` - Policy updated
+
+**Request Example:**
+```bash
+curl -X POST http://localhost:8080/api/pricing/webhook \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://your-system.com/webhooks/pricing",
+    "events": ["pricing.quote_generated", "pricing.exception_created"],
+    "secret": "your_webhook_secret"
+  }'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "webhook_id": "pricing_webhook_1708473600",
+  "url": "https://your-system.com/webhooks/pricing",
+  "events": ["pricing.quote_generated", "pricing.exception_created"],
+  "message": "Pricing webhook registered"
+}
+```
+
+**Webhook Payload Format:**
+```json
+{
+  "event": "pricing.quote_generated",
+  "timestamp": "2026-02-21T02:45:00Z",
+  "webhook_id": "pricing_webhook_1708473600",
+  "data": {
+    "quote_id": "quote_12345",
+    "model": "k2p5",
+    "segment": "enterprise",
+    "recommended_price": 0.75,
+    "gross_margin_pct": 98.5
+  }
+}
+```
+
+---
+
+#### List Pricing Webhooks
+**Endpoint:** `GET /pricing/webhooks`
+
+List all registered pricing webhooks.
+
+**Response:**
+```json
+{
+  "success": true,
+  "webhooks": [
+    {
+      "webhook_id": "pricing_webhook_1708473600",
+      "url": "https://your-system.com/webhooks/pricing",
+      "events": ["pricing.quote_generated", "pricing.exception_created"],
+      "created_at": "2026-02-21T02:30:00Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+---
+
 #### Generate Pricing Quote
 **Endpoint:** `POST /pricing/quote`
 

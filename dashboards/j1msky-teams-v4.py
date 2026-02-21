@@ -894,6 +894,158 @@ class MetricsCollector:
 # Initialize metrics collector
 metrics = MetricsCollector()
 
+
+# Prometheus Metrics Exporter
+class PrometheusExporter:
+    """
+    Export metrics in Prometheus format for monitoring with Grafana.
+    
+    Usage:
+        exporter = PrometheusExporter()
+        
+        # In your HTTP handler:
+        if self.path == '/metrics':
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(exporter.export_metrics().encode())
+    """
+    
+    def __init__(self, metrics_collector=None):
+        self.metrics = metrics_collector or metrics
+        self.cost_tracker = cost_tracker
+        self.rate_limits = RATE_LIMITS
+        
+    def export_metrics(self) -> str:
+        """Generate Prometheus-formatted metrics"""
+        lines = []
+        
+        # Agent metrics
+        dashboard = self.metrics.get_dashboard_metrics()
+        
+        lines.append('# HELP j1msky_agents_total Total number of agents spawned')
+        lines.append('# TYPE j1msky_agents_total counter')
+        lines.append(f'j1msky_agents_total {dashboard["agents"]["total_spawned"]}')
+        
+        lines.append('# HELP j1msky_agents_completed Total number of agents completed')
+        lines.append('# TYPE j1msky_agents_completed counter')
+        lines.append(f'j1msky_agents_completed {dashboard["agents"]["total_completed"]}')
+        
+        lines.append('# HELP j1msky_agents_failed Total number of agents failed')
+        lines.append('# TYPE j1msky_agents_failed counter')
+        lines.append(f'j1msky_agents_failed {dashboard["agents"]["total_failed"]}')
+        
+        lines.append('# HELP j1msky_agents_success_rate Success rate percentage')
+        lines.append('# TYPE j1msky_agents_success_rate gauge')
+        lines.append(f'j1msky_agents_success_rate {dashboard["agents"]["success_rate"]}')
+        
+        # Performance metrics
+        lines.append('# HELP j1msky_avg_completion_time Average task completion time in seconds')
+        lines.append('# TYPE j1msky_avg_completion_time gauge')
+        lines.append(f'j1msky_avg_completion_time {dashboard["performance"]["avg_completion_time"]}')
+        
+        lines.append('# HELP j1msky_uptime_hours System uptime in hours')
+        lines.append('# TYPE j1msky_uptime_hours gauge')
+        lines.append(f'j1msky_uptime_hours {dashboard["performance"]["uptime_hours"]}')
+        
+        # Cost metrics
+        lines.append('# HELP j1msky_total_cost_dollars Total cost in USD')
+        lines.append('# TYPE j1msky_total_cost_dollars counter')
+        lines.append(f'j1msky_total_cost_dollars {dashboard["costs"]["total_spent"]}')
+        
+        lines.append('# HELP j1msky_daily_cost_dollars Today\'s cost in USD')
+        lines.append('# TYPE j1msky_daily_cost_dollars gauge')
+        lines.append(f'j1msky_daily_cost_dollars {dashboard["costs"]["today"]}')
+        
+        # Model breakdown
+        lines.append('# HELP j1msky_model_spawns Total spawns by model')
+        lines.append('# TYPE j1msky_model_spawns counter')
+        for model, stats in dashboard.get('breakdown', {}).get('by_model', {}).items():
+            lines.append(f'j1msky_model_spawns{{model="{model}"}} {stats.get("spawned", 0)}')
+        
+        lines.append('# HELP j1msky_model_completions Total completions by model')
+        lines.append('# TYPE j1msky_model_completions counter')
+        for model, stats in dashboard.get('breakdown', {}).get('by_model', {}).items():
+            lines.append(f'j1msky_model_completions{{model="{model}"}} {stats.get("completed", 0)}')
+        
+        lines.append('# HELP j1msky_model_failures Total failures by model')
+        lines.append('# TYPE j1msky_model_failures counter')
+        for model, stats in dashboard.get('breakdown', {}).get('by_model', {}).items():
+            lines.append(f'j1msky_model_failures{{model="{model}"}} {stats.get("failed", 0)}')
+        
+        # Rate limit metrics
+        lines.append('# HELP j1msky_rate_limit_remaining Remaining requests in current window')
+        lines.append('# TYPE j1msky_rate_limit_remaining gauge')
+        for provider, limits in self.rate_limits.items():
+            remaining = limits['limit'] - limits['requests']
+            lines.append(f'j1msky_rate_limit_remaining{{provider="{provider}"}} {remaining}')
+        
+        lines.append('# HELP j1msky_rate_limit_used Used requests in current window')
+        lines.append('# TYPE j1msky_rate_limit_used gauge')
+        for provider, limits in self.rate_limits.items():
+            lines.append(f'j1msky_rate_limit_used{{provider="{provider}"}} {limits["requests"]}')
+        
+        lines.append('# HELP j1msky_rate_limit_total Total requests allowed per window')
+        lines.append('# TYPE j1msky_rate_limit_total gauge')
+        for provider, limits in self.rate_limits.items():
+            lines.append(f'j1msky_rate_limit_total{{provider="{provider}"}} {limits["limit"]}')
+        
+        # Health metrics
+        health = self.metrics.get_health_status()
+        status_map = {'healthy': 0, 'warning': 1, 'critical': 2}
+        status_value = status_map.get(health['status'], 0)
+        
+        lines.append('# HELP j1msky_health_status System health status (0=healthy, 1=warning, 2=critical)')
+        lines.append('# TYPE j1msky_health_status gauge')
+        lines.append(f'j1msky_health_status {status_value}')
+        
+        lines.append('# HELP j1msky_error_rate_percent Error rate percentage')
+        lines.append('# TYPE j1msky_error_rate_percent gauge')
+        lines.append(f'j1msky_error_rate_percent {health["error_rate"]}')
+        
+        # Budget metrics
+        budget_status = self.cost_tracker.check_budget_alert()
+        budget_map = {'ok': 0, 'notice': 1, 'warning': 2, 'critical': 3}
+        budget_value = budget_map.get(budget_status[0], 0)
+        
+        lines.append('# HELP j1msky_budget_status Budget alert status (0=ok, 1=notice, 2=warning, 3=critical)')
+        lines.append('# TYPE j1msky_budget_status gauge')
+        lines.append(f'j1msky_budget_status {budget_value}')
+        
+        return '\n'.join(lines) + '\n'
+    
+    def get_metrics_dict(self) -> dict:
+        """Get metrics as dictionary for JSON endpoints"""
+        dashboard = self.metrics.get_dashboard_metrics()
+        health = self.metrics.get_health_status()
+        budget_status, budget_message = self.cost_tracker.check_budget_alert()
+        
+        return {
+            'agents': dashboard['agents'],
+            'performance': dashboard['performance'],
+            'costs': dashboard['costs'],
+            'breakdown': dashboard.get('breakdown', {}),
+            'health': health,
+            'budget': {
+                'status': budget_status,
+                'message': budget_message,
+                'limit': 50.0
+            },
+            'rate_limits': {
+                provider: {
+                    'used': limits['requests'],
+                    'limit': limits['limit'],
+                    'remaining': limits['limit'] - limits['requests']
+                }
+                for provider, limits in self.rate_limits.items()
+            }
+        }
+
+
+# Initialize Prometheus exporter
+prometheus_exporter = PrometheusExporter()
+
+
 # Workflow Engine for Multi-Agent Pipelines
 class WorkflowEngine:
     """
@@ -2136,6 +2288,20 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
                 },
                 'guardrail_check': guardrail
             })
+
+        elif self.path == '/metrics':
+            # Prometheus metrics endpoint
+            prometheus_data = prometheus_exporter.export_metrics()
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/plain; version=0.0.4')
+            self.end_headers()
+            self.wfile.write(prometheus_data.encode())
+
+        elif self.path == '/api/metrics':
+            # JSON metrics endpoint for dashboard
+            metrics_data = prometheus_exporter.get_metrics_dict()
+            self.send_json(metrics_data)
+
         elif self.path == '/':
             stats = get_system_stats()
             

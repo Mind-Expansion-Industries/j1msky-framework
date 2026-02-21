@@ -2506,6 +2506,370 @@ curl http://localhost:8080/api/metrics | jq '.'
 
 ---
 
+## 🧰 SDK Reference
+
+### Official SDKs
+
+| SDK | Version | Status | Install |
+|-----|---------|--------|---------|
+| **Python** | 4.1.0 | Stable | `pip install j1msky` |
+| **JavaScript** | 4.1.0 | Stable | `npm install j1msky` |
+| **Go** | 4.0.0 | Beta | `go get github.com/j1msky/sdk-go` |
+| **Rust** | 4.0.0 | Beta | `cargo add j1msky` |
+
+---
+
+### Python SDK
+
+**Installation:**
+```bash
+pip install j1msky
+```
+
+**Basic Usage:**
+```python
+from j1msky import J1MSKYClient
+
+# Initialize client
+client = J1MSKYClient(
+    base_url="http://localhost:8080",
+    api_key="your_api_key"  # Optional for local instances
+)
+
+# Spawn an agent
+agent = client.spawn(
+    model="k2p5",
+    task="Write a Python function to calculate fibonacci",
+    priority="normal"
+)
+
+# Wait for completion with timeout
+result = agent.wait_for_completion(timeout=300)
+print(result.output)
+print(f"Cost: ${result.cost}")
+```
+
+**Advanced Usage:**
+```python
+from j1msky import J1MSKYClient, TaskPriority
+
+# Spawn with callback
+agent = client.spawn(
+    model="sonnet",
+    task="Research AI trends",
+    priority=TaskPriority.HIGH,
+    webhook_url="https://your-app.com/webhook"
+)
+
+# Check status manually
+status = client.get_agent_status(agent.id)
+if status.state == "completed":
+    print(status.result)
+
+# Spawn team for complex tasks
+team_result = client.spawn_team(
+    team="team_creative",
+    task="Design a landing page for our product",
+    priority=TaskPriority.HIGH
+)
+```
+
+**Error Handling:**
+```python
+from j1msky import J1MSKYClient, J1MSKYError, RateLimitError
+
+client = J1MSKYClient()
+
+try:
+    result = client.spawn(model="k2p5", task="Hello world")
+except RateLimitError as e:
+    print(f"Rate limited. Retry after: {e.retry_after}s")
+    time.sleep(e.retry_after)
+    result = client.spawn(model="k2p5", task="Hello world")
+except J1MSKYError as e:
+    print(f"API Error: {e.message}")
+    print(f"Request ID: {e.request_id}")  # For support
+```
+
+**Pricing Integration:**
+```python
+from j1msky import J1MSKYClient
+
+client = J1MSKYClient()
+
+# Get quote before running task
+quote = client.get_quote(
+    model="k2p5",
+    estimated_input_tokens=2000,
+    estimated_output_tokens=800,
+    complexity="medium",
+    segment="mid_market"
+)
+
+print(f"Internal cost: ${quote.internal_cost}")
+print(f"Customer price: ${quote.recommended_price}")
+print(f"Margin: {quote.gross_margin_pct}%")
+
+# Check if quote passes guardrails
+if quote.guardrail_check.is_compliant:
+    # Safe to proceed
+    agent = client.spawn(model="k2p5", task="Task description")
+```
+
+**Configuration:**
+```python
+from j1msky import J1MSKYClient, Config
+
+config = Config(
+    base_url="http://localhost:8080",
+    api_key="your_key",
+    timeout=30,
+    max_retries=3,
+    retry_delay=1.0,
+    cache_enabled=True,
+    cache_ttl=60
+)
+
+client = J1MSKYClient(config=config)
+```
+
+---
+
+### JavaScript/TypeScript SDK
+
+**Installation:**
+```bash
+npm install j1msky
+# or
+yarn add j1msky
+```
+
+**Basic Usage:**
+```javascript
+import { J1MSKYClient } from 'j1msky';
+
+const client = new J1MSKYClient({
+  baseUrl: 'http://localhost:8080',
+  apiKey: 'your_api_key'
+});
+
+// Spawn an agent
+const agent = await client.spawn({
+  model: 'k2p5',
+  task: 'Write a JavaScript function to reverse a string',
+  priority: 'normal'
+});
+
+// Poll for completion
+const result = await agent.waitForCompletion({ timeout: 300000 });
+console.log(result.output);
+console.log(`Cost: $${result.cost}`);
+```
+
+**With Async/Await:**
+```javascript
+import { J1MSKYClient } from 'j1msky';
+
+async function runWorkflow() {
+  const client = new J1MSKYClient();
+  
+  // Research phase
+  const researcher = await client.spawn({
+    model: 'sonnet',
+    task: 'Research: Latest trends in AI automation'
+  });
+  const research = await researcher.waitForCompletion();
+  
+  // Writing phase
+  const writer = await client.spawn({
+    model: 'k2p5',
+    task: `Write blog post based on: ${research.output}`
+  });
+  const article = await writer.waitForCompletion();
+  
+  return article;
+}
+
+runWorkflow().catch(console.error);
+```
+
+**Error Handling:**
+```javascript
+import { J1MSKYClient, RateLimitError, J1MSKYError } from 'j1msky';
+
+const client = new J1MSKYClient();
+
+try {
+  const result = await client.spawn({ model: 'k2p5', task: 'Hello' });
+} catch (error) {
+  if (error instanceof RateLimitError) {
+    console.log(`Rate limited. Retry after: ${error.retryAfter}s`);
+    await sleep(error.retryAfter * 1000);
+    // Retry...
+  } else if (error instanceof J1MSKYError) {
+    console.error(`API Error: ${error.message}`);
+    console.error(`Request ID: ${error.requestId}`);
+  }
+}
+```
+
+**Webhooks:**
+```javascript
+import { J1MSKYClient } from 'j1msky';
+
+const client = new J1MSKYClient();
+
+// Register webhook
+await client.registerWebhook({
+  url: 'https://your-app.com/webhooks/j1msky',
+  events: ['agent.completed', 'agent.failed'],
+  secret: 'your_webhook_secret'
+});
+
+// Spawn with automatic webhook notification
+const agent = await client.spawn({
+  model: 'k2p5',
+  task: 'Analyze data',
+  webhookUrl: 'https://your-app.com/webhooks/j1msky'
+});
+```
+
+---
+
+### Go SDK
+
+**Installation:**
+```bash
+go get github.com/j1msky/sdk-go
+```
+
+**Basic Usage:**
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+    
+    "github.com/j1msky/sdk-go"
+)
+
+func main() {
+    client := j1msky.NewClient("http://localhost:8080", "api_key")
+    
+    ctx := context.Background()
+    
+    // Spawn agent
+    agent, err := client.Spawn(ctx, j1msky.SpawnRequest{
+        Model:    "k2p5",
+        Task:     "Write a Go function",
+        Priority: "normal",
+    })
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    // Wait for completion
+    result, err := client.WaitForCompletion(ctx, agent.ID, 300)
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Println(result.Output)
+    fmt.Printf("Cost: $%.2f\n", result.Cost)
+}
+```
+
+---
+
+### Rust SDK
+
+**Installation:**
+```toml
+[dependencies]
+j1msky = "4.0"
+tokio = { version = "1", features = ["full"] }
+```
+
+**Basic Usage:**
+```rust
+use j1msky::Client;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let client = Client::new("http://localhost:8080", Some("api_key"));
+    
+    // Spawn agent
+    let agent = client
+        .spawn("k2p5", "Write a Rust function")
+        .await?;
+    
+    // Wait for completion
+    let result = client
+        .wait_for_completion(&agent.id, 300)
+        .await?;
+    
+    println!("{}", result.output);
+    println!("Cost: ${}", result.cost);
+    
+    Ok(())
+}
+```
+
+---
+
+### SDK Features Comparison
+
+| Feature | Python | JS/TS | Go | Rust |
+|---------|--------|-------|----|----|
+| **Sync/Async** | Both | Async | Sync | Async |
+| **Type Hints** | ✅ | ✅ | N/A | ✅ |
+| **Auto-retry** | ✅ | ✅ | ✅ | ✅ |
+| **Caching** | ✅ | ✅ | ❌ | ❌ |
+| **Streaming** | Planned | Planned | ❌ | ❌ |
+| **Webhooks** | ✅ | ✅ | ✅ | ❌ |
+
+---
+
+### SDK Best Practices
+
+**1. Use Connection Pooling:**
+```python
+# Python - requests.Session() is used internally
+client = J1MSKYClient()  # Reuses connections automatically
+```
+
+**2. Handle Rate Limits Gracefully:**
+```javascript
+// JavaScript - SDK has built-in retry
+const client = new J1MSKYClient({
+  maxRetries: 5,
+  retryDelay: 1000
+});
+```
+
+**3. Use Webhooks Instead of Polling:**
+```python
+# Set up webhook for completion
+client.register_webhook(url="https://your-app.com/webhook")
+
+# Spawn without blocking
+agent = client.spawn(model="k2p5", task="Long task")
+# Result will POST to your webhook when ready
+```
+
+**4. Cache Quotes for Batch Operations:**
+```python
+quotes = client.get_batch_quotes(
+    model="k2p5",
+    complexities=["low", "medium", "high"],
+    segments=["smb", "mid_market", "enterprise"]
+)
+```
+
+---
+
 ## 📚 Resources
 
 - **Full Docs:** https://docs.j1msky.ai

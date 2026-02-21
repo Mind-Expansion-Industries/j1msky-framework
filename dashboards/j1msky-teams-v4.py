@@ -447,10 +447,20 @@ class CostTracker:
             return 'notice', f'Budget at {percentage:.0f}%: ${current_cost:.2f} / ${daily_budget:.2f}'
         return 'ok', f'Budget healthy: ${current_cost:.2f} / ${daily_budget:.2f}'
 
-    def recommend_task_quote(self, model, estimated_input=1000, estimated_output=500, complexity='medium'):
+    def recommend_task_quote(self, model, estimated_input=1000, estimated_output=500, complexity='medium', segment='mid_market'):
         """Generate a customer-facing quote recommendation from model cost estimates."""
+        # Segment markup adjustments
+        segment_adjustments = {
+            'enterprise': 0.5,
+            'mid_market': 0.0,
+            'smb': -0.5,
+            'startup': -1.0
+        }
+        segment_adj = segment_adjustments.get(segment, 0.0)
+
         complexity_markup = {'low': 3.0, 'medium': 4.0, 'high': 5.0}
-        markup = complexity_markup.get(complexity, 4.0)
+        base_markup = complexity_markup.get(complexity, 4.0)
+        markup = base_markup + segment_adj
 
         internal_cost = self.estimate_task_cost(model, estimated_input, estimated_output)
         minimum_price = 0.50
@@ -467,10 +477,13 @@ class CostTracker:
         return {
             'model': model,
             'complexity': complexity,
+            'segment': segment,
             'estimated_input_tokens': int(estimated_input),
             'estimated_output_tokens': int(estimated_output),
             'internal_cost': round(internal_cost, 4),
-            'markup': markup,
+            'base_markup': base_markup,
+            'segment_adjustment': segment_adj,
+            'final_markup': round(markup, 2),
             'recommended_price': recommended_price,
             'gross_margin_pct': margin_pct,
             'margin_band': margin_band
@@ -2313,6 +2326,7 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
             model = params.get('model', ['k2p5'])[0]
             complexity = params.get('complexity', ['medium'])[0]
             delivery_type = params.get('delivery_type', ['task'])[0]
+            segment = params.get('segment', ['mid_market'])[0]
 
             try:
                 estimated_input = int(params.get('estimated_input', ['1000'])[0])
@@ -2327,12 +2341,16 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
             if complexity not in {'low', 'medium', 'high'}:
                 self.send_json({'success': False, 'error': 'complexity must be low|medium|high'})
                 return
+            if segment not in {'enterprise', 'mid_market', 'smb', 'startup'}:
+                self.send_json({'success': False, 'error': 'segment must be enterprise|mid_market|smb|startup'})
+                return
 
             quote = cost_tracker.recommend_task_quote(
                 model,
                 estimated_input=estimated_input,
                 estimated_output=estimated_output,
-                complexity=complexity
+                complexity=complexity,
+                segment=segment
             )
             guardrail = cost_tracker.evaluate_margin_guardrail(quote, delivery_type=delivery_type)
 

@@ -203,6 +203,32 @@ Key thresholds to watch:
 - Average margin exceeding target by >15% → consider markup increases
 - Exception creation rate >20% of quotes → tighten initial guardrails
 
+### Segment-Aware Pricing
+
+When quoting for different customer segments, pass the `segment` parameter:
+
+- `enterprise` → +0.5x markup premium (compliance/SLA value)
+- `mid_market` → baseline markup (standard)
+- `smb` → -0.5x markup discount (volume play)
+- `startup` → -1.0x markup strategic bet (expansion path)
+
+Example via API:
+```bash
+curl -X POST http://localhost:8080/api/pricing/quote \
+  -d "model=k2p5" \
+  -d "estimated_input=2000" \
+  -d "estimated_output=800" \
+  -d "complexity=medium" \
+  -d "segment=enterprise"
+```
+
+The response will include:
+- `base_markup` → complexity-based starting point
+- `segment_adjustment` → segment modifier applied
+- `final_markup` → combined result used for pricing
+
+Note: Minimum margin floors (50% for subscriptions) apply regardless of segment.
+
 ---
 
 ## 🎯 USE CASES

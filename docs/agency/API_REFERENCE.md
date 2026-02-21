@@ -392,6 +392,7 @@ Returns active pricing policy, a sample quote, and margin guardrail result.
 - `estimated_output`: integer token estimate
 - `complexity`: `low|medium|high`
 - `delivery_type`: `task|subscription|enterprise`
+- `segment`: `enterprise|mid_market|smb|startup` (optional, default: `mid_market`)
 
 **Response:**
 ```json
@@ -400,10 +401,13 @@ Returns active pricing policy, a sample quote, and margin guardrail result.
   "quote": {
     "model": "sonnet",
     "complexity": "high",
+    "segment": "enterprise",
     "estimated_input_tokens": 3000,
     "estimated_output_tokens": 1200,
     "internal_cost": 0.027,
-    "markup": 5.0,
+    "base_markup": 5.0,
+    "segment_adjustment": 0.5,
+    "final_markup": 5.5,
     "recommended_price": 0.5,
     "gross_margin_pct": 94.6,
     "margin_band": "strong"

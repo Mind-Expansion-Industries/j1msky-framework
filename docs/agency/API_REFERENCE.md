@@ -434,6 +434,7 @@ Creates an auditable approve/escalate decision packet for one quote candidate.
 - `complexity`: `low|medium|high`
 - `delivery_type`: `task|subscription|enterprise`
 - `approver`: decision owner label (default: `ops-auto`)
+- `segment`: `enterprise|mid_market|smb|startup` (optional, default: `mid_market`)
 
 **Response:**
 ```json
@@ -449,6 +450,10 @@ Creates an auditable approve/escalate decision packet for one quote candidate.
   "quote": {
     "model": "k2p5",
     "complexity": "medium",
+    "segment": "mid_market",
+    "base_markup": 4.0,
+    "segment_adjustment": 0.0,
+    "final_markup": 4.0,
     "recommended_price": 0.5,
     "gross_margin_pct": 99.6,
     "margin_band": "strong"

@@ -2068,6 +2068,7 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
             complexity = params.get('complexity', ['medium'])[0]
             delivery_type = params.get('delivery_type', ['task'])[0]
             approver = params.get('approver', ['ops-auto'])[0]
+            segment = params.get('segment', ['mid_market'])[0]
 
             try:
                 estimated_input = int(params.get('estimated_input', ['1000'])[0])
@@ -2082,12 +2083,16 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
             if complexity not in {'low', 'medium', 'high'}:
                 self.send_json({'success': False, 'error': 'complexity must be low|medium|high'})
                 return
+            if segment not in {'enterprise', 'mid_market', 'smb', 'startup'}:
+                self.send_json({'success': False, 'error': 'segment must be enterprise|mid_market|smb|startup'})
+                return
 
             quote = cost_tracker.recommend_task_quote(
                 model,
                 estimated_input=estimated_input,
                 estimated_output=estimated_output,
-                complexity=complexity
+                complexity=complexity,
+                segment=segment
             )
             guardrail = cost_tracker.evaluate_margin_guardrail(quote, delivery_type=delivery_type)
             decision_status = 'approved' if guardrail.get('is_compliant') else 'escalated'

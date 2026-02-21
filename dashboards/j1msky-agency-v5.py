@@ -313,6 +313,7 @@ HTML = '''<!DOCTYPE html>
             color: var(--text-2);
             text-transform: uppercase;
             margin-top: 4px;
+            overflow-wrap: anywhere;
         }
 
         .quick-grid {

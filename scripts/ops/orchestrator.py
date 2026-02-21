@@ -8,6 +8,7 @@ CEO-Worker hierarchy with automatic fallbacks
 import json
 import time
 import random
+import threading
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, Optional, List
@@ -995,6 +996,182 @@ class OrchestratorMonitor:
 
 # Initialize monitor
 monitor = OrchestratorMonitor(orchestrator)
+
+
+# Simple TTL Cache for expensive operations
+class SimpleTTLCache:
+    """
+    Thread-safe TTL cache for expensive operations.
+    Used to cache model recommendations and pricing calculations.
+    """
+    
+    def __init__(self, default_ttl_seconds: int = 60):
+        self._cache: Dict[str, Any] = {}
+        self._timestamps: Dict[str, float] = {}
+        self._lock = threading.Lock()
+        self.default_ttl = default_ttl_seconds
+    
+    def get(self, key: str) -> Optional[Any]:
+        """Get value if not expired."""
+        with self._lock:
+            if key not in self._cache:
+                return None
+            
+            timestamp = self._timestamps.get(key, 0)
+            if (time.time() - timestamp) > self.default_ttl:
+                # Expired - clean up
+                del self._cache[key]
+                del self._timestamps[key]
+                return None
+            
+            return self._cache[key]
+    
+    def set(self, key: str, value: Any, ttl_seconds: Optional[int] = None) -> None:
+        """Store value with optional custom TTL."""
+        ttl = ttl_seconds or self.default_ttl
+        with self._lock:
+            self._cache[key] = value
+            self._timestamps[key] = time.time()
+    
+    def invalidate(self, key: str) -> bool:
+        """Remove key from cache. Returns True if key existed."""
+        with self._lock:
+            if key in self._cache:
+                del self._cache[key]
+                del self._timestamps[key]
+                return True
+            return False
+    
+    def clear(self) -> None:
+        """Clear all cached entries."""
+        with self._lock:
+            self._cache.clear()
+            self._timestamps.clear()
+    
+    def cleanup_expired(self) -> int:
+        """Remove expired entries. Returns count removed."""
+        now = time.time()
+        removed = 0
+        with self._lock:
+            expired_keys = [
+                k for k, ts in self._timestamps.items()
+                if (now - ts) > self.default_ttl
+            ]
+            for k in expired_keys:
+                del self._cache[k]
+                del self._timestamps[k]
+                removed += 1
+        return removed
+    
+    def get_stats(self) -> Dict[str, Any]:
+        """Get cache statistics."""
+        with self._lock:
+            now = time.time()
+            expired = sum(
+                1 for ts in self._timestamps.values()
+                if (now - ts) > self.default_ttl
+            )
+            return {
+                "total_entries": len(self._cache),
+                "expired_entries": expired,
+                "valid_entries": len(self._cache) - expired,
+                "default_ttl_seconds": self.default_ttl
+            }
+
+
+# Global cache instances
+_model_cache = SimpleTTLCache(default_ttl_seconds=30)  # Model availability changes frequently
+_pricing_cache = SimpleTTLCache(default_ttl_seconds=300)  # Pricing policy changes less often
+_team_cache = SimpleTTLCache(default_ttl_seconds=60)  # Team compositions stable
+
+
+def cached_model_selection(task_type: str, complexity: str, priority: str) -> str:
+    """
+    Get model for task with caching.
+    Cache key includes all parameters that affect selection.
+    """
+    cache_key = f"model:{task_type}:{complexity}:{priority}"
+    
+    # Try cache first
+    cached = _model_cache.get(cache_key)
+    if cached is not None:
+        monitor.record_request()
+        return cached
+    
+    # Compute and cache
+    result = orchestrator.get_model_for_task(task_type, complexity, priority)
+    _model_cache.set(cache_key, result)
+    monitor.record_request()
+    return result
+
+
+def cached_team_recommendation(project_type: str) -> Dict[str, str]:
+    """Get team composition with caching."""
+    cache_key = f"team:{project_type}"
+    
+    cached = _team_cache.get(cache_key)
+    if cached is not None:
+        return cached
+    
+    result = orchestrator.get_team_for_project(project_type)
+    _team_cache.set(cache_key, result)
+    return result
+
+
+def cached_price_quote(model: str, tokens: int, complexity: str, segment: str) -> Dict[str, Any]:
+    """Get pricing quote with caching (rounded tokens for cache efficiency)."""
+    # Round tokens to nearest 100 for better cache hit rate
+    rounded_tokens = round(tokens / 100) * 100
+    cache_key = f"price:{model}:{rounded_tokens}:{complexity}:{segment}"
+    
+    cached = _pricing_cache.get(cache_key)
+    if cached is not None:
+        return cached
+    
+    result = orchestrator.recommend_task_price(model, tokens, complexity, segment)
+    _pricing_cache.set(cache_key, result)
+    return result
+
+
+def invalidate_caches(cache_type: Optional[str] = None) -> Dict[str, int]:
+    """
+    Invalidate cache entries.
+    
+    Args:
+        cache_type: 'model', 'pricing', 'team', or None for all
+    
+    Returns:
+        Dict with counts of invalidated entries by cache type
+    """
+    results = {}
+    
+    if cache_type is None or cache_type == "model":
+        count = len(_model_cache._cache)
+        _model_cache.clear()
+        results["model"] = count
+    
+    if cache_type is None or cache_type == "pricing":
+        count = len(_pricing_cache._cache)
+        _pricing_cache.clear()
+        results["pricing"] = count
+    
+    if cache_type is None or cache_type == "team":
+        count = len(_team_cache._cache)
+        _team_cache.clear()
+        results["team"] = count
+    
+    return results
+
+
+def get_cache_status() -> Dict[str, Any]:
+    """Get status of all caches for monitoring."""
+    return {
+        "model_cache": _model_cache.get_stats(),
+        "pricing_cache": _pricing_cache.get_stats(),
+        "team_cache": _team_cache.get_stats(),
+        "cache_hit_savings_estimate": "~5-15ms per cached call"
+    }
+
 
 if __name__ == "__main__":
     print("J1MSKY Unified Model Orchestrator v5.1")

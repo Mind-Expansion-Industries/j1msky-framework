@@ -2056,6 +2056,166 @@ Restrict API access by IP:
 
 ---
 
+## 🛠️ Troubleshooting Guide
+
+### Quick Diagnostics Checklist
+
+When something isn't working, run through this checklist first:
+
+```bash
+# 1. Check if service is running
+curl http://localhost:8080/api/health
+
+# 2. Check orchestrator status
+curl http://localhost:8080/api/orchestrator/status | jq '.budget_alert_level, .operational_flags.requires_ops_attention'
+
+# 3. Check rate limits
+curl http://localhost:8080/api/rate-limits
+
+# 4. View recent errors
+tail -n 50 /tmp/teams-v4.log | grep ERROR
+```
+
+---
+
+### Common Issues & Solutions
+
+#### 1. Connection Refused / Can't Connect to API
+
+**Symptoms:**
+```bash
+curl: (7) Failed to connect to localhost port 8080: Connection refused
+```
+
+**Solutions:**
+
+| Cause | Solution |
+|-------|----------|
+| Service not running | `sudo systemctl start j1msky` |
+| Port conflict | Find and kill process: `sudo kill -9 <PID>` |
+| Firewall blocking | `sudo ufw allow 8080/tcp` |
+| Wrong URL | Verify IP: `hostname -I` |
+
+---
+
+#### 2. Rate Limit Exceeded (429 Errors)
+
+**Symptoms:**
+```json
+{
+  "error": {
+    "code": 429,
+    "message": "Rate limit exceeded",
+    "retry_after": 3600
+  }
+}
+```
+
+**Solutions:**
+
+| Cause | Solution |
+|-------|----------|
+| Hourly limit hit | Wait for reset |
+| Bursty traffic | Implement request queuing |
+| Wrong model choice | Switch to `"model": "k2p5"` |
+
+**Code Fix (Exponential Backoff):**
+```python
+import time
+import random
+
+def api_call_with_backoff(func, max_retries=5):
+    for attempt in range(max_retries):
+        try:
+            return func()
+        except RateLimitError:
+            delay = (2 ** attempt) + random.uniform(0, 1)
+            time.sleep(delay)
+```
+
+---
+
+#### 3. Agent Spawning Fails
+
+**Diagnosis:**
+```bash
+# Check model availability
+curl http://localhost:8080/api/orchestrator/status | jq '.provider_usage'
+
+# Check budget
+curl http://localhost:8080/api/orchestrator/status | jq '.today_spend, .daily_budget'
+```
+
+**Solutions:**
+
+| Cause | Solution |
+|-------|----------|
+| Model rate limited | Switch model or wait |
+| Budget exceeded | Check `.budget_alert_level` |
+| Disk full | Clean logs: `rm /tmp/teams-v4.log.*` |
+| API key invalid | Verify `config/api-keys.json` |
+
+---
+
+#### 4. High API Costs / Budget Alerts
+
+**Immediate Actions:**
+
+| Urgency | Action |
+|---------|--------|
+| Critical (>90%) | Pause non-urgent tasks |
+| Warning (>70%) | Switch to cheaper models |
+| Notice (>50%) | Review expensive task patterns |
+
+**Use budget-aware selection:**
+```python
+import requests
+
+rec = requests.post(
+    "http://localhost:8080/api/orchestrator/recommend-model",
+    json={"task_type": "coding", "complexity": "medium", "estimated_tokens": 2000}
+).json()
+
+if rec['budget_available']:
+    model = rec['recommended_model']
+```
+
+---
+
+#### 5. Agent Returns Poor Results
+
+| Problem | Fix |
+|---------|-----|
+| Incomplete output | Break into smaller tasks |
+| Wrong format | Add format example |
+| Off-topic | Add constraints: "Only focus on X" |
+| Code errors | Use `"model": "k2p5"` for coding |
+
+---
+
+#### 6. Webhooks Not Firing
+
+| Cause | Solution |
+|-------|----------|
+| URL unreachable | Verify endpoint is publicly accessible |
+| SSL certificate error | Use valid SSL cert |
+| Wrong event filter | Check registered events |
+
+---
+
+### Error Code Quick Reference
+
+| HTTP | Meaning | Action |
+|------|---------|--------|
+| 200 | Success | Continue |
+| 400 | Bad Request | Check request format |
+| 401 | Unauthorized | Check API key |
+| 429 | Rate Limited | Wait and retry |
+| 500 | Server Error | Check logs |
+| 503 | Service Unavailable | Retry shortly |
+
+---
+
 ## 🧪 Examples
 
 ### Example 1: Content Creation Pipeline

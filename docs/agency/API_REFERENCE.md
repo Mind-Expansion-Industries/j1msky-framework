@@ -3507,6 +3507,283 @@ Questions about this release?
 
 ---
 
+## 🖥️ CLI Reference
+
+J1MSKY provides a command-line interface for common operations.
+
+### Installation
+
+```bash
+# Install CLI
+pip install j1msky-cli
+
+# Verify installation
+j1msky --version
+```
+
+### Global Options
+
+```bash
+j1msky [GLOBAL_OPTIONS] <command> [ARGS]
+
+Global Options:
+  --host, -h        API host (default: http://localhost:8080)
+  --api-key, -k     API key for authentication
+  --format, -f      Output format: json, table, yaml (default: table)
+  --help            Show help
+```
+
+### Commands
+
+#### Agent Management
+
+**Spawn an agent:**
+```bash
+j1msky agent spawn \
+  --model k2p5 \
+  --task "Write a Python function" \
+  --priority normal
+
+# Output:
+# ┌──────────┬──────────────────────────────────────┐
+# │ Agent ID │ subagent_1234567890_1234             │
+# │ Status   │ spawning                             │
+# │ Model    │ k2p5                                 │
+# │ Est. Cost│ $0.05                                │
+# └──────────┴──────────────────────────────────────┘
+```
+
+**Check agent status:**
+```bash
+j1msky agent status <agent_id>
+
+# Example:
+j1msky agent status subagent_1234567890_1234
+```
+
+**List active agents:**
+```bash
+j1msky agent list \
+  --status active \
+  --limit 20
+```
+
+**Cancel an agent:**
+```bash
+j1msky agent cancel <agent_id>
+```
+
+---
+
+#### Team Operations
+
+**List available teams:**
+```bash
+j1msky team list
+
+# Output:
+# ┌──────────────┬─────────────────┬────────┐
+# │ Name         │ Specialty       │ Status │
+# ├──────────────┼─────────────────┼────────┤
+# │ team_coding  │ Programming     │ active │
+# │ team_creative│ Content         │ active │
+# │ team_research│ Analysis        │ active │
+# └──────────────┴─────────────────┴────────┘
+```
+
+**Deploy a team:**
+```bash
+j1msky team deploy team_coding \
+  --task "Build a REST API for user authentication"
+```
+
+---
+
+#### Pricing & Quotes
+
+**Generate a quote:**
+```bash
+j1msky pricing quote \
+  --model k2p5 \
+  --input-tokens 2000 \
+  --output-tokens 800 \
+  --complexity medium \
+  --segment mid_market
+
+# Output:
+# ┌─────────────────────┬────────┐
+# │ Internal Cost       │ $0.008 │
+# │ Recommended Price   │ $0.32  │
+# │ Gross Margin        │ 97.5%  │
+# │ Margin Band         │ strong │
+# └─────────────────────┴────────┘
+```
+
+**Check pricing health:**
+```bash
+j1msky pricing health
+```
+
+---
+
+#### System Status
+
+**Get system status:**
+```bash
+j1msky status
+
+# Output:
+# ┌─────────────────┬───────────┐
+# │ Status          │ healthy   │
+# │ Models Active   │ 5         │
+# │ Daily Spend     │ $12.45    │
+# │ Budget Remaining│ $37.55    │
+# │ Uptime          │ 15d 3h    │
+# └─────────────────┴───────────┘
+```
+
+**Check rate limits:**
+```bash
+j1msky limits
+
+# Output:
+# ┌───────────┬───────┬───────┬───────────┐
+# │ Provider  │ Used  │ Limit │ Remaining │
+# ├───────────┼───────┼───────┼───────────┤
+# │ anthropic │ 23    │ 50    │ 27        │
+# │ kimi      │ 45    │ 100   │ 55        │
+# │ web_search│ 12    │ 100   │ 88        │
+# └───────────┴───────┴───────┴───────────┘
+```
+
+---
+
+#### Configuration
+
+**Configure CLI:**
+```bash
+j1msky config set host http://localhost:8080
+j1msky config set api-key your_api_key_here
+j1msky config set default_model k2p5
+```
+
+**View configuration:**
+```bash
+j1msky config get
+
+# Output:
+# ┌──────────────┬────────────────────────┐
+# │ Key          │ Value                  │
+# ├──────────────┼────────────────────────┤
+# │ host         │ http://localhost:8080  │
+# │ default_model│ k2p5                   │
+# │ format       │ table                  │
+# └──────────────┴────────────────────────┘
+```
+
+---
+
+#### Monitoring
+
+**Stream logs:**
+```bash
+j1msky logs --follow
+```
+
+**View metrics:**
+```bash
+j1msky metrics \
+  --type operations \
+  --last 24h
+```
+
+**Generate report:**
+```bash
+j1msky report generate \
+  --type executive \
+  --period daily \
+  --output report.md
+```
+
+---
+
+#### Workflow Management
+
+**Create workflow:**
+```bash
+j1msky workflow create my_workflow.yaml
+```
+
+**Run workflow:**
+```bash
+j1msky workflow run my_workflow \
+  --input data.json
+```
+
+**List workflows:**
+```bash
+j1msky workflow list
+```
+
+---
+
+### Scripting Examples
+
+**Batch process files:**
+```bash
+#!/bin/bash
+# process_files.sh
+
+for file in *.txt; do
+    content=$(cat "$file")
+    j1msky agent spawn \
+        --model sonnet \
+        --task "Summarize: $content" \
+        --format json | jq -r '.agent_id'
+done
+```
+
+**Monitor costs:**
+```bash
+#!/bin/bash
+# cost_alert.sh
+
+BUDGET_LIMIT=40.00
+CURRENT=$(j1msky status --format json | jq -r '.today_spend')
+
+if (( $(echo "$CURRENT > $BUDGET_LIMIT" | bc -l) )); then
+    echo "ALERT: Daily spend \$$CURRENT exceeds limit \$$BUDGET_LIMIT"
+    # Send notification...
+fi
+```
+
+**Scheduled report:**
+```bash
+# Add to crontab:
+# 0 9 * * * j1msky report generate --type executive --output /var/reports/daily_$(date +\%Y\%m\%d).md
+```
+
+---
+
+### Shell Completion
+
+**Bash:**
+```bash
+j1msky completion bash > /etc/bash_completion.d/j1msky
+```
+
+**Zsh:**
+```bash
+j1msky completion zsh > "${fpath[1]}/_j1msky"
+```
+
+**Fish:**
+```bash
+j1msky completion fish > ~/.config/fish/completions/j1msky.fish
+```
+
+---
+
 ## 📚 Resources
 
 - **Full Docs:** https://docs.j1msky.ai

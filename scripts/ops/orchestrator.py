@@ -2696,6 +2696,327 @@ class PerformanceProfiler:
 performance_profiler = PerformanceProfiler()
 
 
+# Report Generator for Automated Reporting
+class ReportGenerator:
+    """
+    Generate comprehensive reports for various stakeholders.
+    
+    Report Types:
+    - Executive Summary: High-level metrics for leadership
+    - Operations Report: Detailed system status for ops teams
+    - Financial Report: Costs, margins, and pricing analysis
+    - Performance Report: System performance and optimization opportunities
+    - Usage Report: How customers are using the platform
+    
+    Usage:
+        generator = ReportGenerator()
+        
+        # Generate daily executive report
+        report = generator.generate_report(
+            report_type="executive",
+            period="daily",
+            date=datetime.now()
+        )
+        
+        # Export to different formats
+        generator.export_report(report, format="pdf", filename="daily_exec.pdf")
+    """
+    
+    def __init__(self, output_dir: str = "/home/m1ndb0t/Desktop/J1MSKY/reports"):
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+    
+    def generate_report(
+        self,
+        report_type: str,
+        period: str = "daily",
+        date: datetime = None
+    ) -> Dict[str, Any]:
+        """
+        Generate a report of the specified type.
+        
+        Args:
+            report_type: executive, operations, financial, performance, usage
+            period: daily, weekly, monthly, quarterly
+            date: Report date (defaults to now)
+        """
+        if date is None:
+            date = datetime.now()
+        
+        generators = {
+            "executive": self._generate_executive_report,
+            "operations": self._generate_operations_report,
+            "financial": self._generate_financial_report,
+            "performance": self._generate_performance_report,
+            "usage": self._generate_usage_report
+        }
+        
+        if report_type not in generators:
+            return {"error": f"Unknown report type: {report_type}"}
+        
+        return generators[report_type](period, date)
+    
+    def _generate_executive_report(self, period: str, date: datetime) -> Dict[str, Any]:
+        """Generate executive summary report."""
+        status = orchestrator.get_status_report()
+        
+        # Get key metrics
+        today_spend = status.get("today_spend", 0)
+        daily_budget = status.get("daily_budget", 50)
+        budget_util = status.get("budget_utilization_pct", 0)
+        
+        return {
+            "report_type": "Executive Summary",
+            "period": period,
+            "generated_at": date.isoformat(),
+            "executive_summary": {
+                "system_health": status.get("operational_flags", {}).get("overall_status", "healthy"),
+                "key_metrics": {
+                    "daily_spend": f"${today_spend:.2f}",
+                    "budget_utilization": f"{budget_util:.1f}%",
+                    "models_active": status.get("models_active", 0),
+                    "alert_level": status.get("budget_alert_level", "ok")
+                },
+                "recommendations": status.get("operational_flags", {}).get("recommended_action", "No action required")
+            },
+            "highlights": [
+                f"System operating at {budget_util:.0f}% of daily budget",
+                f"{status.get('models_active', 0)} AI models available",
+                f"Rate limits: {self._summarize_rate_limits(status.get('rate_limits', {}))}"
+            ],
+            "action_items": self._generate_action_items(status)
+        }
+    
+    def _generate_operations_report(self, period: str, date: datetime) -> Dict[str, Any]:
+        """Generate detailed operations report."""
+        status = orchestrator.get_status_report()
+        perf_stats = performance_profiler.get_report()
+        
+        return {
+            "report_type": "Operations Report",
+            "period": period,
+            "generated_at": date.isoformat(),
+            "system_status": {
+                "health": status.get("operational_flags", {}),
+                "models": status.get("models_active", 0),
+                "usage_summary": status.get("usage_summary", {}),
+                "anomalies": status.get("usage_anomalies", {})
+            },
+            "performance": perf_stats,
+            "rate_limits": status.get("rate_limits", {}),
+            "provider_usage": status.get("provider_usage", {}),
+            "bottlenecks": perf_stats.get("bottlenecks", []),
+            "recommendations": perf_stats.get("recommendations", [])
+        }
+    
+    def _generate_financial_report(self, period: str, date: datetime) -> Dict[str, Any]:
+        """Generate financial report with costs and margins."""
+        status = orchestrator.get_status_report()
+        
+        # Calculate financial metrics
+        today_spend = status.get("today_spend", 0)
+        daily_budget = status.get("daily_budget", 50)
+        
+        # Sample quote for margin analysis
+        sample_quote = status.get("example_task_quote", {})
+        margin = sample_quote.get("gross_margin_pct", 0)
+        
+        return {
+            "report_type": "Financial Report",
+            "period": period,
+            "generated_at": date.isoformat(),
+            "costs": {
+                "today_spend": today_spend,
+                "daily_budget": daily_budget,
+                "budget_remaining": status.get("budget_remaining", 0),
+                "utilization_pct": status.get("budget_utilization_pct", 0)
+            },
+            "pricing": {
+                "policy": status.get("pricing_policy", {}),
+                "sample_quote": sample_quote,
+                "sample_margin_pct": margin,
+                "margin_band": sample_quote.get("margin_band", "unknown")
+            },
+            "forecast": status.get("monthly_forecast", {}),
+            "portfolio": status.get("quote_portfolio_preview", {})
+        }
+    
+    def _generate_performance_report(self, period: str, date: datetime) -> Dict[str, Any]:
+        """Generate performance optimization report."""
+        perf_stats = performance_profiler.get_report()
+        
+        return {
+            "report_type": "Performance Report",
+            "period": period,
+            "generated_at": date.isoformat(),
+            "operation_stats": perf_stats.get("operation_stats", {}),
+            "model_stats": perf_stats.get("model_stats", {}),
+            "bottlenecks": perf_stats.get("bottlenecks", []),
+            "optimization_recommendations": perf_stats.get("recommendations", []),
+            "summary": {
+                "total_operations": sum(
+                    op.get("count", 0) 
+                    for op in perf_stats.get("operation_stats", {}).values()
+                ),
+                "critical_bottlenecks": sum(
+                    1 for b in perf_stats.get("bottlenecks", [])
+                    if b.get("severity") == "critical"
+                )
+            }
+        }
+    
+    def _generate_usage_report(self, period: str, date: datetime) -> Dict[str, Any]:
+        """Generate usage analytics report."""
+        status = orchestrator.get_status_report()
+        
+        return {
+            "report_type": "Usage Report",
+            "period": period,
+            "generated_at": date.isoformat(),
+            "usage_summary": status.get("usage_summary", {}),
+            "top_models": status.get("usage_summary", {}).get("top_models", []),
+            "recent_usage": status.get("recent_usage", 0),
+            "provider_breakdown": status.get("provider_usage", {}),
+            "model_mix_recommendation": status.get("model_mix_recommendation", {})
+        }
+    
+    def _summarize_rate_limits(self, rate_limits: Dict) -> str:
+        """Create human-readable rate limit summary."""
+        if not rate_limits:
+            return "All systems normal"
+        
+        limited = []
+        for provider, data in rate_limits.items():
+            current = data.get("current", 0)
+            hourly = data.get("hourly", 100)
+            if current / hourly > 0.8:
+                limited.append(f"{provider} at {current}/{hourly}")
+        
+        return "; ".join(limited) if limited else "All systems normal"
+    
+    def _generate_action_items(self, status: Dict) -> List[Dict]:
+        """Generate action items based on status."""
+        actions = []
+        
+        flags = status.get("operational_flags", {})
+        if flags.get("requires_ops_attention"):
+            actions.append({
+                "priority": "high",
+                "action": flags.get("recommended_action", "Review system status"),
+                "owner": "ops"
+            })
+        
+        if status.get("budget_alert_level") in ["warning", "critical"]:
+            actions.append({
+                "priority": "high",
+                "action": f"Budget at {status.get('budget_utilization_pct', 0):.0f}% - review spending",
+                "owner": "finance"
+            })
+        
+        anomalies = status.get("usage_anomalies", {})
+        if anomalies.get("has_anomalies"):
+            actions.append({
+                "priority": "medium",
+                "action": f"Investigate {anomalies.get('count', 0)} usage anomalies",
+                "owner": "engineering"
+            })
+        
+        return actions
+    
+    def export_report(
+        self,
+        report: Dict[str, Any],
+        format: str = "json",
+        filename: str = None
+    ) -> str:
+        """
+        Export report to file.
+        
+        Args:
+            report: Report data
+            format: json, md (markdown), or txt
+            filename: Output filename (auto-generated if None)
+        """
+        if filename is None:
+            report_type = report.get("report_type", "report").replace(" ", "_").lower()
+            date_str = datetime.now().strftime("%Y%m%d")
+            filename = f"{report_type}_{date_str}.{format}"
+        
+        filepath = self.output_dir / filename
+        
+        if format == "json":
+            with open(filepath, 'w') as f:
+                json.dump(report, f, indent=2)
+        
+        elif format == "md":
+            markdown = self._convert_to_markdown(report)
+            with open(filepath, 'w') as f:
+                f.write(markdown)
+        
+        elif format == "txt":
+            text = self._convert_to_text(report)
+            with open(filepath, 'w') as f:
+                f.write(text)
+        
+        return str(filepath)
+    
+    def _convert_to_markdown(self, report: Dict) -> str:
+        """Convert report to markdown format."""
+        lines = [
+            f"# {report.get('report_type', 'Report')}",
+            f"**Period:** {report.get('period', 'N/A')}",
+            f"**Generated:** {report.get('generated_at', 'N/A')}",
+            "",
+            "## Summary",
+            "",
+            "```json",
+            json.dumps(report, indent=2),
+            "```"
+        ]
+        return "\n".join(lines)
+    
+    def _convert_to_text(self, report: Dict) -> str:
+        """Convert report to plain text format."""
+        lines = [
+            f"{report.get('report_type', 'Report').upper()}",
+            f"Period: {report.get('period', 'N/A')}",
+            f"Generated: {report.get('generated_at', 'N/A')}",
+            "",
+            json.dumps(report, indent=2)
+        ]
+        return "\n".join(lines)
+    
+    def schedule_report(
+        self,
+        report_type: str,
+        period: str,
+        schedule: str,
+        recipients: List[str]
+    ) -> Dict[str, Any]:
+        """
+        Schedule automated report generation.
+        
+        Args:
+            report_type: Type of report to generate
+            period: Reporting period
+            schedule: Cron expression for schedule
+            recipients: Email addresses to send to
+        """
+        # This would integrate with task_scheduler in production
+        return {
+            "success": True,
+            "report_type": report_type,
+            "period": period,
+            "schedule": schedule,
+            "recipients": recipients,
+            "message": "Report scheduled (integration with task_scheduler required)"
+        }
+
+
+# Initialize report generator
+report_generator = ReportGenerator()
+
+
 if __name__ == "__main__"::
     print("J1MSKY Unified Model Orchestrator v5.1")
     print("=" * 50)

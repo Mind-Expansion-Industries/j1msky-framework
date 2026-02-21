@@ -2355,4 +2355,82 @@ Ensure all customer-facing staff understand and can apply pricing policies corre
 - Office hours (weekly, RevOps team)
 - Certification exam (online, self-paced)
 
+## 60) Quarterly Pricing Review
+
+### Purpose
+Conduct a comprehensive review of pricing performance, policy effectiveness, and strategic alignment every quarter.
+
+### Review Schedule
+
+**Week 1: Data Collection**
+- Pull all quotes from the quarter
+- Gather experiment results
+- Collect win/loss data
+- Compile competitive intelligence
+
+**Week 2: Analysis**
+- Calculate segment performance
+- Analyze margin trends
+- Review exception patterns
+- Assess policy effectiveness
+
+**Week 3: Recommendation Development**
+- Identify improvement opportunities
+- Design experiments for next quarter
+- Draft policy change proposals
+- Prepare executive summary
+
+**Week 4: Review Meeting and Decisions**
+- Present findings to leadership
+- Decide on policy changes
+- Approve experiments
+- Set next quarter pricing priorities
+
+### Key Metrics to Review
+
+| Metric | Target | Review Frequency |
+|--------|--------|------------------|
+| Average gross margin | >65% | Quarterly |
+| Approval rate | 75-85% | Quarterly |
+| Exception rate | <15% | Quarterly |
+| Segment win rates | By segment | Quarterly |
+| Policy compliance | >90% | Quarterly |
+| Experiment success rate | >50% | Quarterly |
+
+### Quarterly Review Outputs
+
+1. **Pricing Performance Report**
+   - Executive summary
+   - Detailed metrics by segment
+   - Trend analysis
+   - Competitive positioning update
+
+2. **Policy Recommendations**
+   - Proposed markup adjustments
+   - Segment strategy changes
+   - Exception criteria updates
+   - New experiment proposals
+
+3. **Action Plan**
+   - Approved policy changes
+   - Experiment roadmap
+   - Training needs
+   - System improvements
+
+### Attendees
+
+- Chief Revenue Officer ( Chair )
+- VP Revenue Operations
+- Pricing Administrator
+- Sales Leadership
+- Product Management (optional)
+- Finance (optional)
+
+### Decision Authority
+
+- Minor policy tweaks: RevOps lead approval
+- Major policy changes: CRO approval
+- Pricing model changes: Executive team approval
+- Strategic pricing shifts: Board notification
+
 

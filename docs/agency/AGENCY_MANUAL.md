@@ -1346,6 +1346,59 @@ Request → Queue (Redis/RabbitMQ) → Worker Nodes → Results
 
 ---
 
+## 📋 PRICING QUICK REFERENCE
+
+### API Endpoints Summary
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/pricing/status` | GET | View pricing policy and sample quotes |
+| `/api/pricing/health` | GET | Check system health and costs |
+| `/api/pricing/quote` | POST | Generate single quote |
+| `/api/pricing/batch-quotes` | POST | Generate quotes for all segments |
+| `/api/pricing/decision` | POST | Get approval/escalate decision |
+| `/api/pricing/scenario` | POST | Batch evaluate multiple quotes |
+| `/api/pricing/portfolio-alert` | POST | Check portfolio compliance |
+| `/api/pricing/exception-alert` | POST | Assess exception aging risk |
+| `/api/pricing/weekly-metrics` | POST | Aggregate weekly data |
+| `/api/pricing/weekly-comparison` | POST | Compare weeks |
+| `/api/pricing/experiment-summary` | POST | Analyze experiment results |
+
+### Segment Adjustments
+
+| Segment | Adjustment | Use Case |
+|---------|------------|----------|
+| Enterprise | +0.5x | Large companies with procurement |
+| Mid-Market | 0.0x | Standard pricing |
+| SMB | -0.5x | Volume play, lower touch |
+| Startup | -1.0x | Strategic bet, expansion path |
+
+### Margin Thresholds
+
+| Delivery Type | Minimum Margin |
+|---------------|----------------|
+| Task | 55% |
+| Subscription | 50% |
+| Enterprise | 45% |
+
+### Alert Thresholds
+
+| Metric | Warning | Critical |
+|--------|---------|----------|
+| Daily margin | <60% | <50% |
+| Exception age | >14 days | >30 days |
+| Escalation rate | >25% | >40% |
+| Budget utilization | >80% | >95% |
+
+### Escalation Path
+
+1. **Quote non-compliant** → Route to Deal Desk
+2. **Exception >14 days** → Manager follow-up
+3. **Exception >30 days** → Executive review
+4. **Portfolio compliance <67%** → Leadership review
+
+---
+
 ## 🔮 FUTURE FEATURES
 
 Coming soon:

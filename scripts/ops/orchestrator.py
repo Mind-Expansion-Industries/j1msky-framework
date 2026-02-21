@@ -19,7 +19,7 @@ class UnifiedOrchestrator:
         self.config = self.load_config()
         self.usage_log = []
         self.daily_spend = defaultdict(float)
-        
+
     def load_config(self):
         """Load model stack configuration"""
         try:
@@ -39,7 +39,7 @@ class UnifiedOrchestrator:
         """Keep usage log bounded to avoid unbounded memory growth."""
         if len(self.usage_log) > max_entries:
             self.usage_log = self.usage_log[-max_entries:]
-    
+
     def get_default_config(self):
         """Default configuration if file missing"""
         return {
@@ -67,7 +67,7 @@ class UnifiedOrchestrator:
                 }
             }
         }
-    
+
     def get_model_for_task(self, task_type, complexity="medium", priority="normal"):
         """
         Select best model for task based on type, complexity, and priority
@@ -85,26 +85,26 @@ class UnifiedOrchestrator:
             "ui_design": ["sonnet", "minimax-m2.5"],
             "business_analysis": ["opus", "sonnet"]
         }
-        
+
         # Get preferred models for task
         preferred = task_models.get(task_type, ["sonnet"])
-        
+
         # Check rate limits and availability
         available = []
         for model in preferred:
             if self.check_model_available(model):
                 available.append(model)
-        
+
         # If none available, use fallback chain
         if not available:
             for model in preferred:
                 fallback = self.get_fallback(model)
                 if self.check_model_available(fallback):
                     available.append(fallback)
-        
+
         # Return best available or default to sonnet
         return available[0] if available else "sonnet"
-    
+
     def _refresh_rate_limit_window(self, provider: str):
         """Reset provider counters when hourly window rolls over."""
         rate_limits = self.config.setdefault("rate_limits", {})
@@ -126,7 +126,7 @@ class UnifiedOrchestrator:
             "minimax-m2.5": "minimax-portal",
             "codex": "openai-codex"
         }
-        
+
         provider = provider_map.get(model_alias)
         if not provider:
             return True
@@ -135,14 +135,14 @@ class UnifiedOrchestrator:
         limits = self.config.get("rate_limits", {}).get(provider, {})
         hourly_limit = limits.get("hourly", 100)
         current = limits.get("current", 0)
-        
+
         return current < hourly_limit
-    
+
     def get_fallback(self, model_alias):
         """Get fallback model"""
         fallbacks = self.config.get("orchestration", {}).get("fallback_chain", {})
         return fallbacks.get(model_alias, "sonnet")
-    
+
     def record_usage(self, model_alias, task, tokens=0):
         """Record model usage"""
         usage = {
@@ -158,7 +158,7 @@ class UnifiedOrchestrator:
         estimated_cost = self.estimate_cost(model_alias, tokens or 1000)
         day_key = datetime.now().strftime("%Y-%m-%d")
         self.daily_spend[day_key] += estimated_cost
-        
+
         # Update rate limit counter
         provider_map = {
             "opus": "anthropic",
@@ -181,7 +181,7 @@ class UnifiedOrchestrator:
 
         # Persist counters and budget context
         self.save_config()
-    
+
     def get_team_for_project(self, project_type):
         """Get recommended team composition for project type"""
         teams = {
@@ -217,7 +217,7 @@ class UnifiedOrchestrator:
             }
         }
         return teams.get(project_type, {"lead": "sonnet", "support": "minimax-m2.5"})
-    
+
     def estimate_cost(self, model_alias, estimated_tokens=1000):
         """Estimate cost for task"""
         cost_map = {
@@ -534,7 +534,72 @@ class UnifiedOrchestrator:
             "test": test_summary,
             "recommendation": recommendation
         }
-    
+
+    def generate_pricing_summary_report(self, quotes: List[Dict[str, Any]], period: str = "weekly") -> Dict[str, Any]:
+        """Generate a comprehensive pricing summary report for a given period."""
+        if not quotes:
+            return {
+                "period": period,
+                "generated_at": datetime.now().isoformat(),
+                "summary": "No quotes in period",
+                "metrics": {}
+            }
+
+        # Overall metrics
+        total = len(quotes)
+        approved = sum(1 for q in quotes if q.get("decision_status") == "approved")
+        escalated = total - approved
+        avg_margin = sum(q.get("gross_margin_pct", 0) for q in quotes) / total
+        total_revenue = sum(q.get("recommended_price", 0) for q in quotes)
+
+        # Segment breakdown
+        segments = {}
+        for q in quotes:
+            seg = q.get("segment", "unknown")
+            if seg not in segments:
+                segments[seg] = {"count": 0, "approved": 0, "revenue": 0}
+            segments[seg]["count"] += 1
+            if q.get("decision_status") == "approved":
+                segments[seg]["approved"] += 1
+            segments[seg]["revenue"] += q.get("recommended_price", 0)
+
+        for seg in segments:
+            seg_quotes = [q for q in quotes if q.get("segment") == seg]
+            segments[seg]["avg_margin"] = round(sum(q.get("gross_margin_pct", 0) for q in seg_quotes) / len(seg_quotes), 2)
+            segments[seg]["approval_rate"] = round(segments[seg]["approved"] / segments[seg]["count"], 2)
+
+        # Model breakdown
+        models = {}
+        for q in quotes:
+            model = q.get("model", "unknown")
+            if model not in models:
+                models[model] = {"count": 0}
+            models[model]["count"] += 1
+
+        for model in models:
+            model_quotes = [q for q in quotes if q.get("model") == model]
+            models[model]["avg_margin"] = round(sum(q.get("gross_margin_pct", 0) for q in model_quotes) / len(model_quotes), 2)
+
+        return {
+            "period": period,
+            "generated_at": datetime.now().isoformat(),
+            "summary": f"{total} quotes, {approved} approved, {escalated} escalated",
+            "metrics": {
+                "total_quotes": total,
+                "approved_count": approved,
+                "escalated_count": escalated,
+                "approval_rate": round(approved / total, 2),
+                "avg_margin_pct": round(avg_margin, 2),
+                "total_revenue": round(total_revenue, 2)
+            },
+            "by_segment": segments,
+            "by_model": models,
+            "exceptions": {
+                "created": sum(1 for q in quotes if q.get("exception_created")),
+                "closed": sum(1 for q in quotes if q.get("exception_closed"))
+            }
+        }
+
     def get_daily_spend(self, day: Optional[str] = None) -> float:
         """Get spend for a specific day (YYYY-MM-DD) or today."""
         if not day:
@@ -795,13 +860,13 @@ orchestrator = UnifiedOrchestrator()
 # Health check and monitoring
 class OrchestratorMonitor:
     """Monitor orchestrator health and performance"""
-    
+
     def __init__(self, orch: UnifiedOrchestrator):
         self.orch = orch
         self.start_time = datetime.now()
         self.error_count = 0
         self.request_count = 0
-        
+
     def get_health(self) -> Dict[str, Any]:
         """Get health status"""
         uptime = (datetime.now() - self.start_time).total_seconds()
@@ -813,11 +878,11 @@ class OrchestratorMonitor:
             "error_rate": self.error_count / max(self.request_count, 1),
             "models_configured": len(self.orch.config.get("models", {})),
         }
-    
+
     def record_request(self):
         """Record successful request"""
         self.request_count += 1
-        
+
     def record_error(self):
         """Record error"""
         self.error_count += 1
@@ -828,10 +893,10 @@ monitor = OrchestratorMonitor(orchestrator)
 if __name__ == "__main__":
     print("J1MSKY Unified Model Orchestrator v5.1")
     print("=" * 50)
-    
+
     # Test orchestration
     print("\nModel Selection Tests:")
-    
+
     test_tasks = [
         ("architecture", "high"),
         ("coding", "medium"),
@@ -840,18 +905,18 @@ if __name__ == "__main__":
         ("documentation", "medium"),
         ("strategy", "high")
     ]
-    
+
     for task, complexity in test_tasks:
         model = orchestrator.get_model_for_task(task, complexity)
         cost = orchestrator.estimate_cost(model, 1000)
         print(f"  {task:20} -> {model:15} (est: ${cost:.3f})")
-    
+
     print("\nTeam Compositions:")
     projects = ["web_app", "mobile_app", "ai_feature", "content_platform"]
     for project in projects:
         team = orchestrator.get_team_for_project(project)
         print(f"  {project:15} -> {team}")
-    
+
     print("\nStatus Report:")
     status = orchestrator.get_status_report()
     print(f"  Models: {status['models_active']}")

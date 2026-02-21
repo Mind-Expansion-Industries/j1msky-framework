@@ -2433,4 +2433,78 @@ Conduct a comprehensive review of pricing performance, policy effectiveness, and
 - Pricing model changes: Executive team approval
 - Strategic pricing shifts: Board notification
 
+## 61) Pricing Audit Procedures
+
+### Purpose
+Ensure pricing integrity through regular audits that verify compliance, accuracy, and adherence to policies.
+
+### Audit Types
+
+**1. Daily Automated Checks**
+- Run automatically by the pricing system
+- Check for: budget overruns, margin violations, calculation errors
+- Output: Alert to ops channel if issues found
+- Owner: Automated system
+
+**2. Weekly Quote Sampling**
+- Random sample of 10% of quotes from the week
+- Verify: correct segment assignment, proper markup calculation, approval documentation
+- Output: Weekly compliance report
+- Owner: Revenue Operations
+
+**3. Monthly Exception Review**
+- Review all exceptions created in the month
+- Verify: proper justification, recovery plans in place, aging within limits
+- Output: Exception health scorecard
+- Owner: Revenue Manager
+
+**4. Quarterly Full Audit**
+- Comprehensive review of all pricing activities
+- Verify: policy adherence, experiment integrity, documentation completeness
+- Output: Quarterly audit report to leadership
+- Owner: Pricing Administrator + Finance
+
+### Audit Checklist
+
+**For Each Quote Audited:**
+- [ ] Customer segment correctly identified
+- [ ] Model selection appropriate for task
+- [ ] Complexity assessment reasonable
+- [ ] Segment adjustment applied correctly
+- [ ] Final price ≥ minimum price floor
+- [ ] Margin meets threshold for delivery type
+- [ ] Approval/escalation documented
+- [ ] Exception reason documented (if applicable)
+
+**For Each Exception Audited:**
+- [ ] Strategic justification provided
+- [ ] Recovery plan documented
+- [ ] Review dates scheduled
+- [ ] Approved by authorized person
+- [ ] Margin impact calculated
+
+### Audit Findings Severity
+
+| Severity | Definition | Response Time | Escalation |
+|----------|------------|---------------|------------|
+| **Critical** | Margin violation, unauthorized pricing | Immediate | CRO notification |
+| **High** | Policy non-compliance, calculation error | 24 hours | RevOps manager |
+| **Medium** | Documentation gap, minor process issue | 1 week | Line manager |
+| **Low** | Best practice suggestion | Next sprint | None |
+
+### Audit Documentation
+
+- All audits logged with timestamp and auditor
+- Findings tracked in audit log
+- Remediation actions assigned with due dates
+- Follow-up audits verify remediation
+
+### Annual External Audit
+
+- Conducted by Finance or external auditor
+- Review: pricing policy adherence, margin accuracy, exception handling
+- Scope: Full fiscal year
+- Output: External audit report
+- Distribution: Executive team, Board (if material findings)
+
 

@@ -448,6 +448,88 @@ Returns operational health status of the pricing system including daily costs, b
 
 ---
 
+#### Get Pricing Report
+**Endpoint:** `GET /pricing/report`
+
+Generates a comprehensive daily pricing report including health metrics, model breakdowns, sample quotes by segment, and current pricing policy.
+
+**Response:**
+```json
+{
+  "success": true,
+  "report": {
+    "generated_at": "2026-02-21T01:45:00-05:00",
+    "period": "daily",
+    "health": {
+      "status": "healthy",
+      "daily_cost": 12.45,
+      "daily_budget": 50.0,
+      "budget_utilization_pct": 24.9,
+      "tasks_completed": 156,
+      "avg_cost_per_task": 0.0798,
+      "issues": []
+    },
+    "by_model": {
+      "k2p5": {
+        "cost": 8.23,
+        "calls": 89,
+        "avg_per_call": 0.0925
+      },
+      "sonnet": {
+        "cost": 4.22,
+        "calls": 67,
+        "avg_per_call": 0.0630
+      }
+    },
+    "sample_quotes_by_segment": {
+      "enterprise": {
+        "model": "k2p5",
+        "complexity": "medium",
+        "segment": "enterprise",
+        "final_markup": 4.5,
+        "recommended_price": 0.65,
+        "gross_margin_pct": 98.5
+      },
+      "mid_market": {
+        "model": "k2p5",
+        "segment": "mid_market",
+        "final_markup": 4.0,
+        "recommended_price": 0.50,
+        "gross_margin_pct": 99.6
+      },
+      "smb": {
+        "model": "k2p5",
+        "segment": "smb",
+        "final_markup": 3.5,
+        "recommended_price": 0.50,
+        "gross_margin_pct": 99.4
+      },
+      "startup": {
+        "model": "k2p5",
+        "segment": "startup",
+        "final_markup": 3.0,
+        "recommended_price": 0.50,
+        "gross_margin_pct": 99.2
+      }
+    },
+    "pricing_policy": {
+      "complexity_markup": {"low": 3.0, "medium": 4.0, "high": 5.0},
+      "segment_adjustments": {"enterprise": 0.5, "mid_market": 0.0, "smb": -0.5, "startup": -1.0},
+      "minimum_price": 0.50,
+      "margin_thresholds": {"task": 55.0, "subscription": 50.0, "enterprise": 45.0}
+    }
+  }
+}
+```
+
+**Use Cases:**
+- Daily standup review of pricing health
+- Audit documentation
+- Stakeholder reporting
+- Policy verification
+
+---
+
 #### Generate Pricing Quote
 **Endpoint:** `POST /pricing/quote`
 

@@ -2568,6 +2568,75 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
                     self.send_json({'success': False, 'error': 'Rate limited'})
             else:
                 self.send_json({'success': False, 'error': 'Team not found'})
+
+        elif self.path == '/api/pricing/report':
+            # Generate comprehensive pricing report
+            daily_report = cost_tracker.get_daily_report()
+            models_breakdown = cost_tracker.get_model_breakdown()
+            
+            total_cost = daily_report.get('total_cost', 0)
+            tasks_completed = daily_report.get('tasks_completed', 0)
+            avg_cost_per_task = round(total_cost / max(tasks_completed, 1), 4)
+            
+            # Calculate health status
+            health_status = 'healthy'
+            issues = []
+            
+            if total_cost > 40:
+                health_status = 'critical' if total_cost >= 50 else 'warning'
+                issues.append(f'High daily cost: ${total_cost:.2f}')
+            
+            if avg_cost_per_task > 0.10:
+                issues.append(f'High avg cost per task: ${avg_cost_per_task}')
+            
+            # Format model breakdown
+            model_health = {}
+            for model, data in models_breakdown.items():
+                model_cost = data.get('cost', 0)
+                model_calls = data.get('calls', 0)
+                model_health[model] = {
+                    'cost': round(model_cost, 4),
+                    'calls': model_calls,
+                    'avg_per_call': round(model_cost / max(model_calls, 1), 4)
+                }
+            
+            # Sample quotes for each segment
+            sample_quotes = {}
+            for segment in ['enterprise', 'mid_market', 'smb', 'startup']:
+                quote = cost_tracker.recommend_task_quote(
+                    'k2p5', 
+                    estimated_input=1500, 
+                    estimated_output=600, 
+                    complexity='medium',
+                    segment=segment
+                )
+                sample_quotes[segment] = quote
+            
+            self.send_json({
+                'success': True,
+                'report': {
+                    'generated_at': datetime.now().isoformat(),
+                    'period': 'daily',
+                    'health': {
+                        'status': health_status,
+                        'daily_cost': round(total_cost, 4),
+                        'daily_budget': 50.0,
+                        'budget_utilization_pct': round((total_cost / 50.0) * 100, 2),
+                        'tasks_completed': tasks_completed,
+                        'avg_cost_per_task': avg_cost_per_task,
+                        'issues': issues
+                    },
+                    'by_model': model_health,
+                    'sample_quotes_by_segment': sample_quotes,
+                    'pricing_policy': {
+                        'complexity_markup': {'low': 3.0, 'medium': 4.0, 'high': 5.0},
+                        'segment_adjustments': {'enterprise': 0.5, 'mid_market': 0.0, 'smb': -0.5, 'startup': -1.0},
+                        'minimum_price': 0.50,
+                        'margin_thresholds': {'task': 55.0, 'subscription': 50.0, 'enterprise': 45.0}
+                    }
+                }
+            })
+
         else:
             self.send_error(404)
     

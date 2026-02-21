@@ -229,6 +229,33 @@ The response will include:
 
 Note: Minimum margin floors (50% for subscriptions) apply regardless of segment.
 
+### Pricing Health Check
+
+Monitor the pricing system's operational health using the health endpoint:
+
+```bash
+curl http://localhost:8080/api/pricing/health
+```
+
+The response includes:
+- `health.status` → overall system health (healthy/warning/critical)
+- `health.daily_cost` → total API spend today
+- `health.budget_utilization_pct` → percentage of daily budget used
+- `health.tasks_completed` → number of tasks completed today
+- `health.avg_cost_per_task` → average cost per task
+- `health.issues` → list of active issues requiring attention
+- `health.by_model` → cost breakdown by model
+
+**When to check:**
+- Morning standup: Verify daily budget status
+- Midday: Check for cost spikes
+- End of day: Review daily totals and model efficiency
+
+**Actions based on status:**
+- `healthy` → normal operations
+- `warning` → review cost drivers, consider model mix adjustments
+- `critical` → pause non-essential tasks, escalate to ops lead
+
 ---
 
 ## 🎯 USE CASES

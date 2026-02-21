@@ -2121,4 +2121,53 @@ Provide real-time visibility into pricing performance for ops and leadership.
 | Escalation rate | >25% | >40% |
 | Portfolio compliance | <80% | <67% |
 
+## 56) Pricing Health Monitoring
+
+### Purpose
+Continuously monitor the pricing system's operational health to catch issues before they impact revenue.
+
+### Health Check Components
+
+**1. Daily Cost Monitoring**
+- Track total daily API spend vs budget
+- Alert at 80% of daily budget
+- Critical alert at 100% of budget
+- Auto-pause non-essential tasks at 95%
+
+**2. Cost Per Task Tracking**
+- Monitor average cost per completed task
+- Benchmark by model and complexity
+- Flag tasks costing >$0.50 for review
+- Investigate cost spikes >50% vs baseline
+
+**3. Model Efficiency Review**
+- Compare actual vs estimated costs by model
+- Track model usage distribution
+- Identify over-reliance on expensive models
+- Recommend model mix optimizations
+
+**4. Quote System Health**
+- Monitor API endpoint response times
+- Track quote generation success rate
+- Alert on >5% error rate
+- Validate pricing calculations periodically
+
+### Automated Health Checks
+
+| Check | Frequency | Owner | Escalation |
+|-------|-----------|-------|------------|
+| Daily budget status | Hourly | Ops | Revenue manager at 80% |
+| Cost per task | Daily | Ops | Weekly review if trending up |
+| Model efficiency | Weekly | RevOps | Monthly optimization session |
+| Quote system uptime | Real-time | Engineering | Immediate if <99% |
+
+### Health Dashboard Integration
+
+The `/api/pricing/health` endpoint provides:
+- Overall health status (healthy/warning/critical)
+- Daily cost and budget utilization
+- Tasks completed and average cost per task
+- Model-by-model cost breakdown
+- Active issues requiring attention
+
 

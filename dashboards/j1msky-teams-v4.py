@@ -2117,6 +2117,50 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
                 'guardrail_check': guardrail
             })
 
+        elif self.path == '/api/pricing/health':
+            # Aggregate pricing system health check
+            daily_report = cost_tracker.get_daily_report()
+            models_breakdown = cost_tracker.get_model_breakdown()
+            
+            total_cost = daily_report.get('total_cost', 0)
+            tasks_completed = daily_report.get('tasks_completed', 0)
+            avg_cost_per_task = round(total_cost / max(tasks_completed, 1), 4)
+            
+            # Determine health status based on cost and volume
+            health_status = 'healthy'
+            issues = []
+            
+            if total_cost > 40:  # 80% of $50 daily budget
+                health_status = 'critical' if total_cost >= 50 else 'warning'
+                issues.append(f'High daily cost: ${total_cost:.2f}')
+            
+            if avg_cost_per_task > 0.10:
+                issues.append(f'High avg cost per task: ${avg_cost_per_task}')
+            
+            model_health = {}
+            for model, data in models_breakdown.items():
+                model_cost = data.get('cost', 0)
+                model_calls = data.get('calls', 0)
+                model_health[model] = {
+                    'cost': round(model_cost, 4),
+                    'calls': model_calls,
+                    'avg_per_call': round(model_cost / max(model_calls, 1), 4)
+                }
+            
+            self.send_json({
+                'success': True,
+                'health': {
+                    'status': health_status,
+                    'daily_cost': round(total_cost, 4),
+                    'daily_budget': 50.0,
+                    'budget_utilization_pct': round((total_cost / 50.0) * 100, 2),
+                    'tasks_completed': tasks_completed,
+                    'avg_cost_per_task': avg_cost_per_task,
+                    'issues': issues,
+                    'by_model': model_health
+                }
+            })
+
         elif self.path == '/api/pricing/scenario':
             delivery_type = params.get('delivery_type', ['task'])[0]
             raw_scenarios = params.get('scenarios', ['[]'])[0]

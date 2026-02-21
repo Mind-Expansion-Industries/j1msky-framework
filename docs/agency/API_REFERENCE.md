@@ -408,6 +408,46 @@ Returns active pricing policy with segment adjustments, sample quotes for each s
 }
 ```
 
+#### Get Pricing Health Check
+**Endpoint:** `GET /pricing/health`
+
+Returns operational health status of the pricing system including daily costs, budget utilization, and model efficiency metrics.
+
+**Response:**
+```json
+{
+  "success": true,
+  "health": {
+    "status": "healthy",
+    "daily_cost": 12.45,
+    "daily_budget": 50.0,
+    "budget_utilization_pct": 24.9,
+    "tasks_completed": 156,
+    "avg_cost_per_task": 0.0798,
+    "issues": [],
+    "by_model": {
+      "k2p5": {
+        "cost": 8.23,
+        "calls": 89,
+        "avg_per_call": 0.0925
+      },
+      "sonnet": {
+        "cost": 4.22,
+        "calls": 67,
+        "avg_per_call": 0.0630
+      }
+    }
+  }
+}
+```
+
+**Health Status Values:**
+- `healthy` → All metrics within normal ranges
+- `warning` → Daily cost >80% of budget OR cost per task elevated
+- `critical` → Daily cost >=100% of budget
+
+---
+
 #### Generate Pricing Quote
 **Endpoint:** `POST /pricing/quote`
 

@@ -2121,6 +2121,7 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
             for idx, item in enumerate(scenarios):
                 model = item.get('model', 'k2p5')
                 complexity = item.get('complexity', 'medium')
+                segment = item.get('segment', 'mid_market')
                 try:
                     estimated_input = int(item.get('estimated_input', 1000))
                     estimated_output = int(item.get('estimated_output', 500))
@@ -2134,12 +2135,16 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
                 if complexity not in {'low', 'medium', 'high'}:
                     self.send_json({'success': False, 'error': f'Invalid complexity in scenario {idx}: {complexity}'})
                     return
+                if segment not in {'enterprise', 'mid_market', 'smb', 'startup'}:
+                    self.send_json({'success': False, 'error': f'Invalid segment in scenario {idx}: {segment}'})
+                    return
 
                 quote = cost_tracker.recommend_task_quote(
                     model,
                     estimated_input=estimated_input,
                     estimated_output=estimated_output,
-                    complexity=complexity
+                    complexity=complexity,
+                    segment=segment
                 )
                 guardrail = cost_tracker.evaluate_margin_guardrail(quote, delivery_type=delivery_type)
                 evaluated.append({'quote': quote, 'guardrail_check': guardrail})

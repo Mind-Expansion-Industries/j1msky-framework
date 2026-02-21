@@ -594,6 +594,7 @@ Use `requires_executive_review=true` as a hard stop before proposal send.
 - `estimated_input`: integer
 - `estimated_output`: integer
 - `complexity`: `low|medium|high`
+- `segment`: `enterprise|mid_market|smb|startup` (optional, default: `mid_market`)
 
 **Response:**
 ```json

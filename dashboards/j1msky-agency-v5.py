@@ -564,6 +564,7 @@ HTML = '''<!DOCTYPE html>
         body.navigating .main {
             opacity: 0.7;
             pointer-events: none;
+            transition: opacity 0.2s ease;
         }
 
         body.navigating::after {
@@ -1615,9 +1616,10 @@ HTML = '''<!DOCTYPE html>
             if (isTypingTarget(e.target)) return;
             if (e.key === 'Escape' && helpVisible) {
                 e.preventDefault();
+                e.stopPropagation();
                 toggleHelp();
             }
-        });
+        }, { capture: true });
 
         // Visibility handling
         document.addEventListener('visibilitychange', () => {

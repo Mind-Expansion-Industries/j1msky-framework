@@ -509,6 +509,7 @@ HTML = '''<!DOCTYPE html>
             min-height: 100px;
             resize: vertical;
             min-width: 0;
+            field-sizing: content;
         }
 
         .btn-primary {

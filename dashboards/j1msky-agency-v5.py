@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.27 - Resize Flicker Reduction
+J1MSKY Agency v6.0.28 - UI Hardening Complete
 Patch release: extends live log escaping to include quotes for stricter HTML safety and rendering stability
 """
 
@@ -47,7 +47,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.27</title>
+    <title>J1MSKY Agency v6.0.28</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -812,7 +812,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.27</h1>
+        <h1>◈ J1MSKY Agency v6.0.28</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1258,9 +1258,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.27';
+                        header.textContent = '◈ J1MSKY Agency v6.0.28';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.27';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.28';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -2031,14 +2031,13 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.27 - Transition Guard Patch          ║")
+        print("║          J1MSKY Agency v6.0.28 - UI Hardening Complete          ║")
         print("╠══════════════════════════════════════════════════════════╣")
-        print("║  ✓ Real-time stats updater                               ║")
-        print("║  ✓ Session persistence across refreshes                  ║")
-        print("║  ✓ Error boundaries & recovery                           ║")
-        print("║  ✓ Swipe navigation & gesture support                    ║")
+        print("║  ✓ Responsive layouts (mobile/tablet/desktop)            ║")
+        print("║  ✓ Navigation state hardening & bfcache recovery         ║")
+        print("║  ✓ Touch gesture handling & swipe navigation             ║")
+        print("║  ✓ Reduced-motion support & accessibility                ║")
         print("║  ✓ Offline detection & visual feedback                   ║")
-        print("║  ✓ Responsive mobile/tablet/desktop layouts              ║")
         print("╚══════════════════════════════════════════════════════════╝")
         print("")
         print("http://localhost:8080")

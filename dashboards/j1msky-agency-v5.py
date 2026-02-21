@@ -678,6 +678,13 @@ HTML = '''<!DOCTYPE html>
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
+            .header-stats {
+                gap: 6px;
+            }
+            .stat-badge {
+                padding: 5px 8px;
+                font-size: 10px;
+            }
         }
 
         /* Tablet */

@@ -1923,16 +1923,23 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
     
     def do_GET(self):
         if self.path == '/api/pricing/status':
-            sample_quote = cost_tracker.recommend_task_quote('k2p5', estimated_input=1200, estimated_output=600, complexity='medium')
+            sample_quote = cost_tracker.recommend_task_quote('k2p5', estimated_input=1200, estimated_output=600, complexity='medium', segment='mid_market')
+            enterprise_quote = cost_tracker.recommend_task_quote('sonnet', estimated_input=2000, estimated_output=1000, complexity='high', segment='enterprise')
+            smb_quote = cost_tracker.recommend_task_quote('k2p5', estimated_input=1000, estimated_output=400, complexity='low', segment='smb')
             guardrail = cost_tracker.evaluate_margin_guardrail(sample_quote, delivery_type='task')
             self.send_json({
                 'success': True,
                 'pricing_policy': {
                     'complexity_markup': {'low': 3.0, 'medium': 4.0, 'high': 5.0},
+                    'segment_adjustments': {'enterprise': 0.5, 'mid_market': 0.0, 'smb': -0.5, 'startup': -1.0},
                     'minimum_price': 0.50,
                     'margin_thresholds': {'task': 55.0, 'subscription': 50.0, 'enterprise': 45.0}
                 },
-                'example_quote': sample_quote,
+                'example_quotes': {
+                    'mid_market': sample_quote,
+                    'enterprise': enterprise_quote,
+                    'smb': smb_quote
+                },
                 'guardrail_check': guardrail
             })
         elif self.path == '/':

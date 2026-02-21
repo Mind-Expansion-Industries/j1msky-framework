@@ -2067,4 +2067,58 @@ Systematically test pricing changes to optimize revenue without guessing.
 - Require executive approval for tests affecting >30% of traffic
 - Auto-rollback if margin drops >5% or win rate drops >10%
 
+## 55) Pricing Metrics Dashboard
+
+### Purpose
+Provide real-time visibility into pricing performance for ops and leadership.
+
+### Dashboard Sections
+
+**1. Daily Snapshot**
+- Quotes sent today
+- Approval vs escalation rate
+- Average margin today
+- Open exceptions count
+
+**2. Weekly Trends**
+- Week-over-week change metrics
+- Rolling 7-day averages
+- Exception aging distribution
+
+**3. Segment Performance**
+- Win rate by segment
+- Average deal size by segment
+- Margin attainment by segment
+
+**4. Model Efficiency**
+- Cost per task by model
+- Model usage distribution
+- Margin by model
+
+**5. Alert Summary**
+- Active pricing alerts
+- Unacknowledged exceptions
+- Executive review queue
+
+### Refresh Frequency
+
+- Real-time: Quote counts, exception status
+- Hourly: Margin calculations, segment breakdowns
+- Daily: Weekly comparisons, trend analysis
+
+### Access Control
+
+- Sales reps: View their own quotes only
+- Revenue managers: Full dashboard access
+- Executives: Summary view with drill-down
+
+### Alert Thresholds
+
+| Metric | Warning | Critical |
+|--------|---------|----------|
+| Daily margin | <60% | <50% |
+| Exception age | >14 days | >30 days |
+| Escalation rate | >25% | >40% |
+| Portfolio compliance | <80% | <67% |
+
 

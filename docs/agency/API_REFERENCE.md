@@ -351,7 +351,7 @@ GET /events?limit=50&cursor=eyJpZCI6MTIzNDV9
 #### Get Pricing Status Snapshot
 **Endpoint:** `GET /pricing/status`
 
-Returns active pricing policy, a sample quote, and margin guardrail result.
+Returns active pricing policy with segment adjustments, sample quotes for each segment, and margin guardrail results.
 
 **Response:**
 ```json
@@ -359,19 +359,44 @@ Returns active pricing policy, a sample quote, and margin guardrail result.
   "success": true,
   "pricing_policy": {
     "complexity_markup": {"low": 3.0, "medium": 4.0, "high": 5.0},
+    "segment_adjustments": {"enterprise": 0.5, "mid_market": 0.0, "smb": -0.5, "startup": -1.0},
     "minimum_price": 0.5,
     "margin_thresholds": {"task": 55.0, "subscription": 50.0, "enterprise": 45.0}
   },
-  "example_quote": {
-    "model": "k2p5",
-    "complexity": "medium",
-    "estimated_input_tokens": 1200,
-    "estimated_output_tokens": 600,
-    "internal_cost": 0.0015,
-    "markup": 4.0,
-    "recommended_price": 0.5,
-    "gross_margin_pct": 99.7,
-    "margin_band": "strong"
+  "example_quotes": {
+    "mid_market": {
+      "model": "k2p5",
+      "complexity": "medium",
+      "segment": "mid_market",
+      "base_markup": 4.0,
+      "segment_adjustment": 0.0,
+      "final_markup": 4.0,
+      "recommended_price": 0.5,
+      "gross_margin_pct": 99.7,
+      "margin_band": "strong"
+    },
+    "enterprise": {
+      "model": "sonnet",
+      "complexity": "high",
+      "segment": "enterprise",
+      "base_markup": 5.0,
+      "segment_adjustment": 0.5,
+      "final_markup": 5.5,
+      "recommended_price": 0.85,
+      "gross_margin_pct": 96.8,
+      "margin_band": "strong"
+    },
+    "smb": {
+      "model": "k2p5",
+      "complexity": "low",
+      "segment": "smb",
+      "base_markup": 3.0,
+      "segment_adjustment": -0.5,
+      "final_markup": 2.5,
+      "recommended_price": 0.5,
+      "gross_margin_pct": 99.4,
+      "margin_band": "strong"
+    }
   },
   "guardrail_check": {
     "delivery_type": "task",

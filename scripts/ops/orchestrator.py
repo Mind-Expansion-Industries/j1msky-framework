@@ -9,6 +9,7 @@ import json
 import time
 import random
 import threading
+import hashlib
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, Optional, List
@@ -1171,6 +1172,272 @@ def get_cache_status() -> Dict[str, Any]:
         "team_cache": _team_cache.get_stats(),
         "cache_hit_savings_estimate": "~5-15ms per cached call"
     }
+
+
+# A/B Testing Framework for Pricing Optimization
+class ABTestFramework:
+    """
+    A/B testing framework for pricing optimization and feature experiments.
+    
+    Usage:
+        ab = ABTestFramework()
+        
+        # Define an experiment
+        ab.create_experiment(
+            experiment_id="pricing_v2",
+            variants={
+                "control": {"markup": 4.0},
+                "test": {"markup": 3.5}
+            },
+            traffic_split=0.2  # 20% to test
+        )
+        
+        # Assign user to variant
+        variant = ab.assign_variant("pricing_v2", user_id="user_123")
+        
+        # Record outcome
+        ab.record_outcome("pricing_v2", "user_123", converted=True, revenue=99.0)
+        
+        # Get results
+        results = ab.get_results("pricing_v2")
+    """
+    
+    def __init__(self, storage_path: str = "/home/m1ndb0t/Desktop/J1MSKY/config"):
+        self.storage_path = Path(storage_path)
+        self.storage_path.mkdir(parents=True, exist_ok=True)
+        self.experiments_file = self.storage_path / "ab_experiments.json"
+        self.experiments = self._load_experiments()
+        self._lock = threading.Lock()
+    
+    def _load_experiments(self) -> Dict[str, Any]:
+        """Load experiments from disk."""
+        if self.experiments_file.exists():
+            try:
+                with open(self.experiments_file, 'r') as f:
+                    return json.load(f)
+            except Exception:
+                return {}
+        return {}
+    
+    def _save_experiments(self):
+        """Save experiments to disk."""
+        with open(self.experiments_file, 'w') as f:
+            json.dump(self.experiments, f, indent=2)
+    
+    def create_experiment(
+        self,
+        experiment_id: str,
+        name: str = "",
+        variants: Dict[str, Dict] = None,
+        traffic_split: float = 0.2,
+        min_sample_size: int = 100,
+        success_metric: str = "conversion"
+    ) -> Dict[str, Any]:
+        """
+        Create a new A/B test experiment.
+        
+        Args:
+            experiment_id: Unique identifier for the experiment
+            name: Human-readable name
+            variants: Dict of variant names to their configurations
+            traffic_split: Percentage of traffic to send to test variant (0.0-1.0)
+            min_sample_size: Minimum samples before calculating significance
+            success_metric: Metric to optimize for ('conversion', 'revenue', 'engagement')
+        """
+        if experiment_id in self.experiments:
+            return {"success": False, "error": f"Experiment {experiment_id} already exists"}
+        
+        if variants is None:
+            variants = {"control": {}, "test": {}}
+        
+        experiment = {
+            "id": experiment_id,
+            "name": name or experiment_id,
+            "variants": variants,
+            "traffic_split": traffic_split,
+            "min_sample_size": min_sample_size,
+            "success_metric": success_metric,
+            "status": "running",
+            "created_at": datetime.now().isoformat(),
+            "assignments": {},  # user_id -> variant
+            "results": {variant: {"conversions": 0, "total": 0, "revenue": 0.0} 
+                       for variant in variants.keys()}
+        }
+        
+        with self._lock:
+            self.experiments[experiment_id] = experiment
+            self._save_experiments()
+        
+        return {"success": True, "experiment": experiment}
+    
+    def assign_variant(self, experiment_id: str, user_id: str) -> str:
+        """
+        Assign a user to a variant for an experiment.
+        Returns the variant name assigned.
+        """
+        with self._lock:
+            if experiment_id not in self.experiments:
+                return "control"  # Default fallback
+            
+            experiment = self.experiments[experiment_id]
+            
+            if experiment["status"] != "running":
+                return "control"
+            
+            # Check if already assigned
+            if user_id in experiment["assignments"]:
+                return experiment["assignments"][user_id]
+            
+            # Assign based on traffic split
+            variants = list(experiment["variants"].keys())
+            if len(variants) < 2:
+                return variants[0] if variants else "control"
+            
+            # Use hash for deterministic but random-looking assignment
+            hash_input = f"{experiment_id}:{user_id}"
+            hash_val = int(hashlib.md5(hash_input.encode()).hexdigest(), 16)
+            
+            # Assign to test variant based on traffic split
+            if (hash_val % 100) < (experiment["traffic_split"] * 100):
+                variant = "test" if "test" in variants else variants[1]
+            else:
+                variant = "control" if "control" in variants else variants[0]
+            
+            experiment["assignments"][user_id] = variant
+            experiment["results"][variant]["total"] += 1
+            self._save_experiments()
+            
+            return variant
+    
+    def record_outcome(
+        self,
+        experiment_id: str,
+        user_id: str,
+        converted: bool = False,
+        revenue: float = 0.0,
+        engagement: float = 0.0
+    ):
+        """Record an outcome for a user in an experiment."""
+        with self._lock:
+            if experiment_id not in self.experiments:
+                return
+            
+            experiment = self.experiments[experiment_id]
+            
+            if user_id not in experiment["assignments"]:
+                return
+            
+            variant = experiment["assignments"][user_id]
+            
+            if converted:
+                experiment["results"][variant]["conversions"] += 1
+            
+            experiment["results"][variant]["revenue"] += revenue
+            
+            # Track engagement separately if provided
+            if "engagement" not in experiment["results"][variant]:
+                experiment["results"][variant]["engagement"] = 0.0
+                experiment["results"][variant]["engagement_count"] = 0
+            
+            if engagement > 0:
+                experiment["results"][variant]["engagement"] += engagement
+                experiment["results"][variant]["engagement_count"] += 1
+            
+            self._save_experiments()
+    
+    def get_results(self, experiment_id: str) -> Dict[str, Any]:
+        """Get statistical results for an experiment."""
+        with self._lock:
+            if experiment_id not in self.experiments:
+                return {"error": "Experiment not found"}
+            
+            experiment = self.experiments[experiment_id]
+            results = experiment["results"]
+            
+            # Calculate conversion rates and confidence intervals
+            analysis = {}
+            for variant, data in results.items():
+                total = data["total"]
+                conversions = data["conversions"]
+                revenue = data["revenue"]
+                
+                conversion_rate = conversions / max(total, 1)
+                avg_revenue = revenue / max(total, 1)
+                
+                analysis[variant] = {
+                    "sample_size": total,
+                    "conversions": conversions,
+                    "conversion_rate": round(conversion_rate, 4),
+                    "total_revenue": round(revenue, 2),
+                    "avg_revenue_per_user": round(avg_revenue, 2)
+                }
+            
+            # Determine winner if enough data
+            if len(analysis) >= 2:
+                control = analysis.get("control", {})
+                test = analysis.get("test", {})
+                
+                control_size = control.get("sample_size", 0)
+                test_size = test.get("sample_size", 0)
+                
+                if control_size >= experiment["min_sample_size"] and \
+                   test_size >= experiment["min_sample_size"]:
+                    
+                    control_rate = control.get("conversion_rate", 0)
+                    test_rate = test.get("conversion_rate", 0)
+                    
+                    lift = ((test_rate - control_rate) / max(control_rate, 0.001)) * 100
+                    
+                    analysis["winner"] = "test" if test_rate > control_rate else "control"
+                    analysis["lift_pct"] = round(lift, 2)
+                    analysis["significant"] = abs(lift) > 10  # Simple threshold
+                else:
+                    analysis["winner"] = "insufficient_data"
+                    analysis["needed_per_variant"] = experiment["min_sample_size"]
+            
+            return {
+                "experiment_id": experiment_id,
+                "status": experiment["status"],
+                "metric": experiment["success_metric"],
+                "variants": analysis
+            }
+    
+    def stop_experiment(self, experiment_id: str, winner: str = None) -> Dict[str, Any]:
+        """Stop an experiment and optionally declare a winner."""
+        with self._lock:
+            if experiment_id not in self.experiments:
+                return {"success": False, "error": "Experiment not found"}
+            
+            self.experiments[experiment_id]["status"] = "stopped"
+            if winner:
+                self.experiments[experiment_id]["winner"] = winner
+            
+            self._save_experiments()
+            
+            return {
+                "success": True,
+                "experiment_id": experiment_id,
+                "final_results": self.get_results(experiment_id)
+            }
+    
+    def list_experiments(self) -> List[Dict[str, Any]]:
+        """List all experiments with summary."""
+        with self._lock:
+            return [
+                {
+                    "id": exp["id"],
+                    "name": exp["name"],
+                    "status": exp["status"],
+                    "variants": list(exp["variants"].keys()),
+                    "total_assignments": len(exp["assignments"]),
+                    "created_at": exp["created_at"]
+                }
+                for exp in self.experiments.values()
+            ]
+
+
+# Initialize A/B testing framework
+ab_testing = ABTestFramework()
 
 
 if __name__ == "__main__":

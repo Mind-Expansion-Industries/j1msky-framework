@@ -1438,6 +1438,321 @@ Request → Queue (Redis/RabbitMQ) → Worker Nodes → Results
 
 ---
 
+## 🚀 DEPLOYMENT GUIDE
+
+### Pre-Deployment Checklist
+
+**Hardware Requirements:**
+- [ ] Raspberry Pi 4 (4GB or 8GB RAM)
+- [ ] 32GB+ microSD card (Class 10 or UHS-I)
+- [ ] Power supply (official 5V/3A recommended)
+- [ ] Ethernet connection or WiFi configured
+- [ ] Case with cooling (fan or heatsink)
+
+**Software Prerequisites:**
+- [ ] Raspberry Pi OS (64-bit Lite or Desktop)
+- [ ] Python 3.11+ installed
+- [ ] Git configured with your credentials
+- [ ] SSH access enabled (for headless setup)
+- [ ] Static IP or DDNS configured (for remote access)
+
+---
+
+### Installation Steps
+
+#### Step 1: Prepare the Pi
+```bash
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install dependencies
+sudo apt install -y python3-pip python3-venv git htop curl
+
+# Install Node.js (for future web components)
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Configure Git
+git config --global user.name "Your Name"
+git config --global user.email "your@email.com"
+```
+
+#### Step 2: Clone Repository
+```bash
+# Navigate to home directory
+cd ~
+
+# Clone the repository
+git clone https://github.com/Mind-Expansion-Industries/j1msky-framework.git
+
+# Enter directory
+cd j1msky-framework
+
+# Create virtual environment
+python3 -m venv venv
+
+# Activate virtual environment
+source venv/bin/activate
+
+# Install Python dependencies
+pip install -r requirements.txt
+```
+
+#### Step 3: Configuration
+```bash
+# Create config directory
+mkdir -p config
+
+# Create API keys file
+cat > config/api-keys.json << 'EOF'
+{
+  "anthropic": "sk-ant-your-key-here",
+  "kimi": "kimi-your-key-here",
+  "openai": "sk-your-key-here"
+}
+EOF
+
+# Set permissions
+chmod 600 config/api-keys.json
+
+# Create environment file
+cat > .env << 'EOF'
+J1MSKY_DASHBOARD_PORT=8080
+J1MSKY_LOG_LEVEL=info
+J1MSKY_DAILY_BUDGET=50.0
+J1MSKY_ENABLE_WEBHOOKS=true
+EOF
+```
+
+#### Step 4: Test Installation
+```bash
+# Run diagnostics
+python3 -c "import sys; print(sys.version)"
+python3 -c "from j1msky_teams_v4 import *; print('Import successful')"
+
+# Check system stats
+curl http://localhost:8080/api/system
+
+# Test spawning an agent
+curl -X POST http://localhost:8080/api/spawn \
+  -H "Content-Type: application/json" \
+  -d '{"model": "k2p5", "task": "test deployment"}'
+```
+
+#### Step 5: Set Up Systemd Service
+```bash
+# Create service file
+sudo tee /etc/systemd/system/j1msky.service > /dev/null << 'EOF'
+[Unit]
+Description=J1MSKY Agent Teams
+After=network.target
+
+[Service]
+Type=simple
+User=m1ndb0t
+WorkingDirectory=/home/m1ndb0t/Desktop/J1MSKY
+Environment=PATH=/home/m1ndb0t/Desktop/J1MSKY/venv/bin
+ExecStart=/home/m1ndb0t/Desktop/J1MSKY/venv/bin/python j1msky-teams-v4.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable and start service
+sudo systemctl daemon-reload
+sudo systemctl enable j1msky
+sudo systemctl start j1msky
+
+# Check status
+sudo systemctl status j1msky
+```
+
+### Production Deployment
+
+#### Reverse Proxy with Nginx
+```bash
+# Install Nginx
+sudo apt install -y nginx
+
+# Create Nginx config
+sudo tee /etc/nginx/sites-available/j1msky > /dev/null << 'EOF'
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+EOF
+
+# Enable site
+sudo ln -s /etc/nginx/sites-available/j1msky /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+#### SSL with Let's Encrypt
+```bash
+# Install Certbot
+sudo apt install -y certbot python3-certbot-nginx
+
+# Obtain certificate
+sudo certbot --nginx -d your-domain.com
+
+# Auto-renewal is set up automatically
+# Test renewal:
+sudo certbot renew --dry-run
+```
+
+#### Firewall Configuration
+```bash
+# Install UFW
+sudo apt install -y ufw
+
+# Configure
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow ssh
+sudo ufw allow http
+sudo ufw allow https
+sudo ufw allow 8080/tcp  # Direct access (optional)
+
+# Enable
+sudo ufw enable
+sudo ufw status
+```
+
+### Monitoring Setup
+
+#### Basic Health Checks
+```bash
+# Create health check script
+cat > ~/health-check.sh << 'EOF'
+#!/bin/bash
+HEALTH=$(curl -s http://localhost:8080/api/system | jq -r '.status')
+if [ "$HEALTH" != "healthy" ]; then
+    echo "ALERT: J1MSKY health check failed at $(date)" | tee -a ~/alerts.log
+    # Send notification (configure as needed)
+    # curl -X POST "https://your-webhook-url" -d "J1MSKY unhealthy"
+fi
+EOF
+
+chmod +x ~/health-check.sh
+
+# Add to crontab (every 5 minutes)
+(crontab -l 2>/dev/null; echo "*/5 * * * * /home/m1ndb0t/health-check.sh") | crontab -
+```
+
+#### Log Rotation
+```bash
+# Configure logrotate
+sudo tee /etc/logrotate.d/j1msky > /dev/null << 'EOF'
+/home/m1ndb0t/Desktop/J1MSKY/logs/*.log {
+    daily
+    rotate 7
+    compress
+    delaycompress
+    missingok
+    notifempty
+    create 644 m1ndb0t m1ndb0t
+}
+EOF
+```
+
+### Backup Strategy
+
+#### Automated Backups
+```bash
+# Create backup script
+cat > ~/backup-j1msky.sh << 'EOF'
+#!/bin/bash
+BACKUP_DIR="/home/m1ndb0t/backups"
+DATE=$(date +%Y%m%d_%H%M%S)
+mkdir -p $BACKUP_DIR
+
+# Backup configs
+tar czf "$BACKUP_DIR/config_$DATE.tar.gz" -C /home/m1ndb0t/Desktop/J1MSKY config/
+
+# Backup logs
+tar czf "$BACKUP_DIR/logs_$DATE.tar.gz" -C /home/m1ndb0t/Desktop/J1MSKY logs/
+
+# Keep only last 10 backups
+ls -t $BACKUP_DIR/config_*.tar.gz | tail -n +11 | xargs rm -f
+ls -t $BACKUP_DIR/logs_*.tar.gz | tail -n +11 | xargs rm -f
+
+echo "Backup completed: $DATE"
+EOF
+
+chmod +x ~/backup-j1msky.sh
+
+# Daily backup at 2 AM
+(crontab -l 2>/dev/null; echo "0 2 * * * /home/m1ndb0t/backup-j1msky.sh") | crontab -
+```
+
+### Updating the System
+
+#### Safe Update Process
+```bash
+# 1. Stop service
+sudo systemctl stop j1msky
+
+# 2. Backup current installation
+cp -r ~/Desktop/J1MSKY ~/Desktop/J1MSKY-backup-$(date +%Y%m%d)
+
+# 3. Pull latest code
+cd ~/Desktop/J1MSKY
+git pull origin main
+
+# 4. Update dependencies
+source venv/bin/activate
+pip install -r requirements.txt --upgrade
+
+# 5. Start service
+sudo systemctl start j1msky
+
+# 6. Verify
+sleep 5
+curl http://localhost:8080/api/system
+```
+
+### Troubleshooting Deployment Issues
+
+**Issue: Service won't start**
+```bash
+# Check logs
+sudo journalctl -u j1msky -n 100
+
+# Check for port conflicts
+sudo lsof -i :8080
+
+# Verify Python environment
+source venv/bin/activate
+python --version
+```
+
+**Issue: Permission denied**
+```bash
+# Fix ownership
+sudo chown -R m1ndb0t:m1ndb0t ~/Desktop/J1MSKY
+
+# Fix permissions
+chmod 600 config/api-keys.json
+chmod 755 *.sh
+```
+
+---
+
 ## 🔮 FUTURE FEATURES
 
 Coming soon:
@@ -1468,6 +1783,6 @@ Welcome to the future of work.
 
 ---
 
-*Manual Version: 1.0*  
-*Last Updated: February 19, 2026*  
+*Manual Version: 1.1*  
+*Last Updated: February 21, 2026*  
 *Status: Business-Ready*

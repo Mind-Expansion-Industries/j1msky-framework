@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.29 - UI Polish + Bugfix
-- Improved mobile/tablet/desktop responsiveness
-- Hardened navigation state handling  
-- Reduced transition glitches
-- Better bfcache recovery
+J1MSKY Agency v6.0.30 - UI Polish + Bugfix (Round 2)
+- Improved touch handling with browser gesture conflict prevention
+- Hardened visibility state management (duplicate handler fix)
+- iOS zoom prevention on form inputs (16px font-size)
+- Simplified StatsUpdater with init guard
 """
 
 import http.server
@@ -50,7 +50,8 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.29</title>
+    <meta name="format-detection" content="telephone=no">
+    <title>J1MSKY Agency v6.0.30</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -534,7 +535,7 @@ HTML = '''<!DOCTYPE html>
             background-position: right 14px center;
         }
 
-        .form-input {
+        .form-input, .form-select, .form-textarea {
             width: 100%;
             min-width: 0;
             padding: 14px;
@@ -542,13 +543,23 @@ HTML = '''<!DOCTYPE html>
             border: 1px solid var(--border);
             border-radius: 8px;
             color: var(--text);
-            font-size: 14px;
+            font-size: 16px; /* Prevents iOS zoom on focus */
             font-family: inherit;
+            -webkit-appearance: none; /* Removes iOS default styling */
+            appearance: none;
         }
 
         .form-input:focus, .form-select:focus, .form-textarea:focus {
             outline: none;
             border-color: var(--cyan);
+        }
+
+        /* Allow user scaling for accessibility, but prevent auto-zoom */
+        @supports (-webkit-touch-callout: none) {
+            /* iOS specific: ensure font-size stays at 16px to prevent zoom */
+            input, textarea, select {
+                font-size: 16px !important;
+            }
         }
 
         .form-textarea {
@@ -846,7 +857,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.29</h1>
+        <h1>◈ J1MSKY Agency v6.0.30</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1159,80 +1170,83 @@ HTML = '''<!DOCTYPE html>
             }
         };
 
-        // Touch/Swipe Handling with improved edge rejection
+        // Touch/Swipe Handling - Hardened against browser gesture conflicts
         const TouchHandler = {
             startX: 0,
             startY: 0,
             startTime: 0,
             threshold: 80,
-            maxTime: 300,
-            edgeThreshold: 20, // Ignore swipes starting too close to edge
-            minIntervalMs: 180,
+            maxTime: 350,
+            edgeThreshold: 24,
+            minIntervalMs: 200,
             lastSwipeAt: 0,
             isTracking: false,
+            isHorizontal: false,
 
             init() {
-                // Only enable swipe navigation on touch-centric devices.
                 if (!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches)) {
                     return;
                 }
-                const opts = { passive: true };
-                document.addEventListener('touchstart', this.onStart.bind(this), opts);
-                document.addEventListener('touchend', this.onEnd.bind(this), opts);
-                document.addEventListener('touchcancel', this.onCancel.bind(this), opts);
+                // passive: false allows preventDefault for horizontal swipes
+                document.addEventListener('touchstart', this.onStart.bind(this), { passive: true });
+                document.addEventListener('touchmove', this.onMove.bind(this), { passive: false });
+                document.addEventListener('touchend', this.onEnd.bind(this), { passive: true });
+                document.addEventListener('touchcancel', this.onCancel.bind(this), { passive: true });
             },
 
             onStart(e) {
-                // Ignore gestures starting on interactive controls.
                 if (e.target && e.target.closest('button, a, input, textarea, select, label, [role="button"]')) {
                     this.isTracking = false;
                     return;
                 }
-
-                // Ignore multi-touch gestures (pinch/zoom) to avoid accidental tab switches.
                 if (!e.touches || e.touches.length !== 1) {
                     this.isTracking = false;
                     return;
                 }
-
                 const touch = e.touches[0];
                 const viewportWidth = window.innerWidth;
-
-                // Ignore edge touches (iOS edge swipe gestures)
                 if (touch.clientX < this.edgeThreshold ||
                     touch.clientX > viewportWidth - this.edgeThreshold) {
                     this.isTracking = false;
                     return;
                 }
-
                 this.startX = touch.clientX;
                 this.startY = touch.clientY;
                 this.startTime = Date.now();
                 this.isTracking = true;
+                this.isHorizontal = false;
+            },
+
+            onMove(e) {
+                if (!this.isTracking) return;
+                if (!e.touches || e.touches.length !== 1) return;
+                const touch = e.touches[0];
+                const deltaX = touch.clientX - this.startX;
+                const deltaY = touch.clientY - this.startY;
+                // Determine if swipe is horizontal early to prevent browser back/forward
+                if (Math.abs(deltaX) > 10 && Math.abs(deltaX) > Math.abs(deltaY)) {
+                    this.isHorizontal = true;
+                    // Prevent default only for horizontal swipes in the main content area
+                    if (!e.target.closest('.main')) return;
+                    e.preventDefault();
+                }
             },
 
             onEnd(e) {
                 if (!this.isTracking) return;
                 this.isTracking = false;
-
                 if (!e.changedTouches || e.changedTouches.length === 0) return;
                 const touch = e.changedTouches[0];
                 const deltaX = touch.clientX - this.startX;
                 const deltaY = touch.clientY - this.startY;
                 const deltaTime = Date.now() - this.startTime;
-
-                // Validate swipe
                 if (deltaTime > this.maxTime) return;
-                if (Math.abs(deltaY) > Math.abs(deltaX) * 1.5) return; // Mostly vertical
+                if (Math.abs(deltaY) > Math.abs(deltaX) * 1.2) return;
                 if (Math.abs(deltaX) < this.threshold) return;
-
-                // Guard against swipe burst spam / in-flight transitions
                 if (NavState.isTransitioning) return;
                 const now = Date.now();
                 if (now - this.lastSwipeAt < this.minIntervalMs) return;
                 this.lastSwipeAt = now;
-
-                // Execute navigation
                 if (deltaX > 0) {
                     showTab(NavState.getPrevTab());
                 } else {
@@ -1242,6 +1256,7 @@ HTML = '''<!DOCTYPE html>
 
             onCancel() {
                 this.isTracking = false;
+                this.isHorizontal = false;
             }
         };
 
@@ -1284,9 +1299,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.29';
+                        header.textContent = '◈ J1MSKY Agency v6.0.30';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.29';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.30';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1720,24 +1735,35 @@ HTML = '''<!DOCTYPE html>
             }
         }, { capture: true });
 
-        // Visibility handling
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                document.body.classList.add('paused');
-                StatsUpdater.stop();
-            } else {
-                document.body.classList.remove('paused');
-                // Skip RAF if transitioning to avoid conflicting with tab switch animations
-                if (!NavState.isTransitioning) {
-                    requestAnimationFrame(() => {
-                        const active = document.querySelector('.panel.active');
-                        if (active) active.style.display = 'block';
-                    });
+        // Visibility handling - Hardened
+        const VisibilityHandler = {
+            isActive: true,
+            
+            init() {
+                document.addEventListener('visibilitychange', () => this.handle());
+            },
+            
+            handle() {
+                const isHidden = document.hidden;
+                this.isActive = !isHidden;
+                
+                if (isHidden) {
+                    document.body.classList.add('paused');
+                    StatsUpdater.stop();
+                } else {
+                    document.body.classList.remove('paused');
+                    // Small delay to let browser settle
+                    setTimeout(() => {
+                        if (!NavState.isTransitioning) {
+                            const active = document.querySelector('.panel.active');
+                            if (active) active.style.display = 'block';
+                        }
+                        StatsUpdater.start();
+                        StatsUpdater.update();
+                    }, 50);
                 }
-                StatsUpdater.start();
-                StatsUpdater.update();
             }
-        });
+        };
 
         // Prevent double-tap zoom (without interfering with form/button taps)
         let lastTouchEnd = 0;
@@ -1751,7 +1777,7 @@ HTML = '''<!DOCTYPE html>
             lastTouchEnd = now;
         }, { passive: false });
 
-        // Real-time stats updater
+        // Real-time stats updater - Hardened
         const StatsUpdater = {
             interval: null,
             inFlight: false,
@@ -1759,23 +1785,17 @@ HTML = '''<!DOCTYPE html>
             pausedByTransition: false,
             lastLogHtml: '',
             lastMetaText: '',
-            updateInterval: 5000, // 5 seconds
+            updateInterval: 5000,
+            isInitialized: false,
 
             init() {
+                if (this.isInitialized) return;
+                this.isInitialized = true;
                 this.start();
-                // Resume on visibility change
-                document.addEventListener('visibilitychange', () => {
-                    if (document.hidden) {
-                        this.stop();
-                    } else {
-                        this.start();
-                        this.update(); // Immediate update on return
-                    }
-                });
             },
 
             start() {
-                if (this.interval) return;
+                if (this.interval || document.hidden) return;
                 this.interval = setInterval(() => this.update(), this.updateInterval);
             },
 
@@ -1788,7 +1808,6 @@ HTML = '''<!DOCTYPE html>
                     this.controller.abort();
                     this.controller = null;
                 }
-                // Reset transient polling state to avoid stale locks after resume.
                 this.inFlight = false;
                 this.pausedByTransition = false;
             },
@@ -1809,17 +1828,19 @@ HTML = '''<!DOCTYPE html>
                 this.inFlight = true;
                 this.controller = new AbortController();
                 try {
-                    const res = await fetch('/api/live', { cache: 'no-store', signal: this.controller.signal });
+                    const res = await fetch('/api/live', { 
+                        cache: 'no-store', 
+                        signal: this.controller.signal 
+                    });
                     if (!res.ok) throw new Error('live endpoint error');
                     const data = await res.json();
 
-                    // Update header badges
                     const tempBadge = document.querySelector('.stat-badge.temp');
                     const memBadge = document.querySelector('.stat-badge.mem');
                     if (tempBadge) tempBadge.textContent = `${data.temp}°C`;
                     if (memBadge) memBadge.textContent = `${data.mem}%`;
 
-                    // Ensure live panel exists
+                    // Only update live panel if it exists or needs creation
                     let panel = document.getElementById('live-watch-panel');
                     if (!panel) {
                         panel = document.createElement('div');
@@ -1835,7 +1856,7 @@ HTML = '''<!DOCTYPE html>
                     }
 
                     const meta = document.getElementById('live-watch-meta');
-                    const nextMeta = `req:${data.requests} • py:${data.python_procs} • updated:${data.now}`;
+                    const nextMeta = `req:${data.requests} • py:${data.python_procs} • ${data.now}`;
                     if (meta && this.lastMetaText !== nextMeta) {
                         meta.textContent = nextMeta;
                         this.lastMetaText = nextMeta;
@@ -1856,30 +1877,20 @@ HTML = '''<!DOCTYPE html>
                         }
                     }
 
-                    // pulse effect
+                    // Subtle pulse effect
                     const badges = document.querySelectorAll('.header-stats .stat-badge');
                     badges.forEach(badge => {
-                        badge.style.animation = 'pulse 0.4s ease';
-                        setTimeout(() => badge.style.animation = '', 400);
+                        badge.style.opacity = '0.7';
+                        setTimeout(() => badge.style.opacity = '', 200);
                     });
                 } catch (e) {
-                    // keep silent in UI; dashboard still usable
+                    // Silent fail - dashboard remains usable
                 } finally {
                     this.inFlight = false;
                     this.controller = null;
                 }
             }
         };
-
-        // Add pulse animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes pulse {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.7; }
-            }
-        `;
-        document.head.appendChild(style);
 
         // Error Boundary for uncaught errors
         window.addEventListener('error', (e) => {
@@ -1970,6 +1981,7 @@ HTML = '''<!DOCTYPE html>
             ResizeHandler.init();
             FocusManager.init();
             StatsUpdater.init();
+            VisibilityHandler.init();
             syncNavAriaFromActive();
         });
 
@@ -2060,12 +2072,12 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.29 - UI Polish Complete      ║")
+        print("║       J1MSKY Agency v6.0.30 - UI Hardening Complete      ║")
         print("╠══════════════════════════════════════════════════════════╣")
-        print("║  ✓ Responsive layouts (mobile/tablet/desktop)            ║")
-        print("║  ✓ Navigation state hardening & bfcache recovery         ║")
-        print("║  ✓ Reduced motion support & accessibility                ║")
-        print("║  ✓ Touch gesture reliability improvements                ║")
+        print("║  ✓ Mobile-first responsive design                        ║")
+        print("║  ✓ Touch gesture handling (conflict-free)                ║")
+        print("║  ✓ Navigation state hardening                            ║")
+        print("║  ✓ iOS Safari compatibility                              ║")
         print("╚══════════════════════════════════════════════════════════╝")
         print("")
         print("http://localhost:8080")

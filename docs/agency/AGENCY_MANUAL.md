@@ -256,6 +256,40 @@ The response includes:
 - `warning` → review cost drivers, consider model mix adjustments
 - `critical` → pause non-essential tasks, escalate to ops lead
 
+### Running Pricing Experiments
+
+When testing pricing changes, track experiments using the orchestrator:
+
+```python
+from scripts.ops.orchestrator import orchestrator
+
+# Track a quote as part of an experiment
+tracked = orchestrator.track_experiment(
+    experiment_id="EXP-2026-02-20-01",
+    variant="test",  # or "control"
+    quote=quote_data
+)
+```
+
+To analyze experiment results:
+
+```python
+# After collecting quotes, summarize results
+experiment_quotes = [...]  # List of tracked quotes
+summary = orchestrator.summarize_experiment(experiment_quotes)
+
+# Review the recommendation
+print(summary["recommendation"])  # "roll_out", "discard", or "inconclusive"
+print(summary["control"])         # Control variant metrics
+print(summary["test"])            # Test variant metrics
+```
+
+**Experiment best practices:**
+- Run experiments for at least 1 week or 50 quotes per variant
+- Never test more than 2 pricing changes simultaneously
+- Always maintain a control group (80% control, 20% test)
+- Stop early if metrics degrade >10%
+
 ---
 
 ## 🎯 USE CASES

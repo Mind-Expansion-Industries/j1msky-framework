@@ -2170,4 +2170,61 @@ The `/api/pricing/health` endpoint provides:
 - Model-by-model cost breakdown
 - Active issues requiring attention
 
+## 57) Experiment Tracking and Analysis
+
+### Purpose
+Systematically track and analyze pricing experiments to make data-driven decisions.
+
+### Experiment Lifecycle
+
+**1. Setup**
+- Assign unique experiment ID (format: EXP-YYYY-MM-DD-N)
+- Define hypothesis and success criteria
+- Set control vs test split (typically 80/20)
+- Document expected duration
+
+**2. Execution**
+- Tag every quote with experiment_id and variant (control/test)
+- Monitor daily enrollment
+- Track early indicators
+- Stop if guardrails breached
+
+**3. Analysis**
+- Minimum sample size: 50 quotes per variant
+- Compare: approval rate, margin, win rate, sales cycle
+- Calculate statistical significance (p<0.05)
+- Document confidence level
+
+**4. Decision**
+- Roll out: Test beats control on primary metric without degrading secondary metrics
+- Iterate: Marginal results, modify and re-test
+- Discard: Test underperforms control
+
+### Experiment Metrics Dashboard
+
+Track these metrics per experiment:
+
+| Metric | Control | Test | Delta | Significance |
+|--------|---------|------|-------|--------------|
+| Quotes sent | 45 | 12 | — | — |
+| Approval rate | 84% | 75% | -9% | p=0.23 |
+| Avg margin | 72% | 78% | +6% | p=0.04 |
+| Exceptions | 3 | 1 | -2 | — |
+
+### Experiment Success Criteria
+
+| Outcome | Condition | Action |
+|---------|-----------|--------|
+| Clear win | Test margin > control AND approval rate >= 90% of control | Roll out |
+| Marginal | Test margin > control but approval rate 80-90% of control | Iterate |
+| Lose-lose | Test worse on both metrics | Discard |
+| Inconclusive | No significant difference after 100 quotes per variant | Extend or discard |
+
+### Experiment Archive
+
+- Retain all experiment data for 12 months
+- Document learnings regardless of outcome
+- Share results in quarterly business reviews
+- Build experiment playbook from accumulated knowledge
+
 

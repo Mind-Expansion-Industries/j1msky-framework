@@ -484,6 +484,56 @@ class UnifiedOrchestrator:
             "significant_shifts": alerts,
             "requires_review": len(alerts) > 0
         }
+
+    def track_experiment(self, experiment_id: str, variant: str, quote: Dict[str, Any]) -> Dict[str, Any]:
+        """Track a quote as part of a pricing experiment."""
+        return {
+            "experiment_id": experiment_id,
+            "variant": variant,
+            "timestamp": datetime.now().isoformat(),
+            "quote": quote,
+            "tracked": True
+        }
+
+    def summarize_experiment(self, experiment_quotes: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Summarize experiment results for decision-making."""
+        if not experiment_quotes:
+            return {"status": "no_data", "control": {}, "test": {}}
+
+        control = [q for q in experiment_quotes if q.get("variant") == "control"]
+        test = [q for q in experiment_quotes if q.get("variant") == "test"]
+
+        def summarize_variant(quotes):
+            if not quotes:
+                return {}
+            total = len(quotes)
+            approved = sum(1 for q in quotes if q.get("quote", {}).get("decision_status") == "approved")
+            avg_margin = sum(q.get("quote", {}).get("gross_margin_pct", 0) for q in quotes) / total
+            return {
+                "count": total,
+                "approval_rate": round(approved / total, 2),
+                "avg_margin_pct": round(avg_margin, 2)
+            }
+
+        control_summary = summarize_variant(control)
+        test_summary = summarize_variant(test)
+
+        recommendation = "inconclusive"
+        if control_summary and test_summary:
+            if test_summary.get("avg_margin_pct", 0) > control_summary.get("avg_margin_pct", 0) and \
+               test_summary.get("approval_rate", 0) >= control_summary.get("approval_rate", 0) * 0.9:
+                recommendation = "roll_out"
+            elif test_summary.get("approval_rate", 0) < control_summary.get("approval_rate", 0) * 0.8:
+                recommendation = "discard"
+            elif test_summary.get("avg_margin_pct", 0) < control_summary.get("avg_margin_pct", 0) * 0.9:
+                recommendation = "discard"
+
+        return {
+            "status": "complete" if control and test else "in_progress",
+            "control": control_summary,
+            "test": test_summary,
+            "recommendation": recommendation
+        }
     
     def get_daily_spend(self, day: Optional[str] = None) -> float:
         """Get spend for a specific day (YYYY-MM-DD) or today."""

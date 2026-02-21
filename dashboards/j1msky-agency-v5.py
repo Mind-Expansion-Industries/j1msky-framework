@@ -294,6 +294,7 @@ HTML = '''<!DOCTYPE html>
             border-color: var(--cyan);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 255, 255, 0.1);
+            will-change: transform;
         }
 
         .stat-card:active {
@@ -336,10 +337,11 @@ HTML = '''<!DOCTYPE html>
             min-width: 0;
         }
 
-        .quick-btn:active {
-            transform: scale(0.98);
-            background: var(--cyan);
-            color: #000;
+        .quick-btn:hover {
+            border-color: var(--cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.1);
+            will-change: transform;
         }
 
         .quick-btn .icon {

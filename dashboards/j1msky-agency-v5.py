@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
-J1MSKY Agency v6.0.28 - UI Hardening Complete
-Patch release: extends live log escaping to include quotes for stricter HTML safety and rendering stability
+J1MSKY Agency v6.0.29 - UI Polish + Bugfix
+- Improved mobile/tablet/desktop responsiveness
+- Hardened navigation state handling  
+- Reduced transition glitches
+- Better bfcache recovery
 """
 
 import http.server
@@ -47,7 +50,7 @@ HTML = '''<!DOCTYPE html>
     <meta name="theme-color" content="#0a0a0f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>J1MSKY Agency v6.0.28</title>
+    <title>J1MSKY Agency v6.0.29</title>
     <style>
         :root {
             --bg: #0a0a0f;
@@ -76,7 +79,8 @@ HTML = '''<!DOCTYPE html>
         }
 
         /* Prevent body scroll when navigating */
-        body.navigating { overflow: hidden; }
+        body.navigating { overflow: hidden; touch-action: none; }
+        body.navigating .main { pointer-events: none; }
 
         body {
             background: var(--bg);
@@ -549,9 +553,9 @@ HTML = '''<!DOCTYPE html>
 
         .form-textarea {
             min-height: 100px;
+            height: auto;
             resize: vertical;
             min-width: 0;
-            field-sizing: content;
         }
 
         .btn-primary {
@@ -574,6 +578,8 @@ HTML = '''<!DOCTYPE html>
 
         .panel {
             display: none;
+            opacity: 0;
+            transform: translateY(8px);
             /* Containment for better render performance */
             contain: layout style paint;
             min-width: 0;
@@ -581,21 +587,19 @@ HTML = '''<!DOCTYPE html>
 
         .panel.active {
             display: block;
-            animation: fadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                        transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             overflow-x: hidden;
-            will-change: opacity, transform;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Reduced motion preference */
         @media (prefers-reduced-motion: reduce) {
             .panel.active {
-                animation: none;
-                will-change: auto;
+                transition: none;
+                opacity: 1;
+                transform: none;
             }
             .nav-item span {
                 transition: none;
@@ -609,15 +613,12 @@ HTML = '''<!DOCTYPE html>
                 animation: none;
                 display: none;
             }
+            .main {
+                scroll-behavior: auto;
+            }
         }
 
-        /* Loading state */
-        body.navigating .main {
-            opacity: 0.7;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-        }
-
+        /* Loading state - GPU-accelerated */
         body.navigating::after {
             content: '';
             position: fixed;
@@ -632,11 +633,14 @@ HTML = '''<!DOCTYPE html>
             animation: spin 0.8s linear infinite;
             z-index: 1000;
             pointer-events: none;
+            transform: translateZ(0);
             will-change: transform;
+            backface-visibility: hidden;
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            from { transform: translateZ(0) rotate(0deg); }
+            to { transform: translateZ(0) rotate(360deg); }
         }
 
         /* Offline state */
@@ -746,6 +750,36 @@ HTML = '''<!DOCTYPE html>
                 padding: 5px 8px;
                 font-size: 10px;
             }
+            .stat-value {
+                font-size: clamp(18px, 5.5vw, 24px);
+            }
+        }
+
+        /* Very small phones */
+        @media (max-width: 320px) {
+            .header h1 {
+                font-size: 14px;
+            }
+            .stat-badge {
+                display: none;
+            }
+            .nav-item {
+                min-width: 48px;
+                font-size: 10px;
+            }
+            .nav-item span {
+                font-size: 18px;
+            }
+        }
+
+        /* Foldable phones / small tablets */
+        @media (min-width: 540px) and (max-width: 767px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .quick-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
 
         /* Tablet */
@@ -812,7 +846,7 @@ HTML = '''<!DOCTYPE html>
 </head>
 <body>
     <header class="header">
-        <h1>◈ J1MSKY Agency v6.0.28</h1>
+        <h1>◈ J1MSKY Agency v6.0.29</h1>
         <div class="header-stats">
             <div class="stat-badge temp">{{TEMP}}°C</div>
             <div class="stat-badge mem">{{MEM}}%</div>
@@ -1047,16 +1081,13 @@ HTML = '''<!DOCTYPE html>
     </nav>
 
     <script>
-        // Navigation State Management
+        // Navigation State Management - Hardened
         const NavState = {
             currentTab: 'dashboard',
             isTransitioning: false,
             pendingTab: null,
-            queuedTab: null,
             transitionTimeoutId: null,
-            queuedNavTimeoutId: null,
-            popstateTimeoutId: null,
-            transitionCooldown: 150,
+            transitionCooldown: 180,
             lastTransitionTime: 0,
             history: [],
             maxHistory: 10,
@@ -1112,22 +1143,17 @@ HTML = '''<!DOCTYPE html>
                 return this.failedTransitions < this.maxRetries;
             },
 
-            reset() {
-                this.isTransitioning = false;
-                this.pendingTab = null;
-                this.queuedTab = null;
+            clearAllTimeouts() {
                 if (this.transitionTimeoutId) {
                     clearTimeout(this.transitionTimeoutId);
                     this.transitionTimeoutId = null;
                 }
-                if (this.popstateTimeoutId) {
-                    clearTimeout(this.popstateTimeoutId);
-                    this.popstateTimeoutId = null;
-                }
-                if (this.queuedNavTimeoutId) {
-                    clearTimeout(this.queuedNavTimeoutId);
-                    this.queuedNavTimeoutId = null;
-                }
+            },
+
+            reset() {
+                this.clearAllTimeouts();
+                this.isTransitioning = false;
+                this.pendingTab = null;
                 this.failedTransitions = 0;
                 hideLoading();
             }
@@ -1258,9 +1284,9 @@ HTML = '''<!DOCTYPE html>
                     document.body.classList.remove('offline');
                     if (header) {
                         header.style.color = '';
-                        header.textContent = '◈ J1MSKY Agency v6.0.28';
+                        header.textContent = '◈ J1MSKY Agency v6.0.29';
                     }
-                    if (title) title.textContent = 'J1MSKY Agency v6.0.28';
+                    if (title) title.textContent = 'J1MSKY Agency v6.0.29';
                 } else {
                     document.body.classList.add('offline');
                     if (header) {
@@ -1375,22 +1401,17 @@ HTML = '''<!DOCTYPE html>
         function showTab(tabId, pushState = true) {
             tabId = NavState.normalizeTab(tabId);
 
-            // Prevent duplicate or conflicting transitions
-            if (tabId === NavState.currentTab || tabId === NavState.pendingTab || tabId === NavState.queuedTab) {
+            // Prevent duplicate transitions
+            if (tabId === NavState.currentTab || tabId === NavState.pendingTab) {
                 return;
             }
 
-            // Check transition availability; queue latest request instead of dropping it.
+            // Check transition availability
             if (!NavState.canTransition()) {
-                NavState.queuedTab = NavState.normalizeTab(tabId);
-                if (!NavState.queuedNavTimeoutId) {
-                    NavState.queuedNavTimeoutId = setTimeout(() => {
-                        const nextTab = NavState.normalizeTab(NavState.queuedTab);
-                        NavState.queuedTab = null;
-                        NavState.queuedNavTimeoutId = null;
-                        if (nextTab && nextTab !== NavState.currentTab) showTab(nextTab);
-                    }, NavState.transitionCooldown + 10);
-                }
+                // Schedule retry instead of complex queuing
+                setTimeout(() => {
+                    if (tabId !== NavState.currentTab) showTab(tabId, pushState);
+                }, NavState.transitionCooldown + 20);
                 return;
             }
 
@@ -1405,65 +1426,78 @@ HTML = '''<!DOCTYPE html>
                 return;
             }
 
-            // If help overlay is open, close it before navigating.
+            // Close help if open
             if (typeof helpVisible !== 'undefined' && helpVisible) {
                 toggleHelp();
             }
 
             // Begin transition
             NavState.isTransitioning = true;
-            NavState.pendingTab = NavState.normalizeTab(tabId);
+            NavState.pendingTab = tabId;
             NavState.lastTransitionTime = Date.now();
-            if (NavState.popstateTimeoutId) {
-                clearTimeout(NavState.popstateTimeoutId);
-                NavState.popstateTimeoutId = null;
-            }
+            NavState.clearAllTimeouts();
             showLoading();
 
-            // Watchdog: prevent stuck transitioning state if a frame/update is dropped.
-            if (NavState.transitionTimeoutId) clearTimeout(NavState.transitionTimeoutId);
+            // Watchdog timeout
             NavState.transitionTimeoutId = setTimeout(() => {
                 if (NavState.isTransitioning && NavState.pendingTab === tabId) {
                     NavState.reset();
                 }
-            }, Math.max(1000, NavState.transitionCooldown * 6));
+            }, 1200);
 
             try {
-                const panels = document.querySelectorAll('.panel');
+                const panels = document.querySelectorAll('.main .panel');
                 const navItems = document.querySelectorAll('.nav-item');
                 const tabIndex = NavState.tabs.indexOf(tabId);
 
-                // Validate tab index
                 if (tabIndex === -1) {
                     throw new Error('Invalid tab index for: ' + tabId);
                 }
 
-                // Hide current panels
-                panels.forEach(p => p.classList.remove('active'));
+                // Prepare panels for transition
+                panels.forEach(p => {
+                    if (p.classList.contains('active')) {
+                        p.style.opacity = '0';
+                        p.style.transform = 'translateY(8px)';
+                    }
+                });
 
                 // Use requestAnimationFrame for smooth transition
                 requestAnimationFrame(() => {
                     try {
+                        // Hide current panels
+                        panels.forEach(p => {
+                            p.classList.remove('active');
+                            if (p.id !== 'help') {
+                                setTimeout(() => {
+                                    if (!p.classList.contains('active')) {
+                                        p.style.display = 'none';
+                                    }
+                                }, 250);
+                            }
+                        });
+
                         // Show target panel
                         targetPanel.style.display = 'block';
-                        targetPanel.offsetHeight; // Force reflow
+                        // Force reflow
+                        void targetPanel.offsetHeight;
                         targetPanel.classList.add('active');
 
                         // Update navigation
                         navItems.forEach((n, i) => {
                             const isActive = i === tabIndex;
                             n.classList.toggle('active', isActive);
-                            if (isActive) {
-                                n.setAttribute('aria-current', 'page');
-                            } else {
-                                n.removeAttribute('aria-current');
-                            }
+                            n.setAttribute('aria-current', isActive ? 'page' : 'false');
                         });
 
-                        // Scroll to top (respect reduced-motion preferences)
-                        const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                        // Scroll to top
+                        const prefersReducedMotion = window.matchMedia && 
+                            window.matchMedia('(prefers-reduced-motion: reduce)').matches;
                         if (!document.hidden) {
-                            window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+                            window.scrollTo({ 
+                                top: 0, 
+                                behavior: prefersReducedMotion ? 'auto' : 'smooth' 
+                            });
                         }
 
                         // Update state
@@ -1476,21 +1510,18 @@ HTML = '''<!DOCTYPE html>
                             safePushState({ tab: tabId }, '#' + tabId);
                         }
 
-                        // Cleanup after transition
+                        // Cleanup after transition completes
                         setTimeout(() => {
                             NavState.isTransitioning = false;
                             NavState.pendingTab = null;
-                            if (NavState.queuedTab === NavState.currentTab) {
-                                NavState.queuedTab = null;
-                            }
-                            if (NavState.transitionTimeoutId) {
-                                clearTimeout(NavState.transitionTimeoutId);
-                                NavState.transitionTimeoutId = null;
-                            }
+                            NavState.clearAllTimeouts();
                             hideLoading();
-                            // Hide inactive panels for performance
+                            
+                            // Final cleanup of inactive panels
                             panels.forEach(p => {
                                 if (!p.classList.contains('active')) {
+                                    p.style.opacity = '';
+                                    p.style.transform = '';
                                     p.style.display = 'none';
                                 }
                             });
@@ -1551,30 +1582,28 @@ HTML = '''<!DOCTYPE html>
         window.addEventListener('popstate', (e) => {
             const targetTab = NavState.normalizeTab(e.state?.tab || window.location.hash.slice(1) || 'dashboard');
 
-            // Ensure overlay state doesn't conflict with browser history navigation.
+            // Close help if open
             if (typeof helpVisible !== 'undefined' && helpVisible) {
                 toggleHelp();
             }
 
-            // Ignore no-op popstate events that target the already-active tab
-            // when no queued navigation is pending.
-            const normalizedTarget = NavState.normalizeTab(targetTab);
-            if (normalizedTarget === NavState.currentTab && !NavState.isTransitioning && !NavState.queuedTab) {
+            // Ignore no-op popstate events
+            if (targetTab === NavState.currentTab && !NavState.isTransitioning) {
                 return;
             }
 
-            // If a transition is already active, defer popstate nav slightly.
+            // If transitioning, wait then navigate
             if (NavState.isTransitioning) {
-                if (NavState.popstateTimeoutId) clearTimeout(NavState.popstateTimeoutId);
-                NavState.popstateTimeoutId = setTimeout(() => {
-                    NavState.popstateTimeoutId = null;
-                    const latestTarget = NavState.normalizeTab(window.location.hash.slice(1) || normalizedTarget);
-                    showTab(latestTarget, false);
+                setTimeout(() => {
+                    const latestTarget = NavState.normalizeTab(window.location.hash.slice(1) || targetTab);
+                    if (latestTarget !== NavState.currentTab) {
+                        showTab(latestTarget, false);
+                    }
                 }, NavState.transitionCooldown + 20);
                 return;
             }
 
-            showTab(normalizedTarget, false);
+            showTab(targetTab, false);
         });
 
         function isTypingTarget(el) {
@@ -1894,68 +1923,69 @@ HTML = '''<!DOCTYPE html>
             };
         }
 
-        // Initialize
+        // Initialize - Hardened
         document.addEventListener('DOMContentLoaded', () => {
-            // Ensure all panels start hidden except the active one
-            document.querySelectorAll('.panel').forEach(p => {
-                if (!p.classList.contains('active')) {
+            // Determine initial tab: hash > session > default
+            const hash = window.location.hash.slice(1);
+            const sessionTab = SessionStore.load();
+            const initialTab = NavState.normalizeTab(hash || sessionTab || 'dashboard');
+
+            // Initialize state first
+            NavState.currentTab = initialTab;
+            NavState.pushHistory(initialTab);
+            if (!hash) safeReplaceState({ tab: initialTab }, '#' + initialTab);
+
+            // Sync UI to initial tab before showing anything
+            const panels = document.querySelectorAll('.panel');
+            const navItems = document.querySelectorAll('.nav-item');
+            const targetPanel = document.getElementById(initialTab);
+            const tabIndex = NavState.tabs.indexOf(initialTab);
+
+            // Hide all panels first
+            panels.forEach(p => {
+                if (p.id !== 'help') {
+                    p.classList.remove('active');
                     p.style.display = 'none';
+                    p.style.opacity = '';
+                    p.style.transform = '';
                 }
             });
 
+            // Show target panel
+            if (targetPanel) {
+                targetPanel.style.display = 'block';
+                targetPanel.classList.add('active');
+            }
+
+            // Sync nav items
+            navItems.forEach((n, i) => {
+                const isActive = i === tabIndex;
+                n.classList.toggle('active', isActive);
+                n.setAttribute('aria-current', isActive ? 'page' : 'false');
+            });
+
+            // Initialize handlers
             TouchHandler.init();
             ConnectionHandler.init();
             ResizeHandler.init();
             FocusManager.init();
             StatsUpdater.init();
             syncNavAriaFromActive();
-
-            // Determine initial tab: hash > session > default
-            const hash = window.location.hash.slice(1);
-            const sessionTab = SessionStore.load();
-            const initialTab = NavState.normalizeTab(hash || sessionTab || 'dashboard');
-
-            // Ensure initial tab matches the current DOM state
-            NavState.currentTab = initialTab;
-            NavState.pushHistory(initialTab);
-            if (!hash) safeReplaceState({ tab: initialTab }, '#' + initialTab);
-
-            // Sync UI if needed
-            const targetPanel = document.getElementById(initialTab);
-            if (targetPanel && !targetPanel.classList.contains('active')) {
-                // Panel exists but isn't active - sync it
-                document.querySelectorAll('.panel').forEach(p => {
-                    p.classList.remove('active');
-                    if (!p.id || p.id !== 'help') p.style.display = 'none';
-                });
-                targetPanel.style.display = 'block';
-                targetPanel.classList.add('active');
-
-                // Sync nav
-                const tabIndex = NavState.tabs.indexOf(initialTab);
-                document.querySelectorAll('.nav-item').forEach((n, i) => {
-                    n.classList.toggle('active', i === tabIndex);
-                    if (i === tabIndex) n.setAttribute('aria-current', 'page');
-                    else n.removeAttribute('aria-current');
-                });
-            }
-
-            syncNavAriaFromActive();
-
-            // Sync UI with initial tab
-            if (initialTab !== 'dashboard') {
-                showTab(initialTab, false);
-            }
         });
 
         // Cleanup on page unload
         window.addEventListener('pageshow', (e) => {
-            // Recover from back-forward cache restores where transitional flags may be stale.
+            // Recover from bfcache restores where transitional flags may be stale
             if (e.persisted || NavState.isTransitioning || document.body.classList.contains('navigating')) {
                 NavState.bfcacheRestored = true;
                 NavState.reset();
-                const tab = NavState.normalizeTab(window.location.hash.slice(1) || SessionStore.load() || NavState.currentTab);
-                showTab(tab, false);
+                // Small delay to let the page settle
+                setTimeout(() => {
+                    const tab = NavState.normalizeTab(window.location.hash.slice(1) || SessionStore.load() || NavState.currentTab);
+                    if (tab !== NavState.currentTab) {
+                        showTab(tab, false);
+                    }
+                }, 50);
             }
         });
 
@@ -1963,7 +1993,6 @@ HTML = '''<!DOCTYPE html>
             ResizeHandler.destroy();
             StatsUpdater.stop();
             ConnectionHandler.destroy();
-            // Keep SessionStore intact so tab persistence survives refresh/reopen.
         });
     </script>
 </body>
@@ -2031,13 +2060,12 @@ def run():
     with socketserver.TCPServer(("", 8080), AgencyServer) as httpd:
         print("")
         print("╔══════════════════════════════════════════════════════════╗")
-        print("║          J1MSKY Agency v6.0.28 - UI Hardening Complete          ║")
+        print("║          J1MSKY Agency v6.0.29 - UI Polish Complete      ║")
         print("╠══════════════════════════════════════════════════════════╣")
         print("║  ✓ Responsive layouts (mobile/tablet/desktop)            ║")
         print("║  ✓ Navigation state hardening & bfcache recovery         ║")
-        print("║  ✓ Touch gesture handling & swipe navigation             ║")
-        print("║  ✓ Reduced-motion support & accessibility                ║")
-        print("║  ✓ Offline detection & visual feedback                   ║")
+        print("║  ✓ Reduced motion support & accessibility                ║")
+        print("║  ✓ Touch gesture reliability improvements                ║")
         print("╚══════════════════════════════════════════════════════════╝")
         print("")
         print("http://localhost:8080")

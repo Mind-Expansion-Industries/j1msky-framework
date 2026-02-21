@@ -1579,9 +1579,17 @@ HTML = '''<!DOCTYPE html>
 
         // Toggle help panel with state management
         let helpVisible = false;
+        let helpToggleLock = false;
+
         function toggleHelp() {
+            if (helpToggleLock) return;
+            helpToggleLock = true;
+            
             const helpPanel = document.getElementById('help');
-            if (!helpPanel) return;
+            if (!helpPanel) {
+                helpToggleLock = false;
+                return;
+            }
 
             helpVisible = !helpVisible;
             const mainPanels = document.querySelectorAll('.main .panel');
@@ -1614,6 +1622,11 @@ HTML = '''<!DOCTYPE html>
                 syncNavAriaFromActive();
                 if (helpBtn) helpBtn.focus();
             }
+            
+            // Release lock after transition
+            setTimeout(() => {
+                helpToggleLock = false;
+            }, 50);
         }
 
         // Close help on Escape key
@@ -1630,12 +1643,18 @@ HTML = '''<!DOCTYPE html>
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 document.body.classList.add('paused');
+                StatsUpdater.stop();
             } else {
                 document.body.classList.remove('paused');
-                requestAnimationFrame(() => {
-                    const active = document.querySelector('.panel.active');
-                    if (active) active.style.display = 'block';
-                });
+                // Skip RAF if transitioning to avoid conflicting with tab switch animations
+                if (!NavState.isTransitioning) {
+                    requestAnimationFrame(() => {
+                        const active = document.querySelector('.panel.active');
+                        if (active) active.style.display = 'block';
+                    });
+                }
+                StatsUpdater.start();
+                StatsUpdater.update();
             }
         });
 

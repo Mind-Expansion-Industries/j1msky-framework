@@ -586,6 +586,7 @@ HTML = '''<!DOCTYPE html>
             animation: spin 0.8s linear infinite;
             z-index: 1000;
             pointer-events: none;
+            will-change: transform;
         }
 
         @keyframes spin {

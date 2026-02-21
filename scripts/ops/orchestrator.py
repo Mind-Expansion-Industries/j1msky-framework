@@ -2426,6 +2426,276 @@ class TaskScheduler:
 task_scheduler = TaskScheduler()
 
 
+# Performance Profiler for System Optimization
+class PerformanceProfiler:
+    """
+    Profile and analyze system performance for optimization.
+    
+    Tracks:
+    - Response times by endpoint/operation
+    - Memory usage patterns
+    - Model latency and throughput
+    - Bottleneck identification
+    
+    Usage:
+        profiler = PerformanceProfiler()
+        
+        # Profile a function
+        @profiler.profile
+        def my_function():
+            # ... code ...
+            pass
+        
+        # Get performance report
+        report = profiler.get_report()
+    """
+    
+    def __init__(self, storage_path: str = "/home/m1ndb0t/Desktop/J1MSKY/logs"):
+        self.storage_path = Path(storage_path)
+        self.storage_path.mkdir(parents=True, exist_ok=True)
+        self.metrics_file = self.storage_path / "performance_metrics.json"
+        self.metrics = self._load_metrics()
+        self._lock = threading.Lock()
+        
+    def _load_metrics(self) -> Dict[str, Any]:
+        """Load historical metrics."""
+        if self.metrics_file.exists():
+            try:
+                with open(self.metrics_file, 'r') as f:
+                    return json.load(f)
+            except Exception:
+                pass
+        return {
+            "operations": {},
+            "models": {},
+            "daily_stats": {},
+            "bottlenecks": []
+        }
+    
+    def _save_metrics(self):
+        """Save metrics to disk."""
+        with open(self.metrics_file, 'w') as f:
+            json.dump(self.metrics, f, indent=2)
+    
+    def record_operation(self, operation_name: str, duration_ms: float, 
+                        success: bool = True, metadata: Dict = None):
+        """Record timing for an operation."""
+        with self._lock:
+            if operation_name not in self.metrics["operations"]:
+                self.metrics["operations"][operation_name] = {
+                    "count": 0,
+                    "total_duration": 0,
+                    "min_duration": float('inf'),
+                    "max_duration": 0,
+                    "success_count": 0,
+                    "failure_count": 0,
+                    "recent_durations": []
+                }
+            
+            op = self.metrics["operations"][operation_name]
+            op["count"] += 1
+            op["total_duration"] += duration_ms
+            op["min_duration"] = min(op["min_duration"], duration_ms)
+            op["max_duration"] = max(op["max_duration"], duration_ms)
+            
+            if success:
+                op["success_count"] += 1
+            else:
+                op["failure_count"] += 1
+            
+            # Keep last 100 durations for percentile calculation
+            op["recent_durations"].append(duration_ms)
+            op["recent_durations"] = op["recent_durations"][-100:]
+            
+            self._save_metrics()
+    
+    def record_model_performance(self, model: str, task_type: str, 
+                                 duration_ms: float, tokens_in: int, 
+                                 tokens_out: int, success: bool = True):
+        """Record performance metrics for a model."""
+        with self._lock:
+            if model not in self.metrics["models"]:
+                self.metrics["models"][model] = {
+                    "total_calls": 0,
+                    "total_duration": 0,
+                    "total_tokens_in": 0,
+                    "total_tokens_out": 0,
+                    "success_count": 0,
+                    "failure_count": 0,
+                    "by_task_type": {}
+                }
+            
+            model_stats = self.metrics["models"][model]
+            model_stats["total_calls"] += 1
+            model_stats["total_duration"] += duration_ms
+            model_stats["total_tokens_in"] += tokens_in
+            model_stats["total_tokens_out"] += tokens_out
+            
+            if success:
+                model_stats["success_count"] += 1
+            else:
+                model_stats["failure_count"] += 1
+            
+            # Track by task type
+            if task_type not in model_stats["by_task_type"]:
+                model_stats["by_task_type"][task_type] = {
+                    "count": 0,
+                    "total_duration": 0
+                }
+            
+            model_stats["by_task_type"][task_type]["count"] += 1
+            model_stats["by_task_type"][task_type]["total_duration"] += duration_ms
+            
+            self._save_metrics()
+    
+    def get_operation_stats(self, operation_name: str = None) -> Dict[str, Any]:
+        """Get statistics for operations."""
+        with self._lock:
+            if operation_name:
+                if operation_name not in self.metrics["operations"]:
+                    return {"error": "Operation not found"}
+                
+                op = self.metrics["operations"][operation_name]
+                durations = op["recent_durations"]
+                
+                return {
+                    "operation": operation_name,
+                    "count": op["count"],
+                    "avg_duration_ms": round(op["total_duration"] / op["count"], 2) if op["count"] > 0 else 0,
+                    "min_duration_ms": op["min_duration"] if op["min_duration"] != float('inf') else 0,
+                    "max_duration_ms": op["max_duration"],
+                    "p50_ms": round(sorted(durations)[len(durations)//2], 2) if durations else 0,
+                    "p95_ms": round(sorted(durations)[int(len(durations)*0.95)], 2) if durations else 0,
+                    "success_rate": round(op["success_count"] / op["count"] * 100, 2) if op["count"] > 0 else 0
+                }
+            else:
+                # Return stats for all operations
+                return {
+                    name: self.get_operation_stats(name)
+                    for name in self.metrics["operations"].keys()
+                }
+    
+    def get_model_stats(self) -> Dict[str, Any]:
+        """Get performance statistics by model."""
+        with self._lock:
+            stats = {}
+            for model, data in self.metrics["models"].items():
+                if data["total_calls"] > 0:
+                    stats[model] = {
+                        "total_calls": data["total_calls"],
+                        "avg_latency_ms": round(data["total_duration"] / data["total_calls"], 2),
+                        "tokens_per_call": round((data["total_tokens_in"] + data["total_tokens_out"]) / data["total_calls"], 1),
+                        "success_rate": round(data["success_count"] / data["total_calls"] * 100, 2),
+                        "by_task_type": {
+                            task: {
+                                "count": t["count"],
+                                "avg_duration_ms": round(t["total_duration"] / t["count"], 2) if t["count"] > 0 else 0
+                            }
+                            for task, t in data["by_task_type"].items()
+                        }
+                    }
+            return stats
+    
+    def identify_bottlenecks(self) -> List[Dict[str, Any]]:
+        """Identify performance bottlenecks."""
+        with self._lock:
+            bottlenecks = []
+            
+            for op_name, op_data in self.metrics["operations"].items():
+                if op_data["count"] < 10:  # Need sufficient data
+                    continue
+                
+                avg_duration = op_data["total_duration"] / op_data["count"]
+                
+                # Flag slow operations
+                if avg_duration > 5000:  # > 5 seconds
+                    bottlenecks.append({
+                        "type": "slow_operation",
+                        "operation": op_name,
+                        "avg_duration_ms": round(avg_duration, 2),
+                        "severity": "critical" if avg_duration > 10000 else "warning"
+                    })
+                
+                # Flag high failure rate
+                failure_rate = op_data["failure_count"] / op_data["count"] if op_data["count"] > 0 else 0
+                if failure_rate > 0.1:  # > 10% failure
+                    bottlenecks.append({
+                        "type": "high_failure_rate",
+                        "operation": op_name,
+                        "failure_rate": round(failure_rate * 100, 2),
+                        "severity": "critical" if failure_rate > 0.25 else "warning"
+                    })
+            
+            # Sort by severity
+            severity_order = {"critical": 0, "warning": 1, "info": 2}
+            bottlenecks.sort(key=lambda x: severity_order.get(x["severity"], 3))
+            
+            return bottlenecks[:10]  # Top 10 bottlenecks
+    
+    def get_optimization_recommendations(self) -> List[Dict[str, Any]]:
+        """Generate optimization recommendations."""
+        recommendations = []
+        
+        # Check model performance
+        model_stats = self.get_model_stats()
+        for model, stats in model_stats.items():
+            if stats["success_rate"] < 90:
+                recommendations.append({
+                    "category": "model",
+                    "priority": "high",
+                    "recommendation": f"Investigate {model} failures",
+                    "details": f"Success rate is {stats['success_rate']}%",
+                    "action": f"Check {model} error logs and consider fallback configuration"
+                })
+        
+        # Check for bottlenecks
+        bottlenecks = self.identify_bottlenecks()
+        for bottleneck in bottlenecks:
+            if bottleneck["type"] == "slow_operation":
+                recommendations.append({
+                    "category": "performance",
+                    "priority": "high" if bottleneck["severity"] == "critical" else "medium",
+                    "recommendation": f"Optimize {bottleneck['operation']}",
+                    "details": f"Average duration: {bottleneck['avg_duration_ms']}ms",
+                    "action": "Consider caching or async processing"
+                })
+        
+        return sorted(recommendations, key=lambda x: {"high": 0, "medium": 1, "low": 2}.get(x["priority"], 3))
+    
+    def get_report(self) -> Dict[str, Any]:
+        """Generate comprehensive performance report."""
+        return {
+            "generated_at": datetime.now().isoformat(),
+            "operation_stats": self.get_operation_stats(),
+            "model_stats": self.get_model_stats(),
+            "bottlenecks": self.identify_bottlenecks(),
+            "recommendations": self.get_optimization_recommendations()
+        }
+    
+    def profile(self, func):
+        """Decorator to profile a function."""
+        def wrapper(*args, **kwargs):
+            start_time = time.time()
+            try:
+                result = func(*args, **kwargs)
+                success = True
+                return result
+            except Exception as e:
+                success = False
+                raise
+            finally:
+                duration_ms = (time.time() - start_time) * 1000
+                self.record_operation(func.__name__, duration_ms, success)
+        
+        wrapper.__name__ = func.__name__
+        wrapper.__doc__ = func.__doc__
+        return wrapper
+
+
+# Initialize performance profiler
+performance_profiler = PerformanceProfiler()
+
+
 if __name__ == "__main__"::
     print("J1MSKY Unified Model Orchestrator v5.1")
     print("=" * 50)

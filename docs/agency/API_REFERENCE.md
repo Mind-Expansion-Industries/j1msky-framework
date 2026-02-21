@@ -3316,6 +3316,197 @@ def translate_with_review(content, target_languages=["spanish", "french", "germa
 
 ---
 
+## 📝 Release Notes Template
+
+When releasing new versions, use this template for consistent communication.
+
+### Version Numbering
+
+**Format:** `MAJOR.MINOR.PATCH`
+
+- **MAJOR**: Breaking changes requiring migration
+- **MINOR**: New features, backward compatible
+- **PATCH**: Bug fixes, backward compatible
+
+**Examples:**
+- `v4.1.0` - New features added
+- `v4.1.1` - Bug fix
+- `v5.0.0` - Major breaking changes
+
+---
+
+### Release Note Template
+
+```markdown
+# J1MSKY v[X.Y.Z] - Release Notes
+
+**Release Date:** [YYYY-MM-DD]
+**Support End Date:** [YYYY-MM-DD]
+**Status:** [Beta/Stable/Deprecated]
+
+---
+
+## 🚀 What's New
+
+### [Feature Name]
+**Type:** [New Feature/Enhancement/Performance]
+
+[Description of the feature and its benefits]
+
+**Use Case:**
+[Example scenario where this helps]
+
+**How to Use:**
+```python
+# Code example
+```
+
+---
+
+## ✨ Improvements
+
+### [Improvement Area]
+- [Description of improvement]
+- [Another improvement]
+
+---
+
+## 🐛 Bug Fixes
+
+### [Bug ID or Description]
+**Issue:** [What was wrong]
+**Fix:** [How it was resolved]
+**Impact:** [Who was affected]
+
+---
+
+## ⚠️ Breaking Changes
+
+### [Change Description]
+**Before:** [Old behavior/code]
+**After:** [New behavior/code]
+**Migration:** [Steps to update]
+
+---
+
+## 📊 Performance
+
+| Metric | Before | After | Improvement |
+|--------|--------|-------|-------------|
+| Latency (p95) | 1200ms | 800ms | 33% faster |
+| Throughput | 100 req/s | 150 req/s | 50% increase |
+| Error Rate | 2% | 0.5% | 75% reduction |
+
+---
+
+## 🔒 Security
+
+### [Security Update]
+**Severity:** [Critical/High/Medium/Low]
+**CVE:** [CVE ID if applicable]
+**Description:** [What was fixed]
+**Action Required:** [Steps users must take]
+
+---
+
+## 📚 Documentation
+
+- Updated: [Section/page]
+- New: [New documentation]
+- Fixed: [Documentation corrections]
+
+---
+
+## 🔄 Deprecations
+
+### [Deprecated Feature]
+**Deprecation Date:** [YYYY-MM-DD]
+**Removal Date:** [YYYY-MM-DD]
+**Replacement:** [Alternative to use]
+**Migration Guide:** [Link]
+
+---
+
+## 🆕 SDK Updates
+
+| SDK | Old Version | New Version | Status |
+|-----|-------------|-------------|--------|
+| Python | 4.0.0 | 4.1.0 | ✅ Released |
+| JavaScript | 4.0.0 | 4.1.0 | ✅ Released |
+| Go | 4.0.0 | 4.1.0 | 🔄 Beta |
+| Rust | 4.0.0 | 4.1.0 | 🔄 Beta |
+
+---
+
+## 🧪 Known Issues
+
+| Issue | Severity | Workaround | ETA Fix |
+|-------|----------|------------|---------|
+| [Description] | Medium | [Steps] | v4.1.1 |
+
+---
+
+## ⬆️ Upgrade Instructions
+
+### Automatic (Recommended)
+```bash
+pip install --upgrade j1msky
+```
+
+### Manual
+1. [Step 1]
+2. [Step 2]
+3. [Step 3]
+
+### Database Migrations
+```bash
+j1msky migrate
+```
+
+---
+
+## 🎯 Compatibility
+
+| Component | Minimum Version | Recommended |
+|-----------|----------------|-------------|
+| Python | 3.9 | 3.11+ |
+| Node.js | 18 | 20 |
+| Raspberry Pi OS | Bullseye | Bookworm |
+
+---
+
+## 📈 Statistics
+
+- **Total Changes:** [X commits]
+- **New Features:** [X]
+- **Bug Fixes:** [X]
+- **Contributors:** [X]
+- **Lines Changed:** [+X, -X]
+
+---
+
+## 🙏 Acknowledgments
+
+Thanks to our contributors and community members who made this release possible:
+- [Name] - [Contribution]
+- [Name] - [Contribution]
+
+---
+
+## 📞 Support
+
+Questions about this release?
+- Review the [migration guide](link)
+- Check [updated documentation](link)
+- Contact support@j1msky.ai
+
+---
+
+**Full Changelog:** [GitHub compare link]
+```
+
+---
+
 ## 📚 Resources
 
 - **Full Docs:** https://docs.j1msky.ai

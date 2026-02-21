@@ -2726,6 +2726,14 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
             webhook_id = self.path.split('/')[-1]
             notification_mgr.unregister_webhook(webhook_id)
             self.send_json({'success': True, 'message': f'Webhook {webhook_id} removed'})
+        elif self.path.startswith('/api/pricing/webhook/'):
+            webhook_id = self.path.split('/')[-1]
+            webhooks = getattr(self.__class__, 'pricing_webhooks', {})
+            if webhook_id in webhooks:
+                del webhooks[webhook_id]
+                self.send_json({'success': True, 'message': f'Pricing webhook {webhook_id} removed'})
+            else:
+                self.send_json({'success': False, 'error': f'Webhook {webhook_id} not found'})
         else:
             self.send_error(404)
 

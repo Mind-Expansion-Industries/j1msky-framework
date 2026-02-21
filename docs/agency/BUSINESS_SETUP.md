@@ -2605,4 +2605,111 @@ Delete a webhook:
 curl -X DELETE http://localhost:8080/api/pricing/webhook/pricing_webhook_1708473600
 ```
 
+## 63) Pricing Analytics and Insights
+
+### Purpose
+Leverage pricing data to generate actionable insights that improve business performance.
+
+### Key Metrics to Track
+
+**1. Revenue Metrics**
+- Total quoted revenue by period
+- Revenue by segment
+- Revenue by model
+- Average deal size trends
+
+**2. Margin Metrics**
+- Gross margin by segment
+- Margin by complexity tier
+- Margin by model used
+- Margin trends over time
+
+**3. Operational Metrics**
+- Quotes per sales rep
+- Approval rate by rep
+- Time to quote
+- Exception rate by rep
+
+**4. Win/Loss Metrics**
+- Win rate by segment
+- Win rate by price band
+- Loss reasons analysis
+- Competitive win rate
+
+### Analytics Queries
+
+**Monthly Segment Performance:**
+```python
+from scripts.ops.orchestrator import orchestrator
+
+# Get weekly metrics for the month
+quotes = [...]  # Load month's quotes
+report = orchestrator.generate_pricing_summary_report(quotes, period="monthly")
+
+# Analyze segment performance
+for segment, data in report["by_segment"].items():
+    print(f"{segment}: {data['count']} quotes, {data['avg_margin']}% margin")
+```
+
+**Experiment Analysis:**
+```python
+# Analyze experiment results
+experiment_quotes = [...]  # Filter by experiment_id
+summary = orchestrator.summarize_experiment(experiment_quotes)
+print(f"Recommendation: {summary['recommendation']}")
+```
+
+### Insight Generation
+
+**Automated Insights (Weekly):**
+- Segment with highest margin improvement
+- Model with best cost efficiency
+- Sales rep with highest approval rate
+- Quote pattern anomalies
+
+**Deep Dive Analysis (Monthly):**
+- Price elasticity by segment
+- Seasonal trend identification
+- Correlation: model selection vs win rate
+- Exception pattern analysis
+
+### Insight Distribution
+
+| Insight Type | Audience | Format | Frequency |
+|--------------|----------|--------|-----------|
+| Daily metrics | Ops team | Slack | Daily |
+| Weekly trends | Revenue managers | Email | Weekly |
+| Monthly analysis | Leadership | Deck | Monthly |
+| Quarterly review | Executive team | Report | Quarterly |
+
+### Actionable Insights Examples
+
+**Insight:** "SMB segment shows 15% higher win rate when quoted with k2p5 vs sonnet"
+→ **Action:** Update SMB playbook to prefer k2p5
+
+**Insight:** "Enterprise quotes with >5.0x markup have 40% lower approval rate"
+→ **Action:** Cap enterprise markup at 4.5x
+
+**Insight:** "Quotes sent on Friday have 20% longer approval time"
+→ **Action:** Avoid Friday quote submissions
+
+**Insight:** "Exceptions older than 21 days never recover to target margin"
+→ **Action:** Auto-escalate exceptions at 14 days
+
+### Analytics Tools
+
+- **Built-in:** `/api/pricing/report` for daily summaries
+- **Custom:** Python scripts using orchestrator methods
+- **BI Integration:** Webhook events to external analytics tools
+- **Dashboard:** Real-time metrics via `/api/pricing/health`
+
+### Data Retention for Analytics
+
+| Data Type | Retention | Access |
+|-----------|-----------|--------|
+| Raw quote data | 2 years | RevOps |
+| Aggregated metrics | 5 years | All staff |
+| Experiment data | 1 year | Product + RevOps |
+| Audit logs | 7 years | Compliance |
+
 

@@ -290,6 +290,45 @@ print(summary["test"])            # Test variant metrics
 - Always maintain a control group (80% control, 20% test)
 - Stop early if metrics degrade >10%
 
+### Generating Pricing Reports
+
+Generate comprehensive pricing reports for analysis and stakeholder updates:
+
+```python
+from scripts.ops.orchestrator import orchestrator
+
+# Generate report for a period
+quotes = [...]  # Your quote data
+report = orchestrator.generate_pricing_summary_report(quotes, period="monthly")
+
+# Access overall metrics
+print(f"Total quotes: {report['metrics']['total_quotes']}")
+print(f"Approval rate: {report['metrics']['approval_rate']}%")
+print(f"Average margin: {report['metrics']['avg_margin_pct']}%")
+
+# Segment breakdown
+for segment, data in report['by_segment'].items():
+    print(f"{segment}: {data['count']} quotes, {data['approval_rate']}% approved")
+
+# Model efficiency
+for model, data in report['by_model'].items():
+    print(f"{model}: {data['avg_margin']}% avg margin")
+```
+
+**When to generate reports:**
+- Weekly: Team standups and quick reviews
+- Monthly: Management updates and trend analysis
+- Quarterly: Strategic reviews and policy decisions
+
+**Export options:**
+```bash
+# Via API
+curl http://localhost:8080/api/pricing/report > pricing_report.json
+
+# Pretty print for review
+curl http://localhost:8080/api/pricing/report | python -m json.tool
+```
+
 ---
 
 ## 🎯 USE CASES

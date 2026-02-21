@@ -613,6 +613,26 @@ List all registered pricing webhooks.
 
 ---
 
+#### Delete Pricing Webhook
+**Endpoint:** `DELETE /pricing/webhook/{webhook_id}`
+
+Delete a registered pricing webhook.
+
+**Example:**
+```bash
+curl -X DELETE http://localhost:8080/api/pricing/webhook/pricing_webhook_1708473600
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Pricing webhook pricing_webhook_1708473600 removed"
+}
+```
+
+---
+
 #### Generate Pricing Quote
 **Endpoint:** `POST /pricing/quote`
 

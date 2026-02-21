@@ -196,6 +196,200 @@ class NotificationManager:
 # Initialize notification manager
 notification_mgr = NotificationManager()
 
+
+# Circuit Breaker Pattern for Resilient API Calls
+class CircuitBreaker:
+    """
+    Circuit breaker pattern to prevent cascading failures.
+    
+    States:
+    - CLOSED: Normal operation, calls pass through
+    - OPEN: Failure threshold exceeded, calls fail fast
+    - HALF_OPEN: Testing if service recovered
+    
+    Usage:
+        cb = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
+        
+        @cb.protected
+        def call_external_api():
+            return requests.get('https://api.example.com')
+    """
+    
+    CLOSED = 'closed'
+    OPEN = 'open'
+    HALF_OPEN = 'half_open'
+    
+    def __init__(self, name='default', failure_threshold=5, recovery_timeout=60, 
+                 success_threshold=3, expected_exception=Exception):
+        self.name = name
+        self.failure_threshold = failure_threshold
+        self.recovery_timeout = recovery_timeout
+        self.success_threshold = success_threshold
+        self.expected_exception = expected_exception
+        
+        self._state = self.CLOSED
+        self._failure_count = 0
+        self._success_count = 0
+        self._last_failure_time = None
+        self._lock = threading.Lock()
+        
+        # Metrics
+        self.total_calls = 0
+        self.total_failures = 0
+        self.total_successes = 0
+        self.state_changes = []
+    
+    @property
+    def state(self):
+        """Current circuit state"""
+        with self._lock:
+            return self._state
+    
+    def _transition_to(self, new_state):
+        """Transition to new state with logging"""
+        old_state = self._state
+        self._state = new_state
+        self._record_state_change(old_state, new_state)
+        
+        if new_state == self.OPEN:
+            add_event(f"Circuit breaker '{self.name}' OPENED - failing fast", type='warning')
+        elif new_state == self.CLOSED:
+            add_event(f"Circuit breaker '{self.name}' CLOSED - normal operation", type='success')
+        elif new_state == self.HALF_OPEN:
+            add_event(f"Circuit breaker '{self.name}' HALF_OPEN - testing recovery", type='info')
+    
+    def _record_state_change(self, from_state, to_state):
+        """Record state change for metrics"""
+        self.state_changes.append({
+            'from': from_state,
+            'to': to_state,
+            'timestamp': datetime.now().isoformat()
+        })
+    
+    def can_execute(self):
+        """Check if call should be allowed"""
+        with self._lock:
+            if self._state == self.CLOSED:
+                return True
+            
+            elif self._state == self.OPEN:
+                # Check if recovery timeout has passed
+                if self._last_failure_time:
+                    elapsed = (datetime.now() - self._last_failure_time).total_seconds()
+                    if elapsed >= self.recovery_timeout:
+                        self._transition_to(self.HALF_OPEN)
+                        return True
+                return False
+            
+            elif self._state == self.HALF_OPEN:
+                return True
+        
+        return False
+    
+    def record_success(self):
+        """Record successful call"""
+        with self._lock:
+            self.total_successes += 1
+            self.total_calls += 1
+            
+            if self._state == self.HALF_OPEN:
+                self._success_count += 1
+                if self._success_count >= self.success_threshold:
+                    self._failure_count = 0
+                    self._success_count = 0
+                    self._transition_to(self.CLOSED)
+            elif self._state == self.CLOSED:
+                self._failure_count = 0
+    
+    def record_failure(self):
+        """Record failed call"""
+        with self._lock:
+            self.total_failures += 1
+            self.total_calls += 1
+            self._failure_count += 1
+            self._last_failure_time = datetime.now()
+            
+            if self._state == self.HALF_OPEN:
+                # Failed during recovery test
+                self._success_count = 0
+                self._transition_to(self.OPEN)
+            elif self._state == self.CLOSED:
+                if self._failure_count >= self.failure_threshold:
+                    self._transition_to(self.OPEN)
+    
+    def call(self, func, *args, **kwargs):
+        """Execute function with circuit breaker protection"""
+        if not self.can_execute():
+            raise CircuitBreakerOpenError(
+                f"Circuit breaker '{self.name}' is OPEN. "
+                f"Last failure: {self._last_failure_time}"
+            )
+        
+        try:
+            result = func(*args, **kwargs)
+            self.record_success()
+            return result
+        except self.expected_exception as e:
+            self.record_failure()
+            raise
+    
+    def protected(self, func):
+        """Decorator for circuit breaker protection"""
+        def wrapper(*args, **kwargs):
+            return self.call(func, *args, **kwargs)
+        wrapper.__name__ = func.__name__
+        wrapper.__doc__ = func.__doc__
+        return wrapper
+    
+    def get_metrics(self):
+        """Get circuit breaker metrics"""
+        return {
+            'name': self.name,
+            'state': self._state,
+            'failure_count': self._failure_count,
+            'success_count': self._success_count,
+            'total_calls': self.total_calls,
+            'total_failures': self.total_failures,
+            'total_successes': self.total_successes,
+            'failure_rate': round(self.total_failures / max(self.total_calls, 1), 4),
+            'last_failure_time': self._last_failure_time.isoformat() if self._last_failure_time else None,
+            'state_changes': self.state_changes[-10:]  # Last 10 changes
+        }
+
+
+class CircuitBreakerOpenError(Exception):
+    """Raised when circuit breaker is open"""
+    pass
+
+
+# Global circuit breakers for external services
+_kimi_breaker = CircuitBreaker('kimi', failure_threshold=5, recovery_timeout=60)
+_anthropic_breaker = CircuitBreaker('anthropic', failure_threshold=3, recovery_timeout=90)
+_web_search_breaker = CircuitBreaker('web_search', failure_threshold=10, recovery_timeout=30)
+_image_gen_breaker = CircuitBreaker('image_gen', failure_threshold=5, recovery_timeout=120)
+
+
+def get_circuit_breaker(service):
+    """Get circuit breaker for a service"""
+    breakers = {
+        'kimi': _kimi_breaker,
+        'anthropic': _anthropic_breaker,
+        'web_search': _web_search_breaker,
+        'image_gen': _image_gen_breaker
+    }
+    return breakers.get(service)
+
+
+def get_all_circuit_breaker_metrics():
+    """Get metrics for all circuit breakers"""
+    return {
+        'kimi': _kimi_breaker.get_metrics(),
+        'anthropic': _anthropic_breaker.get_metrics(),
+        'web_search': _web_search_breaker.get_metrics(),
+        'image_gen': _image_gen_breaker.get_metrics()
+    }
+
+
 # Task Queue System for Rate Limit Management
 class TaskQueue:
     """Persistent task queue for handling rate limits and deferred execution"""

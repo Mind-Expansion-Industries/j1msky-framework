@@ -3263,4 +3263,354 @@ Follow-up: [Action item]
 | "Need feature X" | Workaround/roadmap | "How critical is it?" |
 | "Competitor cheaper" | TCO framework | "What does their price include?" |
 
+---
+
+## 📞 APPENDIX C: Sales Call Scripts & Templates
+
+### Pre-Call Preparation (5 Minutes)
+
+**Research Checklist:**
+- [ ] Company size (employees, revenue)
+- [ ] Industry and recent news
+- [ ] Current tech stack (if known)
+- [ ] Competitor tools they might use
+- [ ] Decision maker identification
+- [ ] Mutual connections
+
+**Set Your Intention:**
+- Goal for this call: _______
+- Key questions to ask: _______
+- Value proposition to emphasize: _______
+
+---
+
+### Cold Call Script (First 30 Seconds)
+
+**The Permission-Based Opener:**
+```
+"Hi [Name], this is [Your Name] from J1MSKY. We help [industry] companies 
+automate [task] with AI agents. I know I caught you out of the blue—do you 
+have 27 seconds for me to tell you why I called, then you can decide if it's 
+worth a longer conversation?"
+
+[Pause - wait for yes]
+
+"Great. We recently helped [similar company] reduce their [task] time by 80% 
+using autonomous AI teams. Based on your role at [Company], I thought there 
+might be a fit. Worth a brief conversation?"
+```
+
+**If they say no:**
+```
+"Totally understand. Would it be alright if I sent you a 2-minute video 
+showing what we did for [Company]? If it resonates, we can reconnect. 
+If not, I'll take you off my list. Fair?"
+```
+
+---
+
+### Discovery Call Script (30-Minute Structure)
+
+**Minutes 0-2: Rapport & Agenda**
+```
+"Thanks for making time, [Name]. Before we dive in, what's one thing 
+you're hoping to get out of this conversation?"
+
+[Let them answer]
+
+"Perfect. Here's what I'd love to cover in the next 30 minutes:
+- First 10 minutes: Understanding your current workflow and challenges
+- Next 10 minutes: Showing you how J1MSKY addresses those specifically  
+- Final 10 minutes: Answering questions and deciding if a pilot makes sense
+
+Sound good?"
+```
+
+**Minutes 2-12: Deep Discovery**
+
+*Current State Questions:*
+```
+"Walk me through how you currently handle [task]. What does that process 
+look like from start to finish?"
+
+[Listen - take notes on pain points]
+
+"How long does that typically take?"
+
+"Who else is involved in that process?"
+
+"What happens when [common problem] occurs?"
+```
+
+*Pain Amplification:*
+```
+"You mentioned [pain point] takes [time]. How often is that happening?"
+
+"What impact does that have on [deadlines/revenue/team morale]?"
+
+"If you could wave a magic wand and solve one thing about [task], 
+what would it be?"
+```
+
+*Budget Authority:*
+```
+"For something like this, what does the decision process typically look like?"
+
+"Who else would need to be involved in evaluating this?"
+
+"Have you budgeted for automation tools this quarter/year?"
+```
+
+**Minutes 12-22: Value Demonstration**
+
+*Tailored Presentation:*
+```
+"Based on what you've shared, here's what I'm hearing:
+- You're spending [X hours/week] on [task]
+- [Specific pain point] is costing you [specific impact]
+- You need something that [requirement 1] and [requirement 2]
+
+Is that accurate?"
+
+[Confirm understanding]
+
+"Here's how J1MSKY solves exactly that..."
+```
+
+*Show, Don't Tell:*
+- Share screen for 5-minute demo
+- Use their actual use case if possible
+- Focus on outcomes, not features
+
+**Minutes 22-28: Handle Objections & Trial Close**
+
+```
+"What questions do you have about what you've seen?"
+
+[Address objections using playbook above]
+
+"Based on what we've discussed, does it make sense to run a 7-day pilot 
+with your actual [task]? You'd be able to see real results before making 
+any commitment."
+```
+
+**Minutes 28-30: Next Steps**
+
+```
+"Great. Here's what happens next:
+1. I'll send you the pilot agreement today
+2. We schedule a 15-minute kickoff for [day]
+3. You test with real tasks for 7 days
+4. We review results and decide on next steps
+
+Does that timeline work for you?"
+
+[Schedule follow-up in their calendar right now]
+```
+
+---
+
+### Follow-Up Email Templates
+
+**Template 1: Post-Discovery Call**
+```
+Subject: [Company] + J1MSKY Pilot - Next Steps
+
+Hi [Name],
+
+Thanks for the great conversation today. Excited about the potential 
+to help you [specific outcome discussed].
+
+As promised:
+- Pilot agreement attached
+- Kickoff scheduling link: [link]
+- Case study for [similar company]: [link]
+
+Questions before we kick off?
+
+Best,
+[Your name]
+```
+
+**Template 2: Post-Demo (No Immediate Close)**
+```
+Subject: Resources we discussed + one question
+
+Hi [Name],
+
+Thanks for your time today. Per our conversation:
+
+[Resource 1 they asked about]
+[Resource 2 they asked about]
+[Link to ROI calculator they can use]
+
+Quick question: You mentioned [concern/objection]. Is that the main 
+thing standing in the way of moving forward?
+
+Happy to address that specifically.
+
+Best,
+[Your name]
+```
+
+**Template 3: Break-Up Email (Ghosted After 3 Follow-Ups)**
+```
+Subject: Should I close your file?
+
+Hi [Name],
+
+I haven't heard back after my last few emails. Totally understand if 
+timing isn't right or priorities have shifted.
+
+Should I close your file for now, or is there a better time to reconnect 
+in a few months?
+
+Either way, no hard feelings.
+
+Best,
+[Your name]
+```
+
+---
+
+### Demo Script (15 Minutes)
+
+**Minute 0: Context Setting**
+```
+"I'm going to show you exactly how J1MSKY would handle [their specific 
+use case from discovery]. This will take about 10 minutes, then we can 
+discuss or dive deeper into anything specific. Sound good?"
+```
+
+**Minutes 1-4: The Problem (Their World)**
+```
+"Before I show the solution, let's acknowledge the current reality. 
+[Name], you mentioned [pain point]. That looks like [describe current 
+process]. That's costing you [time/money/frustration]."
+```
+
+**Minutes 4-9: The Solution (Show the Platform)**
+
+*Dashboard Overview (1 min):*
+- Show The Office view
+- Point out active agents working
+
+*Live Agent Spawn (2 mins):*
+```
+"Let me show you how fast this is. I'm going to spawn an agent to 
+[their task]."
+
+[Type their actual task]
+[Select appropriate model]
+[Click spawn]
+
+"That's it. The agent is now working. Let me show you what just 
+happened behind the scenes..."
+```
+
+*Results View (2 mins):*
+- Show completed task
+- Show cost breakdown
+- Show time saved
+
+**Minutes 9-12: Social Proof**
+```
+"This is similar to what we did for [Company]. They were spending 
+[X hours] on [task]. With J1MSKY, that dropped to [Y hours]."
+
+[Show case study or testimonial if available]
+```
+
+**Minutes 12-15: Transition to Close**
+```
+"What questions do you have about what you've seen?"
+
+[Answer questions]
+
+"Based on this, would it make sense to run a pilot with your actual 
+data and see these results firsthand?"
+```
+
+---
+
+### Negotiation Scripts
+
+**When They Ask for a Discount:**
+```
+"I understand budget is tight. Rather than just cutting the price, 
+let's figure out what makes sense. What budget are you working with?"
+
+[Let them answer]
+
+"Okay, at [their budget], we could do [adjusted scope]. That would 
+include [features] but not [features]. Would that work?"
+
+[If no]
+
+"Alternatively, if you can commit to an annual contract, we can offer 
+2 months free—which brings your effective monthly cost to [price]. 
+Interested in exploring that?"
+```
+
+**When Procurement Gets Involved:**
+```
+"Happy to work with your procurement team. To make this smooth, 
+here's what I typically need:
+- Their contact info and preferred process
+- Any vendor forms or security questionnaires
+- Their standard terms they'll need us to review
+
+Can you make that introduction?"
+```
+
+---
+
+### Referral Request Scripts
+
+**To Happy Customers:**
+```
+"[Name], you've been getting great results with J1MSKY. I'm curious—
+do you know anyone else in [industry] struggling with [task] who might 
+benefit from a conversation like ours?"
+
+[If yes]
+
+"Would you be comfortable making a warm introduction? Happy to provide 
+a template."
+
+[If no]
+
+"No problem. If someone comes to mind in the future, I'd appreciate 
+the thought."
+```
+
+**Incentive Framing:**
+```
+"By the way, we have a referral program—if you introduce us to someone 
+who becomes a customer, you get [incentive]. But more importantly, 
+you're helping them solve a problem you used to have."
+```
+
+---
+
+### Call Review Checklist
+
+**After Every Call, Rate Yourself:**
+
+| Area | Score (1-5) | Notes |
+|------|-------------|-------|
+| Discovery depth | | Did I understand their real pain? |
+| Questions asked | | Did I talk less than 30%? |
+| Demo relevance | | Was it tailored to their use case? |
+| Objection handling | | Did I address concerns effectively? |
+| Next steps clarity | | Is there a scheduled follow-up? |
+| Energy & rapport | | Did we build genuine connection? |
+
+**Action Items:**
+- [ ] Send follow-up email within 2 hours
+- [ ] Update CRM with call notes
+- [ ] Schedule next step
+- [ ] Log objections encountered
+- [ ] Identify coaching opportunity
+
 

@@ -2317,7 +2317,40 @@ Link: </api/v4/spawn>; rel="successor-version"
 
 ---
 
-## 📝 Changelog
+## 📝 Changelog & Version History
+
+### Version Overview
+
+| Version | Status | Release Date | End of Life |
+|---------|--------|--------------|-------------|
+| v4.1 | Current | Feb 2026 | TBD |
+| v4.0 | Stable | Feb 2026 | Feb 2027 |
+| v3.2 | Deprecated | Dec 2025 | Jun 2026 |
+| v3.0 | Sunset | Sep 2025 | Jan 2026 |
+
+---
+
+### v4.1.0 (2026-02-21)
+**Feature Release - Caching & Resilience**
+
+**Added:**
+- TTL caching layer for model recommendations and pricing calculations
+- Circuit breaker pattern for external API calls
+- Bulk quote generation endpoint (`POST /pricing/batch-quotes`)
+- Cache management endpoints (`GET /cache/status`, `POST /cache/invalidate`)
+- Enhanced input validation for all pricing endpoints
+- Circuit breaker metrics in health check response
+
+**Changed:**
+- Model selection now uses cached results (30s TTL) for better performance
+- Pricing calculations cached (5min TTL) to reduce redundant computation
+- Improved error messages with actionable remediation steps
+- Rate limit headers now include `X-RateLimit-Reset-At`
+
+**Deprecated:**
+- `POST /pricing/quote` without segment parameter (will default to `mid_market`)
+
+---
 
 ### v4.0.0 (2026-02-19)
 **Major Release - Multi-Model Agent Teams**
@@ -2330,14 +2363,21 @@ Link: </api/v4/spawn>; rel="successor-version"
 - Cost tracking and billing reports
 - Pagination and filtering on list endpoints
 - Security features: IP whitelisting, request signing, audit logging
+- Pricing operations endpoints (`/pricing/*`)
+- Exception aging and portfolio compliance tracking
+- Weekly metrics aggregation and comparison
+- Experiment tracking for pricing optimization
 
 **Changed:**
 - API authentication now uses Bearer tokens
 - Rate limit response includes `retry_after` header
 - Standardized error response format across all endpoints
+- Response headers include `X-Request-Id` for tracing
 
 **Removed:**
 - Legacy v2 endpoints (sunset as of 2026-01-01)
+
+---
 
 ### v3.2.0 (2025-12-15)
 **Maintenance Release**
@@ -2345,10 +2385,18 @@ Link: </api/v4/spawn>; rel="successor-version"
 **Added:**
 - Health check endpoint (`GET /health`)
 - System metrics endpoint (`GET /metrics`)
+- Idempotency key support for write operations
 
 **Fixed:**
 - Rate limit counter not resetting correctly
 - Memory leak in long-running agents
+- Race condition in concurrent agent spawning
+
+**Security:**
+- Patched dependency vulnerabilities
+- Enhanced input sanitization
+
+---
 
 ### v3.1.0 (2025-11-01)
 **Feature Release**
@@ -2357,10 +2405,14 @@ Link: </api/v4/spawn>; rel="successor-version"
 - Batch agent spawning (`POST /spawn-batch`)
 - Agent priority levels (low, normal, high)
 - Custom timeout configuration per agent
+- Task queuing system for rate limit management
 
 **Changed:**
 - Improved error messages for invalid models
 - Reduced default agent timeout from 10min to 5min
+- Enhanced logging with structured JSON format
+
+---
 
 ### v3.0.0 (2025-09-15)
 **Major Release - Business Tier**
@@ -2370,10 +2422,87 @@ Link: </api/v4/spawn>; rel="successor-version"
 - Usage-based billing integration
 - Team management endpoints
 - Role-based access control (RBAC)
+- Notification system for agent events
 
 **Breaking Changes:**
 - All endpoints now require authentication
 - Response format changed to include metadata wrapper
+- Rate limits enforced per API key
+
+---
+
+## 🗺️ API Roadmap
+
+### Q1 2026 (Next 3 Months)
+
+**Planned Features:**
+- **Streaming responses** for real-time agent output
+- **WebSocket support** for persistent connections
+- **GraphQL endpoint** for flexible data fetching
+- **SDK updates** with caching and offline support
+
+**Breaking Changes Preview:**
+- None planned for v4.x
+- v5.0 target: Q3 2026 (major refactor)
+
+---
+
+### Q2 2026
+
+**Planned Features:**
+- **Multi-region support** for data residency
+- **Advanced analytics** endpoint with time-series queries
+- **Plugin system** for custom integrations
+- **Mobile SDK** (iOS/Android)
+
+---
+
+### Q3 2026
+
+**v5.0 Planning:**
+- REST + GraphQL unified API
+- Async/await pattern throughout
+- New pricing model support
+- Enhanced security features
+
+---
+
+## 🔄 Deprecation Policy
+
+### Lifecycle Stages
+
+| Stage | Duration | Support Level |
+|-------|----------|---------------|
+| **Beta** | 1-2 months | Community support only |
+| **Stable** | 12+ months | Full support, SLA applies |
+| **Deprecated** | 6 months | Security fixes only |
+| **Sunset** | - | Endpoint removed |
+
+### Deprecation Notifications
+
+When an endpoint is deprecated:
+1. **Email notification** 6 months before removal
+2. **Response header** includes `Deprecation: true` and `Sunset` date
+3. **Documentation** updated with migration path
+4. **SDK updates** with warnings
+
+---
+
+## 📊 API Metrics Dashboard
+
+Track these metrics to monitor API health:
+
+```bash
+# Get current API metrics
+curl http://localhost:8080/api/metrics | jq '.'
+```
+
+**Key Metrics:**
+- Request volume by endpoint
+- Error rates (target: <0.1%)
+- P50/P95/P99 latency
+- Rate limit hit rate
+- Cache hit rate
 
 ---
 
@@ -2383,8 +2512,9 @@ Link: </api/v4/spawn>; rel="successor-version"
 - **GitHub:** https://github.com/Mind-Expansion-Industries/j1msky-framework
 - **Support:** support@j1msky.ai
 - **Status:** https://status.j1msky.ai
+- **Changelog RSS:** https://docs.j1msky.ai/changelog.xml
 
 ---
 
-*API Version: 4.0*  
-*Last Updated: February 19, 2026*
+*API Version: 4.1*  
+*Last Updated: February 21, 2026*

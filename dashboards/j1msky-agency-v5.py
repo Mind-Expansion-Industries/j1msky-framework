@@ -1868,9 +1868,32 @@ HTML = '''<!DOCTYPE html>
             const sessionTab = SessionStore.load();
             const initialTab = NavState.normalizeTab(hash || sessionTab || 'dashboard');
 
+            // Ensure initial tab matches the current DOM state
             NavState.currentTab = initialTab;
             NavState.pushHistory(initialTab);
             if (!hash) safeReplaceState({ tab: initialTab }, '#' + initialTab);
+
+            // Sync UI if needed
+            const targetPanel = document.getElementById(initialTab);
+            if (targetPanel && !targetPanel.classList.contains('active')) {
+                // Panel exists but isn't active - sync it
+                document.querySelectorAll('.panel').forEach(p => {
+                    p.classList.remove('active');
+                    if (!p.id || p.id !== 'help') p.style.display = 'none';
+                });
+                targetPanel.style.display = 'block';
+                targetPanel.classList.add('active');
+
+                // Sync nav
+                const tabIndex = NavState.tabs.indexOf(initialTab);
+                document.querySelectorAll('.nav-item').forEach((n, i) => {
+                    n.classList.toggle('active', i === tabIndex);
+                    if (i === tabIndex) n.setAttribute('aria-current', 'page');
+                    else n.removeAttribute('aria-current');
+                });
+            }
+
+            syncNavAriaFromActive();
 
             // Sync UI with initial tab
             if (initialTab !== 'dashboard') {

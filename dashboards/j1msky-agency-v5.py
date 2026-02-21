@@ -297,6 +297,12 @@ HTML = '''<!DOCTYPE html>
             will-change: transform;
         }
 
+        .stat-card:focus-visible {
+            outline: 2px solid var(--cyan);
+            outline-offset: 2px;
+            transform: translateY(-2px);
+        }
+
         .stat-card:active {
             transform: translateY(0);
         }
@@ -430,6 +436,11 @@ HTML = '''<!DOCTYPE html>
 
         .model-card:hover {
             border-color: var(--cyan);
+        }
+
+        .model-card:focus-visible {
+            outline: 2px solid var(--cyan);
+            outline-offset: 2px;
         }
 
         .model-header {

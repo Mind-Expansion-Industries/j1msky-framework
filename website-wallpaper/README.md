@@ -5,6 +5,7 @@ Deployable client-facing landing page for art-generation subscription.
 ## Files
 - `index.html` — Landing + offer + CTA page for AI wallpaper subscription
 - `gift.html` — Gift subscription page for viral growth (gift purchases)
+- `teams.html` — Team/enterprise plans for B2B sales (higher ACV)
 - `privacy.html` — Privacy policy page
 - `terms.html` — Terms of service page
 - `success.html` / `cancel.html` — Stripe redirect completion pages

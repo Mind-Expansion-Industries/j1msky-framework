@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WallpaperDaily for Teams — AI Art for Design Teams</title>
+    <meta name="description" content="Daily 4K wallpapers for your entire design team or agency. Bulk pricing, admin dashboard, and commercial license included.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --accent: #06b6d4;
+            --dark: #0a0a0f;
+            --dark-card: #12121a;
+            --gray: #6b7280;
+            --light: #f3f4f6;
+            --success: #10b981;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            line-height: 1.6;
+        }
+        .noise {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.03; z-index: -1;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        }
+        .orb {
+            position: fixed; border-radius: 50%; filter: blur(100px); z-index: -2;
+            width: 500px; height: 500px; background: var(--primary); opacity: 0.12;
+            top: -150px; right: -150px;
+        }
+        .wrap { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.25rem; }
+        .nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .logo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1.4rem; background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav a { color: var(--gray); text-decoration: none; font-size: .9rem; }
+        .badge { display: inline-flex; align-items: center; gap: .3rem; padding: .35rem .8rem; background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.35); border-radius: 50px; font-size: .8rem; color: var(--success); margin-bottom: 1rem; }
+        h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.9rem, 5vw, 2.6rem); line-height: 1.1; margin-bottom: .7rem; }
+        .lead { color: #9ca3af; font-size: 1.1rem; max-width: 600px; }
+        .use-cases { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0; }
+        .use { background: var(--dark-card); border: 1px solid rgba(255,255,255,.08); border-radius: 12px; padding: 1.2rem; }
+        .use strong { display: block; margin-bottom: .3rem; color: #e5e7eb; }
+        .use p { color: var(--gray); font-size: .9rem; }
+        h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; margin: 2.5rem 0 1rem; }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .95rem; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid rgba(255,255,255,.08); }
+        th { color: var(--gray); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; }
+        td strong { color: #e5e7eb; }
+        .check { color: var(--success); font-weight: bold; }
+        .pricing-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .card { background: var(--dark-card); border: 1px solid rgba(255,255,255,.1); border-radius: 16px; padding: 1.5rem; }
+        .card.popular { border-color: var(--primary); background: linear-gradient(135deg, rgba(139,92,246,.1), transparent); }
+        .popular-badge { display: inline-block; background: var(--primary); color: white; padding: .3rem .7rem; border-radius: 50px; font-size: .7rem; font-weight: 700; text-transform: uppercase; margin-bottom: .6rem; }
+        .card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; margin-bottom: .3rem; }
+        .price { font-size: 2.2rem; font-weight: 700; margin: .5rem 0; }
+        .price span { font-size: .9rem; color: var(--gray); font-weight: 400; }
+        .features { list-style: none; margin: 1rem 0; }
+        .features li { padding: .5rem 0; color: #9ca3af; display: flex; align-items: center; gap: .6rem; }
+        .features li::before { content: '✓'; color: var(--success); font-weight: bold; }
+        .btn { display: block; width: 100%; padding: .9rem; background: var(--primary); color: white; text-decoration: none; border-radius: 10px; font-weight: 700; text-align: center; border: none; cursor: pointer; font-size: 1rem; margin-top: 1rem; }
+        .btn-outline { background: transparent; border: 1px solid rgba(255,255,255,.2); }
+        .calculator { background: var(--dark-card); border: 1px solid rgba(255,255,255,.1); border-radius: 16px; padding: 1.5rem; margin: 1.5rem 0; }
+        .calc-row { display: flex; justify-content: space-between; align-items: center; padding: .7rem 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+        .calc-row:last-child { border-bottom: none; font-weight: 700; font-size: 1.1rem; padding-top: 1rem; }
+        input[type="range"] { width: 100%; margin: 1rem 0; }
+        .form-section { background: var(--dark-card); border: 1px solid rgba(255,255,255,.1); border-radius: 16px; padding: 1.5rem; margin: 1.5rem 0; }
+        label { display: block; margin: 1rem 0 .4rem; color: #9ca3af; font-size: .9rem; }
+        label:first-child { margin-top: 0; }
+        input, select, textarea {
+            width: 100%; padding: .9rem 1rem; border-radius: 10px;
+            border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.03);
+            color: var(--light); font: inherit;
+        }
+        textarea { min-height: 80px; resize: vertical; }
+        .footer { text-align: center; padding: 2rem; color: var(--gray); font-size: .9rem; border-top: 1px solid rgba(255,255,255,.06); margin-top: 2rem; }
+    </style>
+</head>
+<body>
+    <div class="noise"></div>
+    <div class="orb"></div>
+
+    <div class="wrap">
+        <div class="nav">
+            <div class="logo">◈ WallpaperDaily</div>
+            <a href="/index.html">← Personal Plans</a>
+        </div>
+
+        <div class="badge">👥 Team Plans</div>
+        <h1>Daily AI Wallpapers for Your Team</h1>
+        <p class="lead">Keep your designers inspired, your presentations stunning, and your brand visuals fresh—without anyone spending time searching for assets.</p>
+
+        <div class="use-cases">
+            <div class="use">
+                <strong>Design Agencies</strong>
+                <p>Daily inspiration for the whole creative team</p>
+            </div>
+            <div class="use">
+                <strong>Tech Startups</strong>
+                <p>Fresh zoom backgrounds and slide decks</p>
+            </div>
+            <div class="use">
+                <strong>Content Studios</strong>
+                <p>Thumbnail and social asset backgrounds</p>
+            </div>
+            <div class="use">
+                <strong>Remote Teams</strong>
+                <p>Shared visual culture across timezones</p>
+            </div>
+        </div>
+
+        <h2>Team Features</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Personal Pro</th>
+                    <th style="color:var(--primary)">Team Plan</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Seats</td>
+                    <td>1 person</td>
+                    <td><strong>5–50 people</strong></td>
+                </tr>
+                <tr>
+                    <td>Daily wallpapers per person</td>
+                    <td>3</td>
+                    <td><span class="check">✓</span> 3</td>
+                </tr>
+                <tr>
+                    <td>Resolution</td>
+                    <td>4K + 8K</td>
+                    <td><span class="check">✓</span> 4K + 8K</td>
+                </tr>
+                <tr>
+                    <td>Commercial license</td>
+                    <td>Individual use</td>
+                    <td><span class="check">✓</span> Full team commercial</td>
+                </tr>
+                <tr>
+                    <td>Admin dashboard</td>
+                    <td>—</td>
+                    <td><span class="check">✓</span> Seat management + analytics</td>
+                </tr>
+                <tr>
+                    <td>Custom brand styles</td>
+                    <td>—</td>
+                    <td><span class="check">✓</span> Team color palette sync</td>
+                </tr>
+                <tr>
+                    <td>Priority support</td>
+                    <td>Email</td>
+                    <td><span class="check">✓</span> Shared Slack channel</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Pricing</h2>
+        <div class="pricing-cards">
+            <div class="card">
+                <h3>Team Starter</h3>
+                <div class="price">$29<span>/month</span></div>
+                <p style="color:#9ca3af;font-size:.9rem;">For small teams getting started</p>
+                <ul class="features">
+                    <li>5 team members</li>
+                    <li>3 wallpapers/person/day</li>
+                    <li>4K + 8K resolution</li>
+                    <li>Team commercial license</li>
+                    <li>Basic admin panel</li>
+                </ul>
+                <a href="#inquiry" class="btn btn-outline">Request Access</a>
+            </div>
+
+            <div class="card popular">
+                <div class="popular-badge">Most Popular</div>
+                <h3>Team Pro</h3>
+                <div class="price">$79<span>/month</span></div>
+                <p style="color:#9ca3af;font-size:.9rem;">For growing creative teams</p>
+                <ul class="features">
+                    <li>15 team members</li>
+                    <li>Everything in Starter</li>
+                    <li>Admin dashboard + analytics</li>
+                    <li>Custom brand style profiles</li>
+                    <li>Shared Slack support</li>
+                </ul>
+                <a href="#inquiry" class="btn">Request Access</a>
+            </div>
+
+            <div class="card">
+                <h3>Enterprise</h3>
+                <div class="price">Custom</span></div>
+                <p style="color:#9ca3af;font-size:.9rem;">For organizations 50+</p>
+                <ul class="features">
+                    <li>Unlimited seats</li>
+                    <li>Everything in Pro</li>
+                    <li>SSO/SAML</li>
+                    <li>Custom AI training</li>
+                    <li>Dedicated account manager</li>
+                </ul>
+                <a href="#inquiry" class="btn btn-outline">Contact Sales</a>
+            </div>
+        </div>
+
+        <div class="calculator">
+            <h3 style="margin-bottom:1rem;font-family:'Space Grotesk',sans-serif;">Savings Calculator</h3>
+            <label>Team size: <strong id="team-size-display">10</strong> people</label>
+            <input type="range" id="team-size" min="5" max="50" value="10" oninput="updateCalc()">
+
+            <div class="calc-row">
+                <span>Individual Pro licenses ($8 × <span id="calc-size">10</span>)</span>
+                <span id="individual-cost">$80</span>
+            </div>
+            <div class="calc-row">
+                <span>Team Pro plan</span>
+                <span>$79</span>
+            </div>
+            <div class="calc-row" style="color:var(--success)">
+                <span>Monthly savings</span>
+                <span id="savings">$1</span>
+            </div>
+        </div>
+
+        <div id="inquiry" class="form-section">
+            <h3 style="font-family:'Space Grotesk',sans-serif;">Request Team Access</h3>
+            <p style="color:#9ca3af;margin-bottom:1rem;">We're onboarding teams in batches. Tell us about yours and we'll get you set up within 24 hours.</p>
+
+            <form name="teams-inquiry" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/success.html">
+                <input type="hidden" name="form-name" value="teams-inquiry">
+                <input type="hidden" name="source" value="teams-page">
+                <p style="display:none;"><label>Do not fill: <input name="bot-field"></label></p>
+
+                <label for="name">Your Name</label>
+                <input id="name" name="name" required placeholder="Alex Chen">
+
+                <label for="email">Work Email</label>
+                <input id="email" name="email" type="email" required placeholder="alex@company.com">
+
+                <label for="company">Company Name</label>
+                <input id="company" name="company" placeholder="Acme Design Studio">
+
+                <label for="team-count">Approximate Team Size</label>
+                <select id="team-count" name="team_count" required>
+                    <option value="">Select...</option>
+                    <option value="5-10">5–10 people</option>
+                    <option value="11-25">11–25 people</option>
+                    <option value="26-50">26–50 people</option>
+                    <option value="50+">50+ people>
+                </select>
+
+                <label for="use-case">How would your team use daily wallpapers?</label>
+                <textarea id="use-case" name="use_case" placeholder="We'd use them for client presentations, social content backgrounds, and keeping our remote team visually connected..."></textarea>
+
+                <button class="btn" type="submit">Request Early Access →</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© 2026 WallpaperDaily. Team plans include full commercial usage rights.</p>
+    </div>
+
+    <script>
+        function updateCalc() {
+            const size = parseInt(document.getElementById('team-size').value);
+            const individualCost = size * 8;
+            const teamCost = 79;
+            const savings = individualCost - teamCost;
+
+            document.getElementById('team-size-display').textContent = size;
+            document.getElementById('calc-size').textContent = size;
+            document.getElementById('individual-cost').textContent = '$' + individualCost;
+            document.getElementById('savings').textContent = '$' + savings;
+        }
+        updateCalc();
+    </script>
+</body>
+</html>

@@ -1767,6 +1767,315 @@ alert_manager = AlertManager()
 alert_manager.add_console_channel()
 
 
+# Cost Optimizer for Intelligent Model Selection
+class CostOptimizer:
+    """
+    Intelligent cost optimization for model selection and task routing.
+    
+    Features:
+    - Historical cost tracking per task type
+    - Model efficiency scoring
+    - Automatic cost-based model recommendations
+    - Budget-aware task queuing
+    - Cost anomaly detection
+    
+    Usage:
+        optimizer = CostOptimizer()
+        
+        # Get optimal model for task
+        recommendation = optimizer.recommend_model(
+            task_type="coding",
+            complexity="medium",
+            max_budget=0.05
+        )
+        
+        # Record actual cost for learning
+        optimizer.record_actual_cost(
+            task_type="coding",
+            model="k2p5",
+            estimated_cost=0.01,
+            actual_cost=0.012
+        )
+    """
+    
+    def __init__(self, storage_path: str = "/home/m1ndb0t/Desktop/J1MSKY/config"):
+        self.storage_path = Path(storage_path)
+        self.storage_path.mkdir(parents=True, exist_ok=True)
+        self.cost_db_file = self.storage_path / "cost_optimizer.json"
+        self.task_history = self._load_history()
+        self._lock = threading.Lock()
+        
+        # Model cost profiles (cost per 1K tokens)
+        self.model_profiles = {
+            "k2p5": {"input": 0.0005, "output": 0.0015, "speed": "fast", "quality": "good"},
+            "sonnet": {"input": 0.003, "output": 0.015, "speed": "medium", "quality": "excellent"},
+            "opus": {"input": 0.015, "output": 0.075, "speed": "slow", "quality": "best"},
+            "minimax-m2.5": {"input": 0.0001, "output": 0.0001, "speed": "fast", "quality": "good"},
+            "codex": {"input": 0.002, "output": 0.006, "speed": "fast", "quality": "excellent"}
+        }
+    
+    def _load_history(self) -> Dict[str, Any]:
+        """Load cost history from disk."""
+        if self.cost_db_file.exists():
+            try:
+                with open(self.cost_db_file, 'r') as f:
+                    return json.load(f)
+            except Exception:
+                return {}
+        return {"task_types": {}, "model_efficiency": {}}
+    
+    def _save_history(self):
+        """Save cost history to disk."""
+        with open(self.cost_db_file, 'w') as f:
+            json.dump(self.task_history, f, indent=2)
+    
+    def estimate_task_cost(self, model: str, input_tokens: int, output_tokens: int) -> float:
+        """Estimate cost for a task."""
+        if model not in self.model_profiles:
+            return 0.0
+        
+        profile = self.model_profiles[model]
+        input_cost = (input_tokens / 1000) * profile["input"]
+        output_cost = (output_tokens / 1000) * profile["output"]
+        return round(input_cost + output_cost, 4)
+    
+    def recommend_model(
+        self,
+        task_type: str,
+        complexity: str = "medium",
+        quality_requirement: str = "good",
+        max_budget: float = None,
+        preferred_speed: str = None
+    ) -> Dict[str, Any]:
+        """
+        Recommend optimal model based on cost, quality, and speed requirements.
+        
+        Args:
+            task_type: Type of task (coding, writing, analysis, etc.)
+            complexity: low, medium, high
+            quality_requirement: good, excellent, best
+            max_budget: Maximum acceptable cost
+            preferred_speed: fast, medium, slow (or None for any)
+        
+        Returns:
+            Recommendation with model, estimated cost, and reasoning
+        """
+        candidates = []
+        
+        for model, profile in self.model_profiles.items():
+            # Check quality match
+            quality_score = {"good": 1, "excellent": 2, "best": 3}
+            required_score = quality_score.get(quality_requirement, 1)
+            model_score = quality_score.get(profile["quality"], 1)
+            
+            if model_score < required_score:
+                continue
+            
+            # Check speed preference
+            if preferred_speed and profile["speed"] != preferred_speed:
+                continue
+            
+            # Calculate efficiency score
+            efficiency = self._get_model_efficiency(task_type, model)
+            
+            # Estimate cost for typical task
+            estimated_input = 1500 if complexity == "low" else 3000 if complexity == "medium" else 5000
+            estimated_output = 500 if complexity == "low" else 1000 if complexity == "medium" else 2000
+            
+            estimated_cost = self.estimate_task_cost(model, estimated_input, estimated_output)
+            
+            # Check budget constraint
+            if max_budget and estimated_cost > max_budget:
+                continue
+            
+            # Calculate score (lower is better): cost / efficiency
+            score = estimated_cost / max(efficiency, 0.1)
+            
+            candidates.append({
+                "model": model,
+                "estimated_cost": estimated_cost,
+                "efficiency": efficiency,
+                "quality": profile["quality"],
+                "speed": profile["speed"],
+                "score": score
+            })
+        
+        if not candidates:
+            # Fallback to cheapest available
+            return {
+                "model": "k2p5",
+                "estimated_cost": 0.01,
+                "reasoning": "No candidates matched criteria, using fallback",
+                "alternatives": []
+            }
+        
+        # Sort by score (ascending)
+        candidates.sort(key=lambda x: x["score"])
+        
+        best = candidates[0]
+        alternatives = candidates[1:3]  # Next 2 best options
+        
+        return {
+            "model": best["model"],
+            "estimated_cost": best["estimated_cost"],
+            "quality": best["quality"],
+            "speed": best["speed"],
+            "reasoning": f"Best balance of cost ({best['estimated_cost']}) and efficiency ({best['efficiency']:.2f})",
+            "alternatives": [
+                {"model": alt["model"], "estimated_cost": alt["estimated_cost"]} 
+                for alt in alternatives
+            ]
+        }
+    
+    def _get_model_efficiency(self, task_type: str, model: str) -> float:
+        """Get efficiency score for model on task type (0-1 scale)."""
+        with self._lock:
+            task_data = self.task_history.get("task_types", {}).get(task_type, {})
+            model_data = task_data.get(model, {})
+            
+            if not model_data:
+                return 0.5  # Default neutral efficiency
+            
+            # Calculate efficiency based on success rate and cost accuracy
+            total_tasks = model_data.get("total_tasks", 0)
+            successful_tasks = model_data.get("successful_tasks", 0)
+            
+            if total_tasks == 0:
+                return 0.5
+            
+            success_rate = successful_tasks / total_tasks
+            
+            # Cost accuracy (how close were estimates to actual)
+            cost_variance = model_data.get("avg_cost_variance", 0)
+            accuracy_score = max(0, 1 - cost_variance)
+            
+            return round((success_rate * 0.6 + accuracy_score * 0.4), 2)
+    
+    def record_actual_cost(
+        self,
+        task_type: str,
+        model: str,
+        estimated_cost: float,
+        actual_cost: float,
+        success: bool = True
+    ):
+        """Record actual cost for learning and optimization."""
+        with self._lock:
+            if "task_types" not in self.task_history:
+                self.task_history["task_types"] = {}
+            
+            if task_type not in self.task_history["task_types"]:
+                self.task_history["task_types"][task_type] = {}
+            
+            if model not in self.task_history["task_types"][task_type]:
+                self.task_history["task_types"][task_type][model] = {
+                    "total_tasks": 0,
+                    "successful_tasks": 0,
+                    "total_estimated_cost": 0,
+                    "total_actual_cost": 0,
+                    "cost_variance_sum": 0
+                }
+            
+            model_data = self.task_history["task_types"][task_type][model]
+            model_data["total_tasks"] += 1
+            if success:
+                model_data["successful_tasks"] += 1
+            
+            model_data["total_estimated_cost"] += estimated_cost
+            model_data["total_actual_cost"] += actual_cost
+            
+            # Track variance
+            variance = abs(actual_cost - estimated_cost) / max(estimated_cost, 0.001)
+            model_data["cost_variance_sum"] += variance
+            
+            # Calculate averages
+            n = model_data["total_tasks"]
+            model_data["avg_cost_variance"] = model_data["cost_variance_sum"] / n
+            model_data["avg_actual_cost"] = model_data["total_actual_cost"] / n
+            
+            self._save_history()
+    
+    def get_optimization_report(self) -> Dict[str, Any]:
+        """Generate cost optimization report."""
+        with self._lock:
+            report = {
+                "generated_at": datetime.now().isoformat(),
+                "task_type_stats": {},
+                "model_efficiency": {},
+                "recommendations": []
+            }
+            
+            # Analyze each task type
+            for task_type, models in self.task_history.get("task_types", {}).items():
+                best_model = None
+                best_efficiency = 0
+                total_cost = 0
+                
+                for model, data in models.items():
+                    efficiency = self._get_model_efficiency(task_type, model)
+                    if efficiency > best_efficiency:
+                        best_efficiency = efficiency
+                        best_model = model
+                    
+                    total_cost += data.get("total_actual_cost", 0)
+                
+                report["task_type_stats"][task_type] = {
+                    "best_model": best_model,
+                    "best_efficiency": best_efficiency,
+                    "total_cost": round(total_cost, 2)
+                }
+            
+            # Generate recommendations
+            for task_type, stats in report["task_type_stats"].items():
+                current = stats["best_model"]
+                # Find cheaper alternative with similar efficiency
+                for model in self.model_profiles:
+                    if model != current:
+                        alt_efficiency = self._get_model_efficiency(task_type, model)
+                        if alt_efficiency >= stats["best_efficiency"] * 0.9:
+                            current_cost = self.model_profiles[current]["input"]
+                            alt_cost = self.model_profiles[model]["input"]
+                            if alt_cost < current_cost:
+                                savings_pct = (current_cost - alt_cost) / current_cost * 100
+                                report["recommendations"].append({
+                                    "task_type": task_type,
+                                    "current_model": current,
+                                    "recommended_model": model,
+                                    "potential_savings_pct": round(savings_pct, 1),
+                                    "reasoning": f"Similar efficiency ({alt_efficiency:.2f}) at lower cost"
+                                })
+            
+            return report
+    
+    def detect_cost_anomalies(self, lookback_hours: int = 24) -> List[Dict]:
+        """Detect unusual cost patterns."""
+        with self._lock:
+            anomalies = []
+            
+            # Get average costs per task type
+            for task_type, models in self.task_history.get("task_types", {}).items():
+                for model, data in models.items():
+                    avg_cost = data.get("avg_actual_cost", 0)
+                    recent_cost = data.get("recent_avg_cost", avg_cost)
+                    
+                    # Check for significant increase
+                    if avg_cost > 0 and recent_cost > avg_cost * 1.5:
+                        anomalies.append({
+                            "type": "cost_increase",
+                            "task_type": task_type,
+                            "model": model,
+                            "average_cost": round(avg_cost, 4),
+                            "recent_cost": round(recent_cost, 4),
+                            "increase_pct": round((recent_cost - avg_cost) / avg_cost * 100, 1)
+                        })
+            
+            return anomalies
+
+
+# Initialize cost optimizer
+cost_optimizer = CostOptimizer()
+
+
 if __name__ == "__main__"::
     print("J1MSKY Unified Model Orchestrator v5.1")
     print("=" * 50)

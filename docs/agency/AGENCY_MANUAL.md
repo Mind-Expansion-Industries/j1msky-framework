@@ -1753,6 +1753,30 @@ chmod 755 *.sh
 
 ---
 
+## 🔒 SECURITY BEST PRACTICES
+
+### API Key Management
+
+**Storage:**
+```bash
+# API keys should be stored in config/api-keys.json
+# with restricted permissions
+
+# Set correct permissions
+chmod 600 config/api-keys.json
+
+# Never commit keys to git
+echo "config/api-keys.json" >> .gitignore
+```
+
+**Rotation Schedule:**
+- Rotate API keys every 90 days
+- Keep 2 active keys during transition
+- Revoke old keys 24 hours after confirming new keys work
+- Monitor for unauthorized usage
+
+---
+
 ## 🔮 FUTURE FEATURES
 
 Coming soon:

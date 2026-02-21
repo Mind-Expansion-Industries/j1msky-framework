@@ -4637,4 +4637,495 @@ A: Tier 1: Direct customers to J1MSKY support. Tier 2+: You provide L1, we provi
 
 **Questions?** partners@j1msky.ai
 
+---
+
+## 📧 APPENDIX G: Email Templates Library
+
+Complete library of ready-to-use email templates for every stage of the customer journey.
+
+---
+
+### Cold Outreach Templates
+
+#### Template 1: Value-First Cold Email
+```
+Subject: [Company] + AI automation idea
+
+Hi [First Name],
+
+I help [industry] companies like [Company] automate [task] with AI. 
+
+Recently worked with [Similar Company] to reduce their [task] time 
+by 75%. Thought there might be a fit for [Company].
+
+Worth a 10-minute conversation?
+
+Best,
+[Your Name]
+
+P.S. - Here's the case study if curious: [link]
+```
+
+#### Template 2: Trigger-Based Outreach
+```
+Subject: Noticed [Company] is hiring [role]s
+
+Hi [First Name],
+
+Saw [Company] is hiring [role]s on LinkedIn. Usually means you're 
+scaling [function] fast.
+
+Question: Are you planning to hire your way through it, or have 
+you considered AI automation?
+
+We helped [Similar Company] handle 3x growth without adding headcount.
+
+Worth a brief conversation?
+
+[Your Name]
+```
+
+#### Template 3: Referral Request
+```
+Subject: [Mutual Connection] suggested I reach out
+
+Hi [First Name],
+
+[Mutual Connection] mentioned you're exploring AI solutions for 
+[Company].
+
+We've helped [number] [industry] companies automate [task] with 
+our AI agent platform.
+
+[Mutual Connection] thought there might be a fit. Worth a quick 
+chat to explore?
+
+Best,
+[Your Name]
+```
+
+---
+
+### Demo/Trial Templates
+
+#### Template 4: Post-Demo Thank You
+```
+Subject: Thanks for your time today + next steps
+
+Hi [First Name],
+
+Great meeting you today. Excited about the potential to help 
+[Company] with [specific use case discussed].
+
+As promised:
+✓ Pilot agreement attached
+✓ Kickoff scheduling: [calendar link]
+✓ Implementation guide: [link]
+
+Quick question: You mentioned [concern/objection]. Is that the 
+main thing we need to address to move forward?
+
+Looking forward to next steps.
+
+Best,
+[Your Name]
+```
+
+#### Template 5: Trial Start
+```
+Subject: Your J1MSKY trial is ready 🚀
+
+Hi [First Name],
+
+Your J1MSKY trial is live. Here's how to get started:
+
+1. **Log in:** [link]
+   Username: [email]
+   Temp password: [password] (change on first login)
+
+2. **Watch:** 5-min getting started video: [link]
+
+3. **First task:** Try our template: "Research competitors for 
+   [Company]"
+
+4. **Need help?** Reply to this email or book time: [calendar]
+
+I'll check in on Thursday to see how it's going.
+
+Welcome aboard!
+
+[Your Name]
+```
+
+#### Template 6: Trial Check-In (Day 3)
+```
+Subject: How's your first week with J1MSKY?
+
+Hi [First Name],
+
+Quick check-in - how's the trial going so far?
+
+Common questions at this stage:
+• How to [specific feature] → [help doc link]
+• Best model for [task type] → [guide link]
+• Workflow examples → [template library]
+
+Hit reply and let me know:
+1. What's working well?
+2. Any questions or blockers?
+3. What would make this a "must-have" for [Company]?
+
+Here to help.
+
+[Your Name]
+```
+
+---
+
+### Follow-Up Templates
+
+#### Template 7: No Response (Follow-Up 1)
+```
+Subject: RE: [Original Subject]
+
+Hi [First Name],
+
+Wanted to bump this to the top of your inbox.
+
+Quick question: Is [task] still a priority for [Company] this 
+quarter?
+
+If yes, worth a 15-minute conversation.
+If no, totally understand - priorities shift.
+
+Either way, let me know.
+
+[Your Name]
+```
+
+#### Template 8: No Response (Follow-Up 2)
+```
+Subject: Should I close your file?
+
+Hi [First Name],
+
+Haven't heard back on my last couple emails. Usually means one 
+of three things:
+
+1. [Task] isn't a priority right now
+2. You're evaluating other options
+3. I should try carrier pigeon instead of email 😊
+
+Should I close your file, or is there a better time to reconnect 
+in a few months?
+
+No hard feelings either way.
+
+[Your Name]
+```
+
+#### Template 9: Post-Proposal Follow-Up
+```
+Subject: [Company] proposal - questions?
+
+Hi [First Name],
+
+Sent over the proposal for [Company] on [date]. Wanted to check 
+in.
+
+Questions I can answer?
+• Pricing breakdown
+• Implementation timeline
+• Security/compliance
+• Custom requirements
+
+Happy to jump on a quick call to review.
+
+[Your Name]
+```
+
+---
+
+### Conversion Templates
+
+#### Template 10: Pricing Objection Response
+```
+Subject: RE: Pricing question
+
+Hi [First Name],
+
+Totally understand budget is a consideration.
+
+Quick question: What are you currently spending on [task], 
+either in time or money?
+
+Most of our customers were spending $X on [alternative] before 
+J1MSKY. At $99/month, if we save you just [Y hours], you've 
+broken even.
+
+Happy to run the ROI math together. What does [task] currently 
+cost [Company]?
+
+[Your Name]
+```
+
+#### Template 11: Creating Urgency
+```
+Subject: [Company] - Q1 pricing ends Friday
+
+Hi [First Name],
+
+Quick heads up: Our Q1 promotional pricing ends this Friday.
+
+Current quote: $[amount]/month
+After Friday: $[higher amount]/month
+
+Same features, same support - just $[difference] more per month.
+
+Worth locking in the lower rate? I can reserve your spot with 
+a signed agreement by Friday.
+
+Let me know.
+
+[Your Name]
+```
+
+#### Template 12: Final Close Attempt
+```
+Subject: One last try - should we close this out?
+
+Hi [First Name],
+
+We've been talking about J1MSKY for [timeframe]. Either we're a 
+fit or we're not - and that's okay.
+
+Last question: What's the one thing standing between "let's do 
+this" and "not right now"?
+
+If I can address that, are we moving forward?
+
+If not, I'll close your file and check back in 6 months.
+
+Your call.
+
+[Your Name]
+```
+
+---
+
+### Customer Success Templates
+
+#### Template 13: Welcome (Post-Purchase)
+```
+Subject: Welcome to J1MSKY! 🎉
+
+Hi [First Name],
+
+Welcome to J1MSKY! Excited to help [Company] automate [task].
+
+Your next steps:
+1. **Schedule onboarding:** [calendar link] (15 min)
+2. **Join community:** [Slack/Discord link]
+3. **Bookmark docs:** [docs link]
+
+Your dedicated success manager: [Name] ([email])
+
+Questions? Reply to this email anytime.
+
+Let's do this!
+
+[Your Name]
+```
+
+#### Template 14: Check-In (Day 7)
+```
+Subject: Week 1 check-in - how's it going?
+
+Hi [First Name],
+
+One week in - how are things going with J1MSKY?
+
+Quick wins so far?
+Any questions or blockers?
+
+If helpful, I can share:
+• Advanced workflow templates
+• Integration examples
+• Tips from similar [industry] customers
+
+Just reply and let me know what would be most useful.
+
+[Your Name]
+```
+
+#### Template 15: Renewal Reminder (30 days)
+```
+Subject: [Company] renewal - upcoming on [date]
+
+Hi [First Name],
+
+Your J1MSKY subscription renews on [date].
+
+Past year highlights:
+✓ [X] tasks completed
+✓ [Y] hours saved
+✓ $[Z] in value delivered
+
+Everything looks good to renew at the same plan?
+
+Or if you've been thinking about upgrading to [higher tier] 
+for [benefit], now's a good time to discuss.
+
+Let me know!
+
+[Your Name]
+```
+
+---
+
+### Expansion/Upsell Templates
+
+#### Template 16: Usage-Based Upsell
+```
+Subject: [Company] is hitting limits - time to upgrade?
+
+Hi [First Name],
+
+Noticed [Company] is at 85% of your [Starter/Pro] plan limits 
+this month.
+
+Options:
+1. **Upgrade to [next tier]:** $[price] - unlimited [feature]
+2. **Stay current:** Hard limit at [limit]
+
+Given your growth trajectory, the upgrade probably pays for 
+itself. Want to discuss?
+
+[Your Name]
+```
+
+#### Template 17: New Feature Announcement
+```
+Subject: New: [Feature] (you asked for this!)
+
+Hi [First Name],
+
+You asked, we built it.
+
+[Feature] is now live - and based on your usage, I think 
+[Company] will love it.
+
+What it does: [2-sentence description]
+
+Want to see it in action? I can show you in 10 minutes:
+[calendar link]
+
+[Your Name]
+```
+
+---
+
+### Win-Back Templates
+
+#### Template 18: Churned Customer Win-Back
+```
+Subject: [Company] + what's changed since you left
+
+Hi [First Name],
+
+[Company] canceled J1MSKY [timeframe] ago. Hope things are 
+going well.
+
+Since then, we've shipped:
+• [Feature 1 you requested]
+• [Feature 2 that solves previous pain point]
+• [Feature 3 relevant to their use case]
+
+Worth another look? I'd love to show you what's new:
+[calendar link]
+
+No pressure - just want to make sure you have the best solution 
+for [task].
+
+[Your Name]
+```
+
+---
+
+### Internal Templates
+
+#### Template 19: Sales Handoff to CS
+```
+Subject: HANDOFF: [Company] - Closed [Plan]
+
+Customer: [Company]
+Contact: [Name, Title, Email]
+Plan: [Plan] at $[price]/month
+Close Date: [Date]
+Use Case: [Primary use case]
+
+Key Context:
+• [Important note from sales process]
+• [Specific requirements discussed]
+• [Competitor they evaluated]
+
+Next Steps:
+1. Onboarding call scheduled: [date/time]
+2. [Special setup required]
+3. [Stakeholder to include]
+
+Full notes: [CRM link]
+
+Thanks!
+[Sales Rep]
+```
+
+#### Template 20: Customer Feedback Request
+```
+Subject: Quick favor - 2 min feedback?
+
+Hi [First Name],
+
+You've been using J1MSKY for [timeframe]. Quick ask:
+
+What's one thing we could do better?
+
+Hit reply with whatever comes to mind - good, bad, or ugly. 
+I read every response.
+
+Thanks!
+[Your Name]
+
+P.S. - If you're loving it, would you leave us a review? 
+[G2/Capterra link]. Takes 2 minutes and helps a lot.
+```
+
+---
+
+### Email Best Practices
+
+**Subject Lines That Work:**
+- Keep under 50 characters
+- Use personalization ([Company], [First Name])
+- Create curiosity or urgency
+- Avoid spam triggers (FREE!!!, Act Now)
+
+**Email Structure:**
+1. **Hook** (first sentence) - why they should care
+2. **Value** - what's in it for them
+3. **Proof** - social proof or example
+4. **Ask** - clear call to action
+5. **P.S.** - secondary CTA or interesting fact
+
+**Timing:**
+- Tuesday-Thursday, 8-10am or 2-4pm
+- Avoid Mondays (inbox overload) and Fridays (checked out)
+- Follow up every 3-4 days
+
+**Tracking:**
+- Open rate target: 40%+
+- Reply rate target: 10%+
+- Meeting booking rate target: 5%+
+- A/B test subject lines weekly
+
 

@@ -420,6 +420,16 @@ HTML = '''<!DOCTYPE html>
             font-weight: 600;
             cursor: pointer;
             flex-shrink: 0;
+            transition: all 0.15s ease;
+        }
+
+        .agent-action:hover {
+            background: #00dddd;
+            transform: translateY(-1px);
+        }
+
+        .agent-action:active {
+            transform: scale(0.98) translateY(0);
         }
 
         .model-card {

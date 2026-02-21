@@ -3,6 +3,299 @@
 
 ---
 
+## 🚀 QUICK START EXAMPLES
+
+Copy-paste ready examples to get started in under 5 minutes.
+
+### Prerequisites
+```bash
+# Set your API endpoint
+export J1MSKY_API="http://localhost:8080/api"
+
+# Set your API key (if authentication enabled)
+export J1MSKY_KEY="your_api_key_here"
+```
+
+### Example 1: Spawn Your First Agent (cURL)
+```bash
+# Spawn a simple coding agent
+curl -X POST "$J1MSKY_API/spawn" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $J1MSKY_KEY" \
+  -d '{
+    "model": "k2p5",
+    "task": "Write a Python function to reverse a string",
+    "priority": "normal"
+  }' | jq '.'
+
+# Expected response:
+# {
+#   "success": true,
+#   "agent_id": "subagent_1234567890_1234",
+#   "model": "k2p5",
+#   "status": "spawning",
+#   "estimated_cost": 0.05
+# }
+```
+
+### Example 2: Check Agent Status
+```bash
+# Replace with your agent_id from spawn response
+AGENT_ID="subagent_1234567890_1234"
+
+curl "$J1MSKY_API/agent/$AGENT_ID" \
+  -H "Authorization: Bearer $J1MSKY_KEY" | jq '.'
+```
+
+### Example 3: Generate a Pricing Quote
+```bash
+# Generate a quote for a medium complexity coding task
+curl -X POST "$J1MSKY_API/pricing/quote" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "k2p5",
+    "estimated_input": 2000,
+    "estimated_output": 800,
+    "complexity": "medium",
+    "segment": "mid_market"
+  }' | jq '.'
+
+# Expected response shows internal cost, recommended price, and margin
+```
+
+### Example 4: Deploy a Full Team
+```bash
+# Deploy the coding team for a complex project
+curl -X POST "$J1MSKY_API/spawn-team" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $J1MSKY_KEY" \
+  -d '{
+    "team": "team_coding",
+    "task": "Build a REST API for user authentication with JWT tokens",
+    "priority": "high"
+  }' | jq '.'
+```
+
+### Example 5: Python SDK Quick Start
+```python
+import requests
+import time
+
+# Configuration
+BASE_URL = "http://localhost:8080/api"
+API_KEY = "your_api_key_here"
+HEADERS = {
+    "Authorization": f"Bearer {API_KEY}",
+    "Content-Type": "application/json"
+}
+
+def spawn_and_wait(task: str, model: str = "k2p5", timeout: int = 300) -> dict:
+    """Spawn an agent and wait for completion."""
+    
+    # Spawn the agent
+    spawn_resp = requests.post(
+        f"{BASE_URL}/spawn",
+        headers=HEADERS,
+        json={"model": model, "task": task, "priority": "normal"}
+    )
+    spawn_resp.raise_for_status()
+    data = spawn_resp.json()
+    
+    if not data.get("success"):
+        raise Exception(f"Spawn failed: {data.get('error')}")
+    
+    agent_id = data["agent_id"]
+    print(f"Spawned agent: {agent_id}")
+    
+    # Poll for completion
+    start_time = time.time()
+    while time.time() - start_time < timeout:
+        status_resp = requests.get(
+            f"{BASE_URL}/agent/{agent_id}",
+            headers=HEADERS
+        )
+        status = status_resp.json()
+        
+        if status.get("status") == "completed":
+            print(f"✅ Task completed in {time.time() - start_time:.1f}s")
+            return status
+        elif status.get("status") == "failed":
+            raise Exception(f"Agent failed: {status.get('error', 'Unknown error')}")
+        
+        time.sleep(2)
+    
+    raise TimeoutError(f"Agent didn't complete within {timeout}s")
+
+# Usage
+if __name__ == "__main__":
+    result = spawn_and_wait("Write a fibonacci function in Python")
+    print(f"Result: {result.get('result', 'No result')}")
+    print(f"Cost: ${result.get('cost', 0)}")
+```
+
+### Example 6: JavaScript/Node.js Quick Start
+```javascript
+const axios = require('axios');
+
+const BASE_URL = 'http://localhost:8080/api';
+const API_KEY = 'your_api_key_here';
+
+const api = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    'Authorization': `Bearer ${API_KEY}`,
+    'Content-Type': 'application/json'
+  }
+});
+
+async function spawnAndWait(task, model = 'k2p5', timeout = 300000) {
+  // Spawn agent
+  const { data: spawnData } = await api.post('/spawn', {
+    model,
+    task,
+    priority: 'normal'
+  });
+  
+  if (!spawnData.success) {
+    throw new Error(`Spawn failed: ${spawnData.error}`);
+  }
+  
+  const { agent_id } = spawnData;
+  console.log(`Spawned agent: ${agent_id}`);
+  
+  // Poll for completion
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeout) {
+    const { data: status } = await api.get(`/agent/${agent_id}`);
+    
+    if (status.status === 'completed') {
+      console.log(`✅ Task completed in ${(Date.now() - startTime) / 1000}s`);
+      return status;
+    } else if (status.status === 'failed') {
+      throw new Error(`Agent failed: ${status.error || 'Unknown error'}`);
+    }
+    
+    await new Promise(r => setTimeout(r, 2000));
+  }
+  
+  throw new Error(`Timeout after ${timeout}ms`);
+}
+
+// Usage
+spawnAndWait('Generate a SQL query to find duplicate emails')
+  .then(result => {
+    console.log('Result:', result.result);
+    console.log('Cost: $', result.cost);
+  })
+  .catch(console.error);
+```
+
+### Example 7: Check System Health
+```bash
+# Quick health check
+curl "$J1MSKY_API/health" | jq '.'
+
+# Full orchestrator status
+curl "$J1MSKY_API/orchestrator/status" | jq '
+  {
+    timestamp: .timestamp,
+    budget_used: .today_spend,
+    budget_remaining: .budget_remaining,
+    alert_level: .budget_alert_level,
+    models_active: .models_active
+  }
+'
+```
+
+### Example 8: Batch Generate Quotes
+```bash
+# Generate quotes for multiple segments at once
+curl -X POST "$J1MSKY_API/pricing/batch-quotes" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "k2p5",
+    "estimated_input": 3000,
+    "estimated_output": 1200,
+    "complexity": "high",
+    "delivery_type": "task"
+  }' | jq '.quotes_by_segment'
+
+# Compare pricing across all segments
+```
+
+### Example 9: Webhook Setup
+```bash
+# Register a webhook to receive pricing events
+curl -X POST "$J1MSKY_API/pricing/webhook" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://your-app.com/webhooks/j1msky",
+    "events": ["pricing.quote_generated", "pricing.exception_created"],
+    "secret": "your_webhook_secret"
+  }' | jq '.'
+
+# List registered webhooks
+curl "$J1MSKY_API/pricing/webhooks" | jq '.'
+```
+
+### Example 10: Error Handling Pattern (Python)
+```python
+import requests
+from requests.exceptions import RequestException, Timeout
+
+def robust_api_call(method, endpoint, max_retries=3, **kwargs):
+    """Make an API call with retry logic."""
+    url = f"{BASE_URL}{endpoint}"
+    
+    for attempt in range(max_retries):
+        try:
+            response = requests.request(
+                method, url,
+                headers=HEADERS,
+                timeout=30,
+                **kwargs
+            )
+            
+            # Handle rate limiting
+            if response.status_code == 429:
+                retry_after = int(response.headers.get('Retry-After', 60))
+                print(f"Rate limited. Waiting {retry_after}s...")
+                time.sleep(retry_after)
+                continue
+            
+            response.raise_for_status()
+            data = response.json()
+            
+            # Check API-level errors
+            if not data.get('success', True):
+                raise Exception(f"API error: {data.get('error')}")
+            
+            return data
+            
+        except Timeout:
+            wait = 2 ** attempt
+            print(f"Timeout. Retrying in {wait}s...")
+            time.sleep(wait)
+        except RequestException as e:
+            if attempt == max_retries - 1:
+                raise
+            wait = 2 ** attempt
+            print(f"Request failed: {e}. Retrying in {wait}s...")
+            time.sleep(wait)
+    
+    raise Exception("Max retries exceeded")
+
+# Usage
+try:
+    result = robust_api_call('POST', '/spawn', 
+                           json={'model': 'k2p5', 'task': 'Hello world'})
+    print(f"Success: {result}")
+except Exception as e:
+    print(f"Failed: {e}")
+```
+
+---
+
 ## 🔑 Authentication
 
 ### API Key

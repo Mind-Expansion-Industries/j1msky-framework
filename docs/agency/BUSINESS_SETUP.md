@@ -2712,4 +2712,152 @@ print(f"Recommendation: {summary['recommendation']}")
 | Experiment data | 1 year | Product + RevOps |
 | Audit logs | 7 years | Compliance |
 
+---
+
+## 📋 APPENDIX: Quick Reference Card for Sales Reps
+
+### The 30-Second Pricing Decision Tree
+
+```
+START: New quote request
+    │
+    ▼
+┌─────────────────────┐
+│ Estimate complexity │◄── low / medium / high
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ Identify segment    │◄── enterprise / mid_market / smb / startup
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ Apply markup:       │
+│ • low: 3x           │
+│ • medium: 4x        │
+│ • high: 5x          │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ Apply segment adj:  │
+│ • enterprise: +0.5x │
+│ • mid_market: +0.0x │
+│ • smb: -0.5x        │
+│ • startup: -1.0x    │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ Enforce $0.50 floor │
+└──────────┬──────────┘
+           │
+           ▼
+┌─────────────────────┐
+│ Check margin >=55%? │
+└──────────┬──────────┘
+           │
+     ┌─────┴─────┐
+     ▼           ▼
+   YES │        │ NO
+     │           ▼
+     │    ┌──────────────┐
+     │    │ ESCALATE TO  │
+     │    │ DEAL DESK    │
+     │    └──────────────┘
+     ▼
+SEND QUOTE
+```
+
+### Margin Guardrail Quick Lookup
+
+| Delivery Type | Minimum Margin | Action if Below |
+|---------------|----------------|-----------------|
+| Task (one-off) | 55% | Escalate to Deal Desk |
+| Subscription | 50% | Escalate + Repackage |
+| Enterprise | 45% | Executive Review |
+
+### Exception Aging Cheat Sheet
+
+| Age | Risk Level | Required Action |
+|-----|------------|-----------------|
+| 0-7 days | Normal | Owner executes recovery plan |
+| 8-14 days | Watch | Manager review within 24h |
+| 15-30 days | Warning | Leadership visibility |
+| 31+ days | Critical | Executive review required |
+
+### Segment Markup Quick Reference
+
+| Segment | Base Adjustment | When to Use |
+|---------|-----------------|-------------|
+| Enterprise | +0.5x | 500+ employees, procurement involved |
+| Mid-Market | +0.0x | 50-500 employees, standard sales |
+| SMB | -0.5x | <50 employees, price sensitive |
+| Startup | -1.0x | Seed/Series A, strategic bet |
+
+### Emergency Contacts
+
+| Issue | Contact | Response Time |
+|-------|---------|---------------|
+| Pricing system down | #ops-critical | <15 min |
+| Exception >30 days | Revenue Lead | Same day |
+| Discount >30% | CRO | <4 hours |
+| Margin violation | Deal Desk | <2 hours |
+| Client threatening churn | CSM Lead | <1 hour |
+
+### Common Pricing Mistakes (Don't Do These!)
+
+❌ **Quoting without checking margin first**  
+✅ Always run guardrail check before sending
+
+❌ **Applying multiple discounts**  
+✅ One discount max, never below 30% without exec approval
+
+❌ **Ignoring the $0.50 minimum**  
+✅ Floor applies even if markup math suggests lower
+
+❌ **Creating exceptions without recovery plans**  
+✅ Every exception needs a path back to target margin
+
+❌ **Quoting Opus for simple tasks**  
+✅ Start with k2p5, escalate only when necessary
+
+### Daily Checklist (2 Minutes)
+
+- [ ] Review overnight quote approval rate (target: >75%)
+- [ ] Check exception aging (target: none >14 days)
+- [ ] Verify daily budget utilization (alert if >80%)
+- [ ] Confirm no critical alerts unacknowledged
+
+### Key Formulas (Memorize These)
+
+```
+Internal Cost = (input_tokens / 1000 × input_rate) + (output_tokens / 1000 × output_rate)
+
+Recommended Price = max(internal_cost × final_markup, $0.50)
+
+Gross Margin % = ((price - internal_cost) / price) × 100
+
+Final Markup = base_markup + segment_adjustment
+```
+
+### API Quick Calls
+
+```bash
+# Check today's budget status
+curl http://localhost:8080/api/orchestrator/status | jq '.budget_utilization_pct, .budget_alert_level'
+
+# Generate a quote
+curl -X POST http://localhost:8080/api/pricing/quote \
+  -d "model=k2p5" \
+  -d "complexity=medium" \
+  -d "segment=mid_market" \
+  -d "estimated_input=2000" \
+  -d "estimated_output=800"
+
+# Check pricing health
+curl http://localhost:8080/api/pricing/health | jq '.health.status, .health.avg_cost_per_task'
+```
+
 

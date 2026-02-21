@@ -143,6 +143,112 @@ class UnifiedOrchestrator:
         fallbacks = self.config.get("orchestration", {}).get("fallback_chain", {})
         return fallbacks.get(model_alias, "sonnet")
 
+    def validate_quote_request(self, model: str, complexity: str, segment: str = "mid_market", 
+                                estimated_input: int = 1000, estimated_output: int = 500) -> tuple:
+        """
+        Centralized validation for pricing quote requests.
+        Returns (is_valid: bool, error_message: str, sanitized_params: dict)
+        """
+        errors = []
+        
+        # Validate model
+        valid_models = ["k2p5", "sonnet", "opus", "minimax-m2.5", "codex"]
+        if model not in valid_models:
+            errors.append(f"Invalid model '{model}'. Must be one of: {', '.join(valid_models)}")
+        
+        # Validate complexity
+        valid_complexities = ["low", "medium", "high"]
+        if complexity not in valid_complexities:
+            errors.append(f"Invalid complexity '{complexity}'. Must be one of: {', '.join(valid_complexities)}")
+        
+        # Validate segment
+        valid_segments = ["enterprise", "mid_market", "smb", "startup"]
+        if segment not in valid_segments:
+            errors.append(f"Invalid segment '{segment}'. Must be one of: {', '.join(valid_segments)}")
+        
+        # Validate token estimates
+        try:
+            estimated_input = int(estimated_input)
+            estimated_output = int(estimated_output)
+            if estimated_input < 1 or estimated_output < 1:
+                errors.append("Token estimates must be positive integers")
+            if estimated_input > 100000 or estimated_output > 100000:
+                errors.append("Token estimates exceed maximum (100,000)")
+        except (TypeError, ValueError):
+            errors.append("Token estimates must be valid integers")
+        
+        if errors:
+            return False, "; ".join(errors), {}
+        
+        return True, "", {
+            "model": model,
+            "complexity": complexity,
+            "segment": segment,
+            "estimated_input": estimated_input,
+            "estimated_output": estimated_output
+        }
+
+    def bulk_generate_quotes(self, tasks: list) -> list:
+        """
+        Generate quotes for multiple tasks in a single batch operation.
+        More efficient than individual quote requests for bulk operations.
+        
+        Args:
+            tasks: List of dicts with keys: model, complexity, segment, 
+                   estimated_input, estimated_output
+        
+        Returns:
+            List of quote result dicts with validation status
+        """
+        results = []
+        
+        for idx, task in enumerate(tasks):
+            # Validate each task
+            is_valid, error_msg, params = self.validate_quote_request(
+                task.get("model", "k2p5"),
+                task.get("complexity", "medium"),
+                task.get("segment", "mid_market"),
+                task.get("estimated_input", 1000),
+                task.get("estimated_output", 500)
+            )
+            
+            if not is_valid:
+                results.append({
+                    "index": idx,
+                    "success": False,
+                    "error": error_msg,
+                    "task_preview": task.get("task_preview", "unnamed task")
+                })
+                continue
+            
+            # Generate quote
+            try:
+                quote = self.recommend_task_price(
+                    params["model"],
+                    params["estimated_input"],
+                    params["complexity"],
+                    params["segment"]
+                )
+                
+                guardrail = self.evaluate_pricing_guardrails(quote, task.get("delivery_type", "task"))
+                
+                results.append({
+                    "index": idx,
+                    "success": True,
+                    "quote": quote,
+                    "guardrail": guardrail,
+                    "task_preview": task.get("task_preview", "unnamed task")
+                })
+            except Exception as e:
+                results.append({
+                    "index": idx,
+                    "success": False,
+                    "error": str(e),
+                    "task_preview": task.get("task_preview", "unnamed task")
+                })
+        
+        return results
+
     def record_usage(self, model_alias, task, tokens=0):
         """Record model usage"""
         usage = {

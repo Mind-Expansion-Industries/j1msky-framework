@@ -1002,6 +1002,7 @@ HTML = '''<!DOCTYPE html>
             tabs: ['dashboard', 'models', 'spawn', 'teams'],
             failedTransitions: 0,
             maxRetries: 3,
+            bfcacheRestored: false,
 
             canTransition() {
                 const now = Date.now();
@@ -1837,9 +1838,10 @@ HTML = '''<!DOCTYPE html>
         });
 
         // Cleanup on page unload
-        window.addEventListener('pageshow', () => {
+        window.addEventListener('pageshow', (e) => {
             // Recover from back-forward cache restores where transitional flags may be stale.
-            if (NavState.isTransitioning || document.body.classList.contains('navigating')) {
+            if (e.persisted || NavState.isTransitioning || document.body.classList.contains('navigating')) {
+                NavState.bfcacheRestored = true;
                 NavState.reset();
                 const tab = NavState.normalizeTab(window.location.hash.slice(1) || SessionStore.load() || NavState.currentTab);
                 showTab(tab, false);

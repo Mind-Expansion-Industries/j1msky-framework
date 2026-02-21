@@ -5128,4 +5128,202 @@ P.S. - If you're loving it, would you leave us a review?
 - Meeting booking rate target: 5%+
 - A/B test subject lines weekly
 
+---
+
+## ❓ APPENDIX H: Frequently Asked Questions (FAQ)
+
+### General Questions
+
+**Q: What exactly is J1MSKY?**
+A: J1MSKY is an AI agent platform that deploys autonomous teams to handle tasks. Think of it as hiring a digital workforce that works 24/7—developers, researchers, writers, and analysts that you can spawn on demand.
+
+**Q: How is this different from ChatGPT?**
+A: Three key differences:
+1. **Autonomy**: J1MSKY agents complete multi-step workflows without babysitting
+2. **Multi-model**: We route tasks to the best AI for the job (not just one model)
+3. **Team-based**: Deploy pre-configured teams rather than single conversations
+
+**Q: Do I need technical skills to use J1MSKY?**
+A: No. The web dashboard lets you deploy agents with clicks, not code. Technical users can use our API for deeper integration.
+
+---
+
+### Pricing & Billing
+
+**Q: How much does it cost?**
+A: Three tiers:
+- **Starter**: $49/month (2 teams, limited tasks)
+- **Pro**: $99/month (all teams, unlimited tasks)
+- **Enterprise**: $299+/month (custom SLA, dedicated support)
+
+Pay-per-task options also available starting at $0.50/task.
+
+**Q: What's included in the price?**
+A: Platform access, all AI model costs, API access, webhook notifications, basic support, and usage analytics. No hidden fees.
+
+**Q: Can I change plans?**
+A: Yes, upgrade or downgrade anytime. Prorated billing applies.
+
+**Q: Is there a free trial?**
+A: Yes, 7-day free trial with full access to Pro features. No credit card required.
+
+**Q: What happens if I exceed my plan limits?**
+A: We notify you at 80% usage. You can upgrade instantly or tasks will queue until next billing cycle.
+
+---
+
+### Technical Questions
+
+**Q: What hardware do I need?**
+A: J1MSKY runs on a Raspberry Pi 4 (4GB minimum, 8GB recommended). We also offer cloud hosting for Enterprise customers.
+
+**Q: Is my data secure?**
+A: Yes. Your data stays on your infrastructure (Pi or cloud instance). We don't store task inputs/outputs on our servers. Enterprise includes SOC 2 compliance.
+
+**Q: Can I use my own API keys?**
+A: Yes. We support bringing your own keys for Anthropic, OpenAI, and other providers for custom deployments.
+
+**Q: What models are available?**
+A: Kimi K2.5, Claude Sonnet, Claude Opus, MiniMax M2.5, and OpenAI Codex. We add new models regularly.
+
+**Q: Is there an API?**
+A: Yes, full REST API with SDKs for Python, JavaScript, Go, and Rust.
+
+---
+
+### Usage Questions
+
+**Q: How long do tasks take?**
+A: Depends on complexity:
+- Simple tasks: 30 seconds - 2 minutes
+- Medium tasks: 2-10 minutes
+- Complex tasks: 10-30 minutes
+
+You can check real-time progress in the dashboard.
+
+**Q: What happens if a task fails?**
+A: Automatic retry up to 3 times. If still failing, you'll be notified with error details. Failed tasks don't count against your quota.
+
+**Q: Can I cancel a running task?**
+A: Yes, cancel anytime from the dashboard. You'll only be charged for tokens used up to cancellation.
+
+**Q: How do I know which model to use?**
+A: The dashboard recommends models based on your task. Generally:
+- Kimi: Fast coding and simple tasks
+- Sonnet: Writing, analysis, creative work
+- Opus: Complex reasoning and architecture
+
+**Q: Can agents work together?**
+A: Yes, deploy Teams (Code Team, Creative Team, etc.) where multiple agents collaborate on complex projects.
+
+---
+
+### Integration Questions
+
+**Q: Can J1MSKY integrate with my tools?**
+A: Yes. Webhooks notify your systems when agents complete tasks. API allows bidirectional integration with most platforms.
+
+**Q: Do you have Zapier/Make integrations?**
+A: Yes, both platforms have J1MSKY connectors. You can also use webhooks for custom integrations.
+
+**Q: Can I white-label J1MSKY?**
+A: Yes, available for Enterprise customers and Strategic Partners.
+
+**Q: Is there an on-premise option?**
+A: Yes, Enterprise includes on-premise deployment with full data isolation.
+
+---
+
+### Support Questions
+
+**Q: What support do you offer?**
+A: Tier-based:
+- **Starter**: Email support (48hr response)
+- **Pro**: Priority email + Slack (24hr response)
+- **Enterprise**: Dedicated success manager + phone (4hr response)
+
+**Q: Where can I find documentation?**
+A: docs.j1msky.ai has guides, API reference, and tutorials. Enterprise customers get onboarding sessions.
+
+**Q: Do you offer training?**
+A: Yes, included with Pro and Enterprise. Self-serve courses available for all tiers.
+
+**Q: How do I report a bug?**
+A: Email support@j1msky.ai or use the in-app feedback button. Include your task ID for faster resolution.
+
+---
+
+### Partnership Questions
+
+**Q: How do I become a partner?**
+A: Apply at j1msky.ai/partners. Three tiers available with commissions from 15-25%.
+
+**Q: Can I resell J1MSKY?**
+A: Yes, through our Partner Program. You can also bundle with your services.
+
+**Q: Do you offer affiliate commissions?**
+A: Yes, 15% recurring for 12 months on all paid referrals.
+
+---
+
+### Billing & Account
+
+**Q: How do I update my payment method?**
+A: Dashboard → Settings → Billing. Update credit card or switch to ACH.
+
+**Q: How do I cancel?**
+A: Dashboard → Settings → Subscription → Cancel. You keep access until end of billing period.
+
+**Q: Do you offer refunds?**
+A: Yes, 30-day money-back guarantee for new customers. Contact support.
+
+**Q: Can I get an invoice?**
+A: Yes, invoices generated automatically and emailed monthly. Available in dashboard anytime.
+
+---
+
+### Troubleshooting
+
+**Q: The dashboard won't load**
+A: Check:
+1. Pi is powered on and connected to network
+2. Try http://[pi-ip]:8080 (not localhost if accessing remotely)
+3. Service is running: `sudo systemctl status j1msky`
+
+**Q: Agents are failing to spawn**
+A: Usually one of:
+1. Rate limit reached - wait an hour
+2. Budget exceeded - check usage in dashboard
+3. API key invalid - verify in config
+
+**Q: Tasks are taking too long**
+A: Check Pi resources:
+- CPU: `htop`
+- Memory: `free -h`
+- Temperature: `vcgencmd measure_temp`
+
+If overheating, improve cooling.
+
+**Q: How do I reset everything?**
+A: Dashboard → Settings → Advanced → Reset. Or SSH in and run:
+```bash
+sudo systemctl stop j1msky
+rm -rf logs/*.json
+sudo systemctl start j1msky
+```
+
+---
+
+### Still Have Questions?
+
+**Contact us:**
+- General: support@j1msky.ai
+- Sales: sales@j1msky.ai
+- Partners: partners@j1msky.ai
+- Security: security@j1msky.ai
+
+**Live chat:** Available in dashboard (Pro+)
+**Community:** [Discord/Slack invite link]
+**Documentation:** docs.j1msky.ai
+
 

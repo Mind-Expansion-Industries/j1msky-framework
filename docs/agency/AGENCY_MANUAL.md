@@ -1777,6 +1777,160 @@ echo "config/api-keys.json" >> .gitignore
 
 ---
 
+## 📖 GLOSSARY
+
+### A
+
+**Agent**: An autonomous AI worker that performs tasks. J1MSKY agents can research, write, code, and analyze without human intervention.
+
+**API (Application Programming Interface)**: A way for software to communicate with J1MSKY programmatically. Allows integration with other tools.
+
+**A/B Testing**: Comparing two versions of something (pricing, messaging) to see which performs better.
+
+### B
+
+**Budget**: The daily or monthly spending limit for API calls. Prevents runaway costs.
+
+### C
+
+**Circuit Breaker**: A safety feature that stops sending requests to failing services to prevent cascading failures.
+
+**Cron**: A time-based job scheduler. Used to run tasks at specific times (e.g., "every Monday at 9am").
+
+### D
+
+**Dashboard**: The web interface for monitoring and controlling J1MSKY. Available at http://your-pi-ip:8080.
+
+**Deployment**: The process of installing and configuring J1MSKY on your hardware.
+
+### E
+
+**Enterprise**: The highest tier of J1MSKY service, including custom SLAs, dedicated support, and advanced security.
+
+**Experiment**: In A/B testing, a comparison between two or more variants to determine which performs better.
+
+### F
+
+**Fallback**: An alternative model or method used when the primary choice is unavailable.
+
+### G
+
+**Guardrail**: A business rule that prevents undesirable outcomes (e.g., minimum margin requirements).
+
+### H
+
+**Health Check**: An automated check to verify J1MSKY is running correctly.
+
+**Hook**: In web development, a function that runs in response to an event (e.g., webhook).
+
+### I
+
+**Integration**: Connecting J1MSKY with other software tools or platforms.
+
+**IP Whitelist**: A security feature allowing only specific IP addresses to access J1MSKY.
+
+### J
+
+**J1MSKY**: The AI agent platform you're using. Pronounced "Jim-sky."
+
+### K
+
+**K2.5**: Kimi K2.5, a fast and cost-effective AI model optimized for coding tasks.
+
+### L
+
+**Latency**: The time delay between requesting a task and receiving a response.
+
+**Log**: A record of events, useful for debugging and monitoring.
+
+### M
+
+**Markup**: The multiplier applied to internal costs to determine customer pricing.
+
+**Model**: An AI system (like Claude or Kimi) that performs tasks. J1MSKY routes to the best model for each job.
+
+**Multi-model**: Using multiple AI models rather than being locked into one.
+
+### N
+
+**Notification**: An alert sent via email, Slack, or webhook when something happens.
+
+### O
+
+**Orchestrator**: The system that decides which model to use for each task based on availability, cost, and capability.
+
+**Ops (Operations)**: The management and monitoring of running systems.
+
+**Opus**: Claude Opus, the most capable (and expensive) AI model, best for complex reasoning.
+
+### P
+
+**Partner**: A company or individual who resells or implements J1MSKY for clients.
+
+**Port**: A number that identifies a specific service on a computer (J1MSKY uses port 8080).
+
+**Pricing Policy**: The rules that determine how much to charge customers (markup, minimums, segments).
+
+### Q
+
+**Queue**: A waiting line for tasks that can't run immediately due to rate limits or capacity.
+
+**Quota**: A limit on how much of a resource can be used (e.g., API calls per hour).
+
+### R
+
+**Raspberry Pi**: A small, affordable computer that can run J1MSKY.
+
+**Rate Limit**: A restriction on how many API calls can be made in a time period.
+
+**Retry**: Attempting a failed operation again, often with a delay.
+
+### S
+
+**Segment**: A customer category (Startup, SMB, Mid-Market, Enterprise) with different pricing.
+
+**SDK (Software Development Kit)**: Tools and libraries for building applications that use J1MSKY.
+
+**Sonnet**: Claude Sonnet, a balanced AI model with good quality and reasonable cost.
+
+**Spawn**: To create and start a new agent.
+
+**Status**: The current condition of an agent or system (e.g., running, completed, failed).
+
+**Subagent**: An agent spawned by another agent or system.
+
+### T
+
+**Task**: A unit of work assigned to an agent (e.g., "Write a blog post").
+
+**Team**: A pre-configured group of agents with complementary skills (Code Team, Creative Team, etc.).
+
+**Throttling**: Limiting the rate of operations to prevent overload.
+
+**Token**: A unit of text processed by AI models (roughly 4 characters or 0.75 words).
+
+### U
+
+**Usage**: The amount of resources consumed (tokens, API calls, cost).
+
+### V
+
+**Variant**: One version in an A/B test (e.g., control vs. test).
+
+**vCPU**: Virtual CPU, a measure of processing power.
+
+**Virtual Environment**: An isolated Python environment for running J1MSKY.
+
+### W
+
+**Webhook**: An HTTP callback that sends data to external systems when events occur.
+
+**Workflow**: A sequence of connected tasks that accomplish a larger goal.
+
+**Worker**: A background process that executes tasks.
+
+---
+
 ## 🔮 FUTURE FEATURES
 
 Coming soon:

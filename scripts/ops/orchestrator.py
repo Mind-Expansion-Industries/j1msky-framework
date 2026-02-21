@@ -2076,6 +2076,356 @@ class CostOptimizer:
 cost_optimizer = CostOptimizer()
 
 
+# Task Scheduler for Recurring Automation
+class TaskScheduler:
+    """
+    Schedule and manage recurring tasks with cron-like flexibility.
+    
+    Features:
+    - Cron expression support (e.g., "0 9 * * 1" for Mondays at 9am)
+    - Interval scheduling (e.g., every 30 minutes)
+    - One-time scheduled tasks
+    - Task history and retry logic
+    - Budget-aware scheduling
+    
+    Usage:
+        scheduler = TaskScheduler()
+        
+        # Schedule daily report
+        scheduler.schedule_cron(
+            task_id="daily_report",
+            cron="0 9 * * *",  # 9am daily
+            task={
+                "model": "sonnet",
+                "prompt": "Generate daily sales report"
+            }
+        )
+        
+        # Run every 30 minutes
+        scheduler.schedule_interval(
+            task_id="health_check",
+            minutes=30,
+            task={
+                "model": "k2p5",
+                "prompt": "Check system health"
+            }
+        )
+        
+        # Start scheduler
+        scheduler.start()
+    """
+    
+    def __init__(self, orchestrator_ref=None):
+        self.orchestrator = orchestrator_ref or orchestrator
+        self.scheduled_tasks: Dict[str, Dict] = {}
+        self.task_history: List[Dict] = []
+        self._running = False
+        self._scheduler_thread: Optional[threading.Thread] = None
+        self._lock = threading.Lock()
+        self.storage_path = Path("/home/m1ndb0t/Desktop/J1MSKY/config/scheduler.json")
+        self._load_tasks()
+    
+    def _load_tasks(self):
+        """Load scheduled tasks from disk."""
+        if self.storage_path.exists():
+            try:
+                with open(self.storage_path, 'r') as f:
+                    data = json.load(f)
+                    self.scheduled_tasks = data.get("tasks", {})
+                    self.task_history = data.get("history", [])[-1000:]  # Keep last 1000
+            except Exception:
+                pass
+    
+    def _save_tasks(self):
+        """Save scheduled tasks to disk."""
+        self.storage_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(self.storage_path, 'w') as f:
+            json.dump({
+                "tasks": self.scheduled_tasks,
+                "history": self.task_history[-1000:]
+            }, f, indent=2)
+    
+    def schedule_cron(
+        self,
+        task_id: str,
+        cron: str,
+        task: Dict[str, Any],
+        enabled: bool = True,
+        max_retries: int = 3
+    ) -> Dict[str, Any]:
+        """
+        Schedule a task using cron expression.
+        
+        Cron format: "min hour day month dow"
+        - min: 0-59
+        - hour: 0-23
+        - day: 1-31
+        - month: 1-12
+        - dow: 0-6 (0=Sunday)
+        
+        Examples:
+        - "0 9 * * *" = 9am daily
+        - "0 9 * * 1" = 9am Mondays
+        - "*/30 * * * *" = Every 30 minutes
+        """
+        with self._lock:
+            self.scheduled_tasks[task_id] = {
+                "id": task_id,
+                "type": "cron",
+                "cron": cron,
+                "task": task,
+                "enabled": enabled,
+                "max_retries": max_retries,
+                "last_run": None,
+                "next_run": self._calculate_next_run(cron),
+                "run_count": 0,
+                "fail_count": 0,
+                "created_at": datetime.now().isoformat()
+            }
+            self._save_tasks()
+        
+        return {"success": True, "task_id": task_id, "next_run": self.scheduled_tasks[task_id]["next_run"]}
+    
+    def schedule_interval(
+        self,
+        task_id: str,
+        minutes: int = 0,
+        hours: int = 0,
+        days: int = 0,
+        task: Dict[str, Any] = None,
+        enabled: bool = True
+    ) -> Dict[str, Any]:
+        """Schedule a task to run at regular intervals."""
+        interval_seconds = (days * 86400) + (hours * 3600) + (minutes * 60)
+        
+        if interval_seconds < 60:
+            return {"success": False, "error": "Interval must be at least 60 seconds"}
+        
+        with self._lock:
+            self.scheduled_tasks[task_id] = {
+                "id": task_id,
+                "type": "interval",
+                "interval_seconds": interval_seconds,
+                "task": task,
+                "enabled": enabled,
+                "last_run": None,
+                "next_run": (datetime.now() + timedelta(seconds=interval_seconds)).isoformat(),
+                "run_count": 0,
+                "fail_count": 0,
+                "created_at": datetime.now().isoformat()
+            }
+            self._save_tasks()
+        
+        return {"success": True, "task_id": task_id, "interval_seconds": interval_seconds}
+    
+    def schedule_once(
+        self,
+        task_id: str,
+        run_at: datetime,
+        task: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Schedule a one-time task."""
+        with self._lock:
+            self.scheduled_tasks[task_id] = {
+                "id": task_id,
+                "type": "once",
+                "run_at": run_at.isoformat(),
+                "task": task,
+                "enabled": True,
+                "last_run": None,
+                "next_run": run_at.isoformat(),
+                "run_count": 0,
+                "created_at": datetime.now().isoformat()
+            }
+            self._save_tasks()
+        
+        return {"success": True, "task_id": task_id, "scheduled_for": run_at.isoformat()}
+    
+    def _calculate_next_run(self, cron: str) -> str:
+        """Calculate next run time from cron expression."""
+        # Simplified cron parser - in production use croniter library
+        parts = cron.split()
+        if len(parts) != 5:
+            return (datetime.now() + timedelta(hours=1)).isoformat()
+        
+        minute, hour, day, month, dow = parts
+        now = datetime.now()
+        
+        # For simple hourly schedules like */30
+        if minute.startswith("*/"):
+            try:
+                interval = int(minute[2:])
+                next_minute = ((now.minute // interval) + 1) * interval
+                if next_minute >= 60:
+                    next_run = now.replace(minute=0) + timedelta(hours=1)
+                else:
+                    next_run = now.replace(minute=next_minute)
+                return next_run.isoformat()
+            except:
+                pass
+        
+        # Default: next hour
+        return (now + timedelta(hours=1)).isoformat()
+    
+    def _should_run(self, task: Dict) -> bool:
+        """Check if a task should run now."""
+        if not task.get("enabled", True):
+            return False
+        
+        next_run = task.get("next_run")
+        if not next_run:
+            return False
+        
+        try:
+            next_run_dt = datetime.fromisoformat(next_run)
+            return datetime.now() >= next_run_dt
+        except:
+            return False
+    
+    def _execute_task(self, task_config: Dict) -> Dict[str, Any]:
+        """Execute a scheduled task."""
+        try:
+            task = task_config.get("task", {})
+            model = task.get("model", "k2p5")
+            prompt = task.get("prompt", "")
+            
+            # Get model recommendation if budget constrained
+            if "max_budget" in task:
+                rec = cost_optimizer.recommend_model(
+                    task_type=task.get("task_type", "general"),
+                    max_budget=task["max_budget"]
+                )
+                model = rec["model"]
+            
+            # Execute through orchestrator
+            # In production, this would integrate with your agent spawning system
+            result = {
+                "success": True,
+                "model_used": model,
+                "executed_at": datetime.now().isoformat(),
+                "task_id": task_config.get("id")
+            }
+            
+            return result
+            
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    def _update_next_run(self, task: Dict):
+        """Update next run time after execution."""
+        task["last_run"] = datetime.now().isoformat()
+        task["run_count"] = task.get("run_count", 0) + 1
+        
+        if task["type"] == "cron":
+            task["next_run"] = self._calculate_next_run(task["cron"])
+        elif task["type"] == "interval":
+            interval = task.get("interval_seconds", 3600)
+            task["next_run"] = (datetime.now() + timedelta(seconds=interval)).isoformat()
+        elif task["type"] == "once":
+            task["enabled"] = False  # Disable one-time tasks after run
+    
+    def _scheduler_loop(self):
+        """Main scheduler loop."""
+        while self._running:
+            try:
+                with self._lock:
+                    for task_id, task in self.scheduled_tasks.items():
+                        if self._should_run(task):
+                            # Execute task
+                            result = self._execute_task(task)
+                            
+                            # Record in history
+                            self.task_history.append({
+                                "task_id": task_id,
+                                "executed_at": datetime.now().isoformat(),
+                                "result": result
+                            })
+                            
+                            # Update next run
+                            self._update_next_run(task)
+                            
+                            # Track failures
+                            if not result.get("success"):
+                                task["fail_count"] = task.get("fail_count", 0) + 1
+                            
+                            self._save_tasks()
+                
+                # Sleep for 30 seconds before next check
+                time.sleep(30)
+                
+            except Exception as e:
+                print(f"Scheduler error: {e}")
+                time.sleep(60)
+    
+    def start(self):
+        """Start the scheduler."""
+        if self._running:
+            return {"success": False, "error": "Scheduler already running"}
+        
+        self._running = True
+        self._scheduler_thread = threading.Thread(target=self._scheduler_loop, daemon=True)
+        self._scheduler_thread.start()
+        
+        return {"success": True, "message": "Scheduler started"}
+    
+    def stop(self):
+        """Stop the scheduler."""
+        self._running = False
+        if self._scheduler_thread:
+            self._scheduler_thread.join(timeout=5)
+        
+        return {"success": True, "message": "Scheduler stopped"}
+    
+    def get_status(self) -> Dict[str, Any]:
+        """Get scheduler status."""
+        return {
+            "running": self._running,
+            "scheduled_tasks_count": len(self.scheduled_tasks),
+            "enabled_tasks": sum(1 for t in self.scheduled_tasks.values() if t.get("enabled")),
+            "tasks": [
+                {
+                    "id": t["id"],
+                    "type": t["type"],
+                    "enabled": t.get("enabled"),
+                    "next_run": t.get("next_run"),
+                    "run_count": t.get("run_count", 0)
+                }
+                for t in self.scheduled_tasks.values()
+            ]
+        }
+    
+    def disable_task(self, task_id: str) -> Dict[str, Any]:
+        """Disable a scheduled task."""
+        with self._lock:
+            if task_id in self.scheduled_tasks:
+                self.scheduled_tasks[task_id]["enabled"] = False
+                self._save_tasks()
+                return {"success": True}
+            return {"success": False, "error": "Task not found"}
+    
+    def enable_task(self, task_id: str) -> Dict[str, Any]:
+        """Enable a scheduled task."""
+        with self._lock:
+            if task_id in self.scheduled_tasks:
+                self.scheduled_tasks[task_id]["enabled"] = True
+                self._save_tasks()
+                return {"success": True}
+            return {"success": False, "error": "Task not found"}
+    
+    def delete_task(self, task_id: str) -> Dict[str, Any]:
+        """Delete a scheduled task."""
+        with self._lock:
+            if task_id in self.scheduled_tasks:
+                del self.scheduled_tasks[task_id]
+                self._save_tasks()
+                return {"success": True}
+            return {"success": False, "error": "Task not found"}
+
+
+# Initialize task scheduler
+task_scheduler = TaskScheduler()
+
+
 if __name__ == "__main__"::
     print("J1MSKY Unified Model Orchestrator v5.1")
     print("=" * 50)

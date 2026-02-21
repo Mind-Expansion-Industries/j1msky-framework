@@ -30,6 +30,7 @@ COPY . /usr/share/nginx/html
 
 - `index.html` — Complete landing page + pricing offer + Netlify-ready lead form
 - `thank-you.html` — Post-submit conversion page
+- `saas.html` — Vertical landing page for SaaS founders (SEO + conversion)
 - `compare.html` — Comparison page: J1MSKY vs Hiring (addresses key objection)
 - `refer.html` — Referral program page for viral growth (earn free months)
 - `case-study.html` — Social proof page showing real client results

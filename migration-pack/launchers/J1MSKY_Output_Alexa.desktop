@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=jimsky Output: Alexa
+Comment=Switch audio output to Alexa Bluetooth
+Exec=/bin/bash -lc 'cd /home/m1ndb0t/Desktop/J1MSKY && ./set-audio-profile.sh alexa'
+Icon=audio-speakers-bluetooth
+Terminal=true
+Type=Application
+Categories=AudioVideo;Settings;

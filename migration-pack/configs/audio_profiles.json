@@ -1,0 +1,26 @@
+{
+  "name": "jimsky-audio-profiles",
+  "default": "alexa",
+  "profiles": {
+    "alexa": {
+      "label": "Alexa Bluetooth (Echo-CXG)",
+      "sink_match": "^bluez_output.EC_0D_E4_92_37_5A",
+      "volume": "90%"
+    },
+    "jack": {
+      "label": "3.5mm Jack",
+      "sink_match": "^alsa_output.platform-fe00b840.mailbox.stereo-fallback$",
+      "volume": "80%"
+    },
+    "hdmi1": {
+      "label": "HDMI 1",
+      "sink_match": "^alsa_output.platform-fef00700.hdmi.hdmi-stereo$",
+      "volume": "80%"
+    },
+    "hdmi2": {
+      "label": "HDMI 2",
+      "sink_match": "platform-fef05700.hdmi",
+      "volume": "80%"
+    }
+  }
+}

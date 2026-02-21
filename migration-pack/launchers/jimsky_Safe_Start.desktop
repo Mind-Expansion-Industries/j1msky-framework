@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=jimsky Safe Start
+Comment=Check ports and start only missing services
+Exec=/bin/bash -lc '/home/m1ndb0t/Desktop/J1MSKY/scripts/startup/safe-start.sh; sleep 1; xdg-open http://127.0.0.1:8080; xdg-open http://127.0.0.1:8093'
+Icon=system-run
+Terminal=true
+Type=Application
+Categories=System;

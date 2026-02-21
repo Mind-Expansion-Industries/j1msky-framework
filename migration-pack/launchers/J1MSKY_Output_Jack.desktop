@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=jimsky Output: Jack
+Comment=Switch audio output to 3.5mm jack
+Exec=/bin/bash -lc 'cd /home/m1ndb0t/Desktop/J1MSKY && ./set-audio-profile.sh jack'
+Icon=audio-headphones
+Terminal=true
+Type=Application
+Categories=AudioVideo;Settings;

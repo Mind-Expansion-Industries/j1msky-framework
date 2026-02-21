@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=jimsky Alexa Command Center
+Comment=Open local Alexa command panel
+Exec=/bin/bash -lc 'nohup python3 /home/m1ndb0t/Desktop/J1MSKY/ALEXA_COMMAND_CENTER.py >/tmp/alexa-cmd-center.log 2>&1 & sleep 1; xdg-open http://127.0.0.1:8092'
+Icon=audio-card
+Terminal=false
+Type=Application
+Categories=System;AudioVideo;

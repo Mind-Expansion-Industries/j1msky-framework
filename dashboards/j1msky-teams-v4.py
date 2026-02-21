@@ -2383,6 +2383,52 @@ class MultiAgentServer(http.server.BaseHTTPRequestHandler):
                 'requires_review': len(alerts) > 0
             })
 
+        elif self.path == '/api/pricing/experiment-summary':
+            raw_quotes = params.get('quotes', ['[]'])[0]
+            try:
+                quotes = json.loads(raw_quotes)
+                if not isinstance(quotes, list):
+                    raise ValueError('quotes must be a JSON array')
+            except Exception as e:
+                self.send_json({'success': False, 'error': f'Invalid quotes payload: {e}'})
+                return
+
+            control = [q for q in quotes if q.get('variant') == 'control']
+            test = [q for q in quotes if q.get('variant') == 'test']
+
+            def summarize_variant(variant_quotes):
+                if not variant_quotes:
+                    return {'count': 0, 'approval_rate': 0.0, 'avg_margin_pct': 0.0}
+                total = len(variant_quotes)
+                approved = sum(1 for q in variant_quotes if q.get('decision_status') == 'approved')
+                avg_margin = sum(q.get('gross_margin_pct', 0.0) for q in variant_quotes) / total
+                return {
+                    'count': total,
+                    'approval_rate': round(approved / total, 2),
+                    'avg_margin_pct': round(avg_margin, 2)
+                }
+
+            control_summary = summarize_variant(control)
+            test_summary = summarize_variant(test)
+
+            recommendation = 'inconclusive'
+            if control_summary['count'] > 0 and test_summary['count'] > 0:
+                if test_summary['avg_margin_pct'] > control_summary['avg_margin_pct'] and \
+                   test_summary['approval_rate'] >= control_summary['approval_rate'] * 0.9:
+                    recommendation = 'roll_out'
+                elif test_summary['approval_rate'] < control_summary['approval_rate'] * 0.8:
+                    recommendation = 'discard'
+                elif test_summary['avg_margin_pct'] < control_summary['avg_margin_pct'] * 0.9:
+                    recommendation = 'discard'
+
+            self.send_json({
+                'success': True,
+                'status': 'complete' if control_summary['count'] > 0 and test_summary['count'] > 0 else 'in_progress',
+                'control': control_summary,
+                'test': test_summary,
+                'recommendation': recommendation
+            })
+
         elif self.path == '/api/pricing/quote':
             model = params.get('model', ['k2p5'])[0]
             complexity = params.get('complexity', ['medium'])[0]

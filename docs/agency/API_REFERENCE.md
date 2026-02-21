@@ -619,6 +619,43 @@ Compares two weeks of pricing metrics and flags significant shifts for calibrati
 }
 ```
 
+#### Summarize Experiment Results
+**Endpoint:** `POST /pricing/experiment-summary`
+
+Analyzes experiment data and provides rollout recommendation based on control vs test performance.
+
+**Request (form fields):**
+- `quotes`: JSON array of tracked experiment quotes
+
+**Quote object fields:**
+- `variant`: `control|test`
+- `decision_status`: `approved|escalated`
+- `gross_margin_pct`: float
+
+**Response:**
+```json
+{
+  "success": true,
+  "status": "complete",
+  "control": {
+    "count": 45,
+    "approval_rate": 0.84,
+    "avg_margin_pct": 72.5
+  },
+  "test": {
+    "count": 12,
+    "approval_rate": 0.75,
+    "avg_margin_pct": 78.0
+  },
+  "recommendation": "roll_out"
+}
+```
+
+**Recommendation Values:**
+- `roll_out` → Test beats control on margin without significant approval rate drop
+- `discard` → Test underperforms control on key metrics
+- `inconclusive` → Insufficient data or mixed results
+
 #### Generate Exception Alert Payload
 **Endpoint:** `POST /pricing/exception-alert`
 

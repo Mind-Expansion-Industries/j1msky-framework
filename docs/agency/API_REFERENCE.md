@@ -2870,6 +2870,452 @@ quotes = client.get_batch_quotes(
 
 ---
 
+## 🍳 API Cookbook
+
+Real-world recipes for common use cases.
+
+---
+
+### Recipe 1: Content Creation Pipeline
+
+**Use Case:** Automatically produce a blog post from topic to publication.
+
+**Workflow:**
+1. Research the topic
+2. Write an outline
+3. Write the full article
+4. Edit and optimize
+5. Generate social media snippets
+
+**Implementation:**
+```python
+import requests
+import time
+
+BASE_URL = "http://localhost:8080/api"
+
+def content_pipeline(topic):
+    """End-to-end content creation pipeline."""
+    
+    # Step 1: Research
+    research_agent = requests.post(f"{BASE_URL}/spawn", json={
+        "model": "sonnet",
+        "task": f"Research: {topic}. Find 5 key insights, 3 statistics, and 2 expert quotes.",
+        "priority": "normal"
+    }).json()
+    
+    research = poll_for_completion(research_agent["agent_id"])
+    
+    # Step 2: Outline
+    outline_agent = requests.post(f"{BASE_URL}/spawn", json={
+        "model": "k2p5",
+        "task": f"Create blog outline based on this research:\n{research['result']}\n\nInclude: intro, 5 sections, conclusion",
+        "priority": "normal"
+    }).json()
+    
+    outline = poll_for_completion(outline_agent["agent_id"])
+    
+    # Step 3: Write article
+    writer_agent = requests.post(f"{BASE_URL}/spawn", json={
+        "model": "sonnet",
+        "task": f"Write 800-word blog post about '{topic}' following this outline:\n{outline['result']}\n\nTone: Professional but conversational. Include a compelling headline.",
+        "priority": "normal"
+    }).json()
+    
+    article = poll_for_completion(writer_agent["agent_id"])
+    
+    # Step 4: Edit
+    editor_agent = requests.post(f"{BASE_URL}/spawn", json={
+        "model": "opus",
+        "task": f"Edit this blog post for clarity, flow, and SEO. Add meta description:\n\n{article['result']}",
+        "priority": "normal"
+    }).json()
+    
+    final_article = poll_for_completion(editor_agent["agent_id"])
+    
+    # Step 5: Social snippets
+    social_agent = requests.post(f"{BASE_URL}/spawn", json={
+        "model": "sonnet",
+        "task": f"Create 3 tweet-length snippets and 1 LinkedIn post from this article:\n{final_article['result']}",
+        "priority": "low"
+    }).json()
+    
+    social = poll_for_completion(social_agent["agent_id"])
+    
+    return {
+        "research": research["result"],
+        "outline": outline["result"],
+        "article": final_article["result"],
+        "social": social["result"],
+        "total_cost": sum([
+            research.get("cost", 0),
+            outline.get("cost", 0),
+            article.get("cost", 0),
+            final_article.get("cost", 0),
+            social.get("cost", 0)
+        ])
+    }
+
+def poll_for_completion(agent_id, timeout=300):
+    """Poll until agent completes."""
+    start = time.time()
+    while time.time() - start < timeout:
+        status = requests.get(f"{BASE_URL}/agent/{agent_id}").json()
+        if status.get("status") == "completed":
+            return status
+        elif status.get("status") == "failed":
+            raise Exception(f"Agent failed: {status.get('error')}")
+        time.sleep(2)
+    raise TimeoutError("Agent didn't complete in time")
+
+# Usage
+result = content_pipeline("AI Automation in Marketing")
+print(f"Article:\n{result['article']}")
+print(f"\nSocial posts:\n{result['social']}")
+print(f"\nTotal cost: ${result['total_cost']:.4f}")
+```
+
+---
+
+### Recipe 2: Code Review Automation
+
+**Use Case:** Automated code review and fix suggestions.
+
+**Implementation:**
+```python
+def automated_code_review(code, language="python"):
+    """Multi-stage code review with fixes."""
+    
+    # Step 1: Initial review
+    review_agent = requests.post(f"{BASE_URL}/spawn", json={
+        "model": "k2p5",
+        "task": f"Review this {language} code for bugs, security issues, and style violations. List each issue with line numbers:\n\n```{language}\n{code}\n```",
+        "priority": "normal"
+    }).json()
+    
+    review = poll_for_completion(review_agent["agent_id"])
+    
+    # Step 2: Generate fixes
+    fix_agent = requests.post(f"{BASE_URL}/spawn", json={
+        "model": "k2p5",
+        "task": f"Fix the issues identified in this code review. Return only the corrected code:\n\nOriginal code:\n{code}\n\nIssues to fix:\n{review['result']}",
+        "priority": "normal"
+    }).json()
+    
+    fixed = poll_for_completion(fix_agent["agent_id"])
+    
+    # Step 3: Security audit
+    security_agent = requests.post(f"{BASE_URL}/spawn", json={
+        "model": "sonnet",
+        "task": f"Security audit of this code. Check for: injection vulnerabilities, exposed secrets, unsafe deserialization, path traversal:\n\n```{language}\n{fixed['result']}\n```",
+        "priority": "high"
+    }).json()
+    
+    security = poll_for_completion(security_agent["agent_id"])
+    
+    return {
+        "original": code,
+        "review": review["result"],
+        "fixed_code": fixed["result"],
+        "security_audit": security["result"],
+        "total_cost": sum([
+            review.get("cost", 0),
+            fixed.get("cost", 0),
+            security.get("cost", 0)
+        ])
+    }
+```
+
+---
+
+### Recipe 3: Competitive Intelligence Monitor
+
+**Use Case:** Monitor competitor websites and generate alerts.
+
+**Implementation:**
+```python
+def monitor_competitor(url, competitor_name):
+    """Monitor competitor website for changes."""
+    
+    # Step 1: Scrape and analyze
+    research_agent = requests.post(f"{BASE_URL}/spawn", json={
+        "model": "sonnet",
+        "task": f"Analyze {url}. Extract: pricing, key features, messaging, target audience, recent changes. Format as structured report.",
+        "priority": "normal"
+    }).json()
+    
+    analysis = poll_for_completion(research_agent["agent_id"])
+    
+    # Step 2: Compare to our positioning
+    comparison_agent = requests.post(f"{BASE_URL}/spawn", json={
+        "model": "opus",
+        "task": f"Compare this competitor analysis to J1MSKY. Identify: their strengths, their weaknesses, how we should position against them, recommended messaging.\n\nCompetitor analysis:\n{analysis['result']}",
+        "priority": "normal"
+    }).json()
+    
+    comparison = poll_for_completion(comparison_agent["agent_id"])
+    
+    # Store for historical tracking
+    store_competitor_data(competitor_name, analysis["result"])
+    
+    return {
+        "competitor": competitor_name,
+        "analysis": analysis["result"],
+        "positioning": comparison["result"]
+    }
+
+def store_competitor_data(name, data):
+    """Store competitor snapshot for change detection."""
+    import json
+    from datetime import datetime
+    
+    snapshot = {
+        "date": datetime.now().isoformat(),
+        "data": data
+    }
+    
+    # Compare to previous
+    try:
+        with open(f"competitors/{name}_latest.json") as f:
+            previous = json.load(f)
+        
+        # Generate diff
+        diff_agent = requests.post(f"{BASE_URL}/spawn", json={
+            "model": "k2p5",
+            "task": f"Compare these two competitor snapshots and identify what changed:\n\nPrevious:\n{previous['data']}\n\nCurrent:\n{data}",
+            "priority": "normal"
+        }).json()
+        
+        diff = poll_for_completion(diff_agent["agent_id"])
+        
+        if "no changes" not in diff["result"].lower():
+            # Send alert
+            requests.post(f"{BASE_URL}/webhooks", json={
+                "url": "https://your-slack-webhook.com",
+                "event": f"Competitor {name} has changes: {diff['result'][:200]}"
+            })
+    except FileNotFoundError:
+        pass
+    
+    # Save current
+    with open(f"competitors/{name}_latest.json", "w") as f:
+        json.dump(snapshot, f)
+```
+
+---
+
+### Recipe 4: Customer Support Triage
+
+**Use Case:** Classify and route support tickets automatically.
+
+**Implementation:**
+```python
+def triage_support_ticket(ticket_text, customer_id):
+    """Classify and route support ticket."""
+    
+    # Step 1: Classify issue
+    classify_agent = requests.post(f"{BASE_URL}/spawn", json={
+        "model": "k2p5",
+        "task": f"Classify this support ticket. Categories: bug_report, feature_request, billing_question, account_issue, technical_support. Also assign priority (low/medium/high/urgent) and estimate complexity (simple/moderate/complex).\n\nTicket: {ticket_text}",
+        "priority": "high"
+    }).json()
+    
+    classification = poll_for_completion(classify_agent["agent_id"])
+    
+    # Step 2: Generate suggested response
+    response_agent = requests.post(f"{BASE_URL}/spawn", json={
+        "model": "sonnet",
+        "task": f"Draft a helpful response to this support ticket. If it's a common issue, provide solution steps. If complex, set expectations for follow-up.\n\nTicket: {ticket_text}\n\nClassification: {classification['result']}",
+        "priority": "normal"
+    }).json()
+    
+    response = poll_for_completion(response_agent["agent_id"])
+    
+    # Step 3: Route to appropriate team
+    routing_rules = {
+        "billing_question": "billing@company.com",
+        "technical_support": "tech-support@company.com",
+        "feature_request": "product@company.com",
+        "bug_report": "engineering@company.com",
+        "account_issue": "accounts@company.com"
+    }
+    
+    category = extract_category(classification["result"])
+    assigned_team = routing_rules.get(category, "support@company.com")
+    
+    return {
+        "ticket_id": f"TICKET_{customer_id}_{int(time.time())}",
+        "classification": classification["result"],
+        "suggested_response": response["result"],
+        "assigned_team": assigned_team,
+        "auto_reply_sent": True
+    }
+
+def extract_category(classification_text):
+    """Extract category from classification."""
+    categories = ["bug_report", "feature_request", "billing_question", 
+                  "account_issue", "technical_support"]
+    for cat in categories:
+        if cat in classification_text.lower():
+            return cat
+    return "general"
+```
+
+---
+
+### Recipe 5: A/B Test Analysis
+
+**Use Case:** Analyze A/B test results and generate recommendations.
+
+**Implementation:**
+```python
+def analyze_ab_test(experiment_id):
+    """Analyze A/B test and generate report."""
+    
+    # Get results from orchestrator
+    results = requests.post(f"{BASE_URL}/orchestrator/experiment/results", json={
+        "experiment_id": experiment_id
+    }).json()
+    
+    if "error" in results:
+        return {"error": results["error"]}
+    
+    # Generate analysis
+    analysis_agent = requests.post(f"{BASE_URL}/spawn", json={
+        "model": "opus",
+        "task": f"Analyze these A/B test results and provide: 1) Executive summary, 2) Statistical significance assessment, 3) Recommendation (roll out / keep testing / stop), 4) Risks to consider.\n\nResults:\n{json.dumps(results, indent=2)}",
+        "priority": "normal"
+    }).json()
+    
+    analysis = poll_for_completion(analysis_agent["agent_id"])
+    
+    # Generate presentation summary
+    summary_agent = requests.post(f"{BASE_URL}/spawn", json={
+        "model": "sonnet",
+        "task": f"Create a 3-slide presentation summary of these A/B test results:\n\n{analysis['result']}\n\nFormat: Slide 1 (Results), Slide 2 (Insights), Slide 3 (Recommendation)",
+        "priority": "low"
+    }).json()
+    
+    summary = poll_for_completion(summary_agent["agent_id"])
+    
+    return {
+        "experiment_id": experiment_id,
+        "raw_results": results,
+        "analysis": analysis["result"],
+        "presentation": summary["result"]
+    }
+```
+
+---
+
+### Recipe 6: Data Processing Pipeline
+
+**Use Case:** Process large datasets in batches with agents.
+
+**Implementation:**
+```python
+def batch_process_data(data_items, task_template, batch_size=10):
+    """Process data items in parallel batches."""
+    
+    results = []
+    batches = [data_items[i:i+batch_size] for i in range(0, len(data_items), batch_size)]
+    
+    for batch_idx, batch in enumerate(batches):
+        print(f"Processing batch {batch_idx + 1}/{len(batches)}...")
+        
+        # Spawn agents for each item in batch
+        agent_ids = []
+        for item in batch:
+            task = task_template.format(item=item)
+            agent = requests.post(f"{BASE_URL}/spawn", json={
+                "model": "k2p5",
+                "task": task,
+                "priority": "normal"
+            }).json()
+            agent_ids.append(agent["agent_id"])
+        
+        # Wait for all to complete
+        for agent_id in agent_ids:
+            result = poll_for_completion(agent_id, timeout=600)
+            results.append(result)
+    
+    # Aggregate results
+    aggregate_agent = requests.post(f"{BASE_URL}/spawn", json={
+        "model": "opus",
+        "task": f"Aggregate and summarize these {len(results)} results. Identify patterns, outliers, and key insights.\n\n" + "\n---\n".join([r["result"] for r in results]),
+        "priority": "normal"
+    }).json()
+    
+    summary = poll_for_completion(aggregate_agent["agent_id"])
+    
+    return {
+        "individual_results": results,
+        "summary": summary["result"],
+        "total_cost": sum(r.get("cost", 0) for r in results) + summary.get("cost", 0)
+    }
+
+# Usage
+data = ["item1", "item2", "item3", ...]  # 100 items
+template = "Analyze this data item and extract key metrics: {item}"
+results = batch_process_data(data, template, batch_size=10)
+```
+
+---
+
+### Recipe 7: Multi-Language Translation
+
+**Use Case:** Translate content to multiple languages with quality checks.
+
+**Implementation:**
+```python
+def translate_with_review(content, target_languages=["spanish", "french", "german"]):
+    """Translate content with quality review."""
+    
+    translations = {}
+    
+    for lang in target_languages:
+        # Translate
+        translate_agent = requests.post(f"{BASE_URL}/spawn", json={
+            "model": "sonnet",
+            "task": f"Translate this content to {lang}. Maintain tone and formatting:\n\n{content}",
+            "priority": "normal"
+        }).json()
+        
+        translated = poll_for_completion(translate_agent["agent_id"])
+        
+        # Quality review
+        review_agent = requests.post(f"{BASE_URL}/spawn", json={
+            "model": "opus",
+            "task": f"Review this {lang} translation for accuracy, naturalness, and tone. Rate 1-10 and note any issues.\n\nOriginal: {content}\n\nTranslation: {translated['result']}",
+            "priority": "normal"
+        }).json()
+        
+        review = poll_for_completion(review_agent["agent_id"])
+        
+        # Revise if needed
+        if "8" not in review["result"] and "9" not in review["result"] and "10" not in review["result"]:
+            revise_agent = requests.post(f"{BASE_URL}/spawn", json={
+                "model": "sonnet",
+                "task": f"Improve this {lang} translation based on feedback:\n\nTranslation: {translated['result']}\n\nFeedback: {review['result']}",
+                "priority": "normal"
+            }).json()
+            
+            revised = poll_for_completion(revise_agent["agent_id"])
+            final = revised["result"]
+        else:
+            final = translated["result"]
+        
+        translations[lang] = {
+            "translation": final,
+            "quality_score": review["result"],
+            "cost": translated.get("cost", 0) + review.get("cost", 0)
+        }
+    
+    return translations
+```
+
+---
+
 ## 📚 Resources
 
 - **Full Docs:** https://docs.j1msky.ai

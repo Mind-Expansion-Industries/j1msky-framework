@@ -4336,4 +4336,305 @@ PROMOTION
 - Sales team usage rate
 - Win rate when case study is used vs not
 
+---
+
+## 🤝 APPENDIX F: Partner Program
+
+### Program Overview
+
+The J1MSKY Partner Program helps agencies, consultants, and technology providers expand their offerings while earning recurring revenue.
+
+**Why Partner with J1MSKY:**
+- **Expand your services** without hiring
+- **Generate recurring revenue** from subscriptions
+- **Differentiate your offering** with AI capabilities
+- **Low-touch implementation** for your clients
+
+---
+
+### Partner Tiers
+
+#### Tier 1: Referral Partner
+**Who:** Anyone who refers customers
+
+**Benefits:**
+- 15% recurring commission for 12 months
+- No minimums or commitments
+- Self-serve partner portal
+- Marketing materials access
+
+**Requirements:**
+- Sign partner agreement
+- Complete 15-minute onboarding
+
+**Ideal For:**
+- Individual consultants
+- Content creators
+- Industry influencers
+- Existing customers
+
+---
+
+#### Tier 2: Implementation Partner
+**Who:** Agencies and consultants who deploy J1MSKY for clients
+
+**Benefits:**
+- 20% recurring commission for 24 months
+- 10% discount on your own J1MSKY subscription
+- Priority support (24-hour response)
+- Co-marketing opportunities
+- Early access to new features
+- Training certification program
+
+**Requirements:**
+- Complete J1MSKY certification (4 hours)
+- Deploy minimum 3 clients in first 6 months
+- Maintain active J1MSKY subscription
+
+**Ideal For:**
+- Marketing agencies
+- Business consultants
+- Systems integrators
+- Dev shops
+
+---
+
+#### Tier 3: Strategic Partner
+**Who:** Large agencies, technology companies, enterprise consultancies
+
+**Benefits:**
+- 25% recurring commission for 36 months
+- White-label option available
+- Dedicated partner success manager
+- API access and custom integrations
+- Joint go-to-market support
+- Exclusive territory rights (negotiated)
+
+**Requirements:**
+- Minimum $10K MRR commitment
+- Dedicated partner team
+- Annual business plan
+- Quarterly business reviews
+
+**Ideal For:**
+- Large consulting firms
+- Technology resellers
+- Industry-specific platforms
+- Enterprise VARs
+
+---
+
+### Commission Structure
+
+**How It Works:**
+
+| Customer Plan | Monthly Price | Tier 1 (15%) | Tier 2 (20%) | Tier 3 (25%) |
+|---------------|---------------|--------------|--------------|--------------|
+| Starter | $49/mo | $7.35/mo | $9.80/mo | $12.25/mo |
+| Pro | $99/mo | $14.85/mo | $19.80/mo | $24.75/mo |
+| Enterprise | $299/mo | $44.85/mo | $59.80/mo | $74.75/mo |
+
+**Example Year 1 Earnings (Pro Plan):**
+- 10 customers: $1,485 - $2,970/year
+- 25 customers: $3,713 - $7,425/year
+- 50 customers: $7,425 - $14,850/year
+- 100 customers: $14,850 - $29,700/year
+
+**Payment Schedule:**
+- Commissions paid monthly (Net-30)
+- Minimum payout: $50
+- Payment via ACH or PayPal
+
+---
+
+### Partner Resources
+
+#### Sales Enablement
+- **Partner portal** with deal registration
+- **Co-branded collateral** (one-pagers, decks)
+- **Demo environment** for client presentations
+- **Pricing calculator** with partner margins
+- **Proposal templates**
+
+#### Technical Resources
+- **Implementation guide** (step-by-step)
+- **API documentation** and examples
+- **Integration templates** (common platforms)
+- **Sandbox environment** for testing
+- **Technical certification** program
+
+#### Marketing Support
+- **Co-marketing funds** (Tier 2+)
+- **Joint webinar** opportunities
+- **Guest blog post** exchanges
+- **Social media** assets and copy
+- **Event sponsorship** (Tier 3)
+
+#### Support
+- **Partner Slack channel**
+- **Monthly office hours**
+- **Quarterly business reviews** (Tier 2+)
+- **Dedicated success manager** (Tier 3)
+
+---
+
+### Partner Onboarding
+
+#### Step 1: Application (5 minutes)
+Submit partner application:
+- Company information
+- Primary contact
+- Expected customer volume
+- Target industries
+
+#### Step 2: Agreement (1-2 days)
+Review and sign:
+- Partner agreement
+- Commission terms
+- Brand guidelines
+- Data protection addendum
+
+#### Step 3: Onboarding (1 hour)
+- Platform walkthrough
+- Sales training
+- Technical setup
+- Portal access
+
+#### Step 4: Certification (2-4 hours, Tier 2+)
+- Product deep-dive
+- Implementation lab
+- Sales scenario role-play
+- Final assessment
+
+#### Step 5: Go-Live
+- First deal support
+- Co-selling opportunities
+- Marketing activation
+
+---
+
+### Partner Sales Process
+
+#### Deal Registration
+**Protect your opportunities:**
+1. Register deal in partner portal
+2. Get 90-day exclusivity
+3. Receive partner pricing
+4. Access deal support
+
+**Registration includes:**
+- Prospect company name
+- Estimated deal size
+- Expected close date
+- Competitive landscape
+
+#### Selling J1MSKY
+
+**Discovery Questions for Your Clients:**
+1. "What repetitive tasks are eating up your team's time?"
+2. "How much are you spending on [content/dev/research] currently?"
+3. "What would you do with an extra 20 hours per week?"
+4. "How do you currently handle scaling during busy periods?"
+
+**Positioning J1MSKY:**
+```
+"We've partnered with J1MSKY to bring you AI-powered automation.
+Unlike generic AI tools, J1MSKY gives you:
+- Autonomous agents that work 24/7
+- Multi-model optimization (always use the best AI)
+- Cost control and transparency
+- Your data stays on your infrastructure
+
+As your implementation partner, we handle setup, training, and 
+ongoing optimization. You get the benefits without the learning curve."
+```
+
+**Pricing Strategy:**
+- Mark up J1MSKY cost (typical: 1.5x - 2x)
+- Bundle with your services
+- Offer managed J1MSKY services
+- Create industry-specific packages
+
+#### Implementation Services
+
+**Bundle Ideas:**
+1. **J1MSKY + Setup** ($500-1,500 one-time)
+   - Initial configuration
+   - Custom workflow design
+   - Team training
+
+2. **J1MSKY + Management** ($500-2,000/month)
+   - J1MSKY subscription
+   - Monthly optimization
+   - Priority support
+   - Usage reporting
+
+3. **J1MSKY + Custom Integration** ($2,000-10,000)
+   - API integration development
+   - Custom agent training
+   - Enterprise setup
+
+---
+
+### Partner Success Metrics
+
+**We Track:**
+- Deals registered
+- Win rate
+- Time to close
+- Customer retention
+- Expansion revenue
+- Support ticket volume
+
+**Partner Scorecard (Quarterly):**
+| Metric | Target | Your Score |
+|--------|--------|------------|
+| Deals registered | 5+ | ___ |
+| Win rate | 30%+ | ___% |
+| Customer retention | 85%+ | ___% |
+| Support tickets | <3/customer | ___ |
+| Training completion | 100% | ___% |
+
+**Rewards for Top Performers:**
+- Commission bonuses
+- Exclusive event invites
+- Early product access
+- Co-marketing budget increases
+- Territory expansion
+
+---
+
+### Partner FAQ
+
+**Q: Can I white-label J1MSKY?**
+A: White-label is available for Tier 3 Strategic Partners with minimum commitments.
+
+**Q: What happens if my customer cancels?**
+A: Commissions stop when customer cancels. No clawbacks after 90 days.
+
+**Q: Can I compete with other partners?**
+A: Registered deals get 90-day exclusivity. Unregistered deals are fair game.
+
+**Q: Do I need technical expertise?**
+A: Tier 1: No. Tier 2+: Basic technical knowledge. We provide training.
+
+**Q: Can I offer discounts?**
+A: Partners get standard discount (10-20%). Additional discounts require approval.
+
+**Q: How do I handle support?**
+A: Tier 1: Direct customers to J1MSKY support. Tier 2+: You provide L1, we provide L2+.
+
+---
+
+### Apply to Partner Program
+
+**Ready to get started?**
+
+1. **Review** partner agreement: [link]
+2. **Complete** application: [link]
+3. **Schedule** onboarding call: [calendar link]
+4. **Join** partner Slack: [invite link]
+
+**Questions?** partners@j1msky.ai
+
 

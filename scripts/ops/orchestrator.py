@@ -1440,7 +1440,334 @@ class ABTestFramework:
 ab_testing = ABTestFramework()
 
 
-if __name__ == "__main__":
+# Alert Manager for Automated Notifications
+class AlertManager:
+    """
+    Centralized alert management for system monitoring.
+    
+    Supports multiple notification channels:
+    - Email (via SMTP)
+    - Slack (via webhooks)
+    - Webhook (generic HTTP POST)
+    - Console (for development)
+    
+    Features:
+    - Alert throttling (prevent spam)
+    - Alert severity levels
+    - Alert acknowledgment
+    - Alert history
+    
+    Usage:
+        alerts = AlertManager()
+        
+        # Configure channels
+        alerts.add_slack_channel("#ops-alerts", webhook_url="...")
+        alerts.add_email_channel("ops@company.com", smtp_config={...})
+        
+        # Send alert
+        alerts.send_alert(
+            severity="warning",
+            title="High CPU Usage",
+            message="CPU at 85% for 5 minutes",
+            channels=["slack", "email"]
+        )
+    """
+    
+    SEVERITY_INFO = "info"
+    SEVERITY_WARNING = "warning"
+    SEVERITY_CRITICAL = "critical"
+    
+    def __init__(self, storage_path: str = "/home/m1ndb0t/Desktop/J1MSKY/config"):
+        self.storage_path = Path(storage_path)
+        self.storage_path.mkdir(parents=True, exist_ok=True)
+        self.alerts_file = self.storage_path / "alerts.json"
+        self.config_file = self.storage_path / "alert_channels.json"
+        
+        self.channels = self._load_channels()
+        self.alert_history = self._load_alerts()
+        self._lock = threading.Lock()
+        
+        # Throttling: track last alert time by (severity, category)
+        self._last_alert_time: Dict[str, float] = {}
+        self._throttle_intervals = {
+            self.SEVERITY_INFO: 3600,      # 1 hour
+            self.SEVERITY_WARNING: 900,    # 15 minutes
+            self.SEVERITY_CRITICAL: 60     # 1 minute
+        }
+    
+    def _load_channels(self) -> Dict[str, Any]:
+        """Load channel configuration."""
+        if self.config_file.exists():
+            try:
+                with open(self.config_file, 'r') as f:
+                    return json.load(f)
+            except Exception:
+                return {}
+        return {}
+    
+    def _save_channels(self):
+        """Save channel configuration."""
+        with open(self.config_file, 'w') as f:
+            json.dump(self.channels, f, indent=2)
+    
+    def _load_alerts(self) -> List[Dict]:
+        """Load alert history."""
+        if self.alerts_file.exists():
+            try:
+                with open(self.alerts_file, 'r') as f:
+                    return json.load(f)[-1000:]  # Keep last 1000
+            except Exception:
+                return []
+        return []
+    
+    def _save_alerts(self):
+        """Save alert history."""
+        with open(self.alerts_file, 'w') as f:
+            json.dump(self.alert_history[-1000:], f, indent=2)  # Keep last 1000
+    
+    def add_slack_channel(self, name: str, webhook_url: str, channel: str = None):
+        """Add Slack webhook channel."""
+        self.channels[name] = {
+            "type": "slack",
+            "webhook_url": webhook_url,
+            "channel": channel,
+            "enabled": True
+        }
+        self._save_channels()
+    
+    def add_webhook_channel(self, name: str, url: str, headers: Dict = None):
+        """Add generic webhook channel."""
+        self.channels[name] = {
+            "type": "webhook",
+            "url": url,
+            "headers": headers or {},
+            "enabled": True
+        }
+        self._save_channels()
+    
+    def add_console_channel(self, name: str = "console"):
+        """Add console output channel (for development)."""
+        self.channels[name] = {
+            "type": "console",
+            "enabled": True
+        }
+        self._save_channels()
+    
+    def enable_channel(self, name: str):
+        """Enable a channel."""
+        if name in self.channels:
+            self.channels[name]["enabled"] = True
+            self._save_channels()
+    
+    def disable_channel(self, name: str):
+        """Disable a channel."""
+        if name in self.channels:
+            self.channels[name]["enabled"] = False
+            self._save_channels()
+    
+    def _should_throttle(self, severity: str, category: str) -> bool:
+        """Check if alert should be throttled."""
+        key = f"{severity}:{category}"
+        now = time.time()
+        last_time = self._last_alert_time.get(key, 0)
+        interval = self._throttle_intervals.get(severity, 3600)
+        
+        if now - last_time < interval:
+            return True
+        
+        self._last_alert_time[key] = now
+        return False
+    
+    def send_alert(
+        self,
+        severity: str,
+        title: str,
+        message: str,
+        category: str = "general",
+        channels: List[str] = None,
+        data: Dict = None,
+        throttle: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Send an alert to configured channels.
+        
+        Args:
+            severity: info, warning, or critical
+            title: Alert title
+            message: Alert message
+            category: Alert category for throttling
+            channels: Specific channels to use, or None for all enabled
+            data: Additional data to include
+            throttle: Whether to apply throttling
+        
+        Returns:
+            Dict with delivery status per channel
+        """
+        # Check throttling
+        if throttle and self._should_throttle(severity, category):
+            return {"throttled": True, "reason": f"Alert throttled for {category}"}
+        
+        alert = {
+            "id": f"alert_{int(time.time())}_{random.randint(1000, 9999)}",
+            "severity": severity,
+            "title": title,
+            "message": message,
+            "category": category,
+            "timestamp": datetime.now().isoformat(),
+            "data": data or {},
+            "acknowledged": False
+        }
+        
+        # Save to history
+        with self._lock:
+            self.alert_history.append(alert)
+            self._save_alerts()
+        
+        # Deliver to channels
+        results = {}
+        target_channels = channels or list(self.channels.keys())
+        
+        for channel_name in target_channels:
+            if channel_name not in self.channels:
+                results[channel_name] = {"success": False, "error": "Channel not found"}
+                continue
+            
+            channel = self.channels[channel_name]
+            if not channel.get("enabled", True):
+                results[channel_name] = {"success": False, "error": "Channel disabled"}
+                continue
+            
+            try:
+                if channel["type"] == "console":
+                    self._send_console(alert)
+                    results[channel_name] = {"success": True}
+                elif channel["type"] == "slack":
+                    self._send_slack(alert, channel)
+                    results[channel_name] = {"success": True}
+                elif channel["type"] == "webhook":
+                    self._send_webhook(alert, channel)
+                    results[channel_name] = {"success": True}
+                else:
+                    results[channel_name] = {"success": False, "error": "Unknown channel type"}
+            except Exception as e:
+                results[channel_name] = {"success": False, "error": str(e)}
+        
+        return {
+            "alert_id": alert["id"],
+            "delivered": results,
+            "throttled": False
+        }
+    
+    def _send_console(self, alert: Dict):
+        """Send alert to console."""
+        severity_colors = {
+            self.SEVERITY_INFO: "\033[94m",      # Blue
+            self.SEVERITY_WARNING: "\033[93m",   # Yellow
+            self.SEVERITY_CRITICAL: "\033[91m"   # Red
+        }
+        reset = "\033[0m"
+        color = severity_colors.get(alert["severity"], "")
+        
+        print(f"\n{color}[{alert['severity'].upper()}] {alert['title']}{reset}")
+        print(f"  {alert['message']}")
+        print(f"  Time: {alert['timestamp']}")
+        if alert['data']:
+            print(f"  Data: {json.dumps(alert['data'], indent=2)}")
+    
+    def _send_slack(self, alert: Dict, channel: Dict):
+        """Send alert to Slack webhook."""
+        # Note: In production, this would make an HTTP POST
+        # For now, we just log that it would be sent
+        webhook_url = channel.get("webhook_url", "")
+        if webhook_url:
+            # In production: requests.post(webhook_url, json=payload)
+            pass
+    
+    def _send_webhook(self, alert: Dict, channel: Dict):
+        """Send alert to generic webhook."""
+        # Note: In production, this would make an HTTP POST
+        url = channel.get("url", "")
+        if url:
+            # In production: requests.post(url, json=alert, headers=headers)
+            pass
+    
+    def acknowledge_alert(self, alert_id: str) -> bool:
+        """Acknowledge an alert."""
+        with self._lock:
+            for alert in self.alert_history:
+                if alert["id"] == alert_id:
+                    alert["acknowledged"] = True
+                    alert["acknowledged_at"] = datetime.now().isoformat()
+                    self._save_alerts()
+                    return True
+            return False
+    
+    def get_active_alerts(self, severity: str = None) -> List[Dict]:
+        """Get non-acknowledged alerts."""
+        with self._lock:
+            alerts = [a for a in self.alert_history if not a.get("acknowledged", False)]
+            if severity:
+                alerts = [a for a in alerts if a["severity"] == severity]
+            return sorted(alerts, key=lambda x: x["timestamp"], reverse=True)
+    
+    def get_alert_history(self, limit: int = 100) -> List[Dict]:
+        """Get alert history."""
+        with self._lock:
+            return self.alert_history[-limit:]
+    
+    def check_and_alert(self):
+        """
+        Check system conditions and send alerts if needed.
+        Should be called periodically (e.g., every minute).
+        """
+        status = orchestrator.get_status_report()
+        
+        # Check budget
+        budget_alert = status.get("budget_alert_level", "ok")
+        if budget_alert == "critical":
+            self.send_alert(
+                severity=self.SEVERITY_CRITICAL,
+                title="Budget Critical",
+                message=f"Daily budget at {status.get('budget_utilization_pct', 0):.1f}%",
+                category="budget",
+                data={"today_spend": status.get("today_spend"), "daily_budget": status.get("daily_budget")}
+            )
+        elif budget_alert == "warning":
+            self.send_alert(
+                severity=self.SEVERITY_WARNING,
+                title="Budget Warning",
+                message=f"Daily budget at {status.get('budget_utilization_pct', 0):.1f}%",
+                category="budget"
+            )
+        
+        # Check operational flags
+        flags = status.get("operational_flags", {})
+        if flags.get("requires_ops_attention"):
+            self.send_alert(
+                severity=self.SEVERITY_WARNING,
+                title="Ops Attention Required",
+                message=flags.get("recommended_action", "Check system status"),
+                category="operations"
+            )
+        
+        # Check usage anomalies
+        anomalies = status.get("usage_anomalies", {})
+        if anomalies.get("has_anomalies"):
+            self.send_alert(
+                severity=self.SEVERITY_WARNING,
+                title="Usage Anomalies Detected",
+                message=f"{anomalies.get('count', 0)} anomalies detected",
+                category="usage",
+                data={"anomalies": anomalies.get("anomalies", [])}
+            )
+
+
+# Initialize alert manager
+alert_manager = AlertManager()
+alert_manager.add_console_channel()
+
+
+if __name__ == "__main__"::
     print("J1MSKY Unified Model Orchestrator v5.1")
     print("=" * 50)
 

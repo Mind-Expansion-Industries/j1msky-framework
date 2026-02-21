@@ -590,6 +590,11 @@ HTML = '''<!DOCTYPE html>
         /* Offline state */
         body.offline .header h1 {
             color: var(--red);
+            opacity: 0.8;
+        }
+
+        body.offline .stat-badge {
+            opacity: 0.6;
         }
 
         /* Help panel specific styles */
@@ -1820,6 +1825,13 @@ HTML = '''<!DOCTYPE html>
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
+            // Ensure all panels start hidden except the active one
+            document.querySelectorAll('.panel').forEach(p => {
+                if (!p.classList.contains('active')) {
+                    p.style.display = 'none';
+                }
+            });
+
             TouchHandler.init();
             ConnectionHandler.init();
             ResizeHandler.init();

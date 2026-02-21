@@ -4,6 +4,7 @@ Deployable client-facing landing page for art-generation subscription.
 
 ## Files
 - `index.html` — Landing + offer + CTA page for AI wallpaper subscription
+- `gift.html` — Gift subscription page for viral growth (gift purchases)
 - `privacy.html` — Privacy policy page
 - `terms.html` — Terms of service page
 - `success.html` / `cancel.html` — Stripe redirect completion pages
@@ -40,3 +41,4 @@ If using a different host, point the form `action` to your backend/CRM endpoint.
 ## Conversion Additions
 - Sticky bottom CTA bar keeps the launch offer visible while scrolling
 - Countdown is mirrored in hero promo + sticky CTA for urgency consistency
+- Gift page (`gift.html`) enables viral acquisition through gift purchases

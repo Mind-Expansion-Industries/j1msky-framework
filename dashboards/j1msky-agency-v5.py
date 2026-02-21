@@ -344,6 +344,10 @@ HTML = '''<!DOCTYPE html>
             will-change: transform;
         }
 
+        .quick-btn:active {
+            transform: scale(0.98) translateY(0);
+        }
+
         .quick-btn .icon {
             font-size: 28px;
             margin-bottom: 8px;
